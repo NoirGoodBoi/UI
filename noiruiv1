@@ -14,38 +14,12 @@ function NoirUI:CreateWindow(settings)
 
     local ACCENT = settings.Accent or Color3.fromRGB(170,85,255)
 
-    -- 🌫 BLUR
-    local Blur = Instance.new("BlurEffect", game.Lighting)
-    Blur.Size = 0
-    TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 12}):Play()
-
     -- MAIN
     local Main = Instance.new("Frame", ScreenGui)
-    Main.Size = UDim2.new(0,320,0,260)
-    Main.Position = UDim2.new(0.5,-160,0.5,-130)
+    Main.Size = UDim2.new(0,340,0,280)
+    Main.Position = UDim2.new(0.5,-170,0.5,-140)
     Main.BackgroundColor3 = Color3.fromRGB(10,10,10)
-    Main.BackgroundTransparency = 1
     Instance.new("UICorner", Main)
-
-    TweenService:Create(Main, TweenInfo.new(0.25), {
-        BackgroundTransparency = 0
-    }):Play()
-
-    -- PAGES
-    local MainPage = Instance.new("Frame", Main)
-    MainPage.Size = UDim2.new(1,0,1,-30)
-    MainPage.Position = UDim2.new(0,0,0,30)
-    MainPage.BackgroundTransparency = 1
-
-    local SettingsPage = Instance.new("Frame", Main)
-    SettingsPage.Size = MainPage.Size
-    SettingsPage.Position = MainPage.Position
-    SettingsPage.BackgroundTransparency = 1
-    SettingsPage.Visible = false
-
-    local function getParent(page)
-        return (page == "Settings") and SettingsPage or MainPage
-    end
 
     -- TITLE
     local Title = Instance.new("TextLabel", Main)
@@ -56,204 +30,176 @@ function NoirUI:CreateWindow(settings)
     Title.Font = Enum.Font.GothamBold
     Title.TextSize = 16
 
-    -- 🎵 SOUND
-    local function PlaySound()
-        if settings.SoundId then
-            local s = Instance.new("Sound", game:GetService("SoundService"))
-            s.SoundId = settings.SoundId
-            s.Volume = 1
-            s:Play()
-            Debris:AddItem(s,2)
+    -- TAB BAR
+    local TabBar = Instance.new("Frame", Main)
+    TabBar.Size = UDim2.new(1,0,0,30)
+    TabBar.Position = UDim2.new(0,0,0,30)
+    TabBar.BackgroundTransparency = 1
+
+    local TabList = Instance.new("UIListLayout", TabBar)
+    TabList.FillDirection = Enum.FillDirection.Horizontal
+    TabList.Padding = UDim.new(0,6)
+
+    -- CONTENT AREA
+    local Content = Instance.new("Frame", Main)
+    Content.Size = UDim2.new(1,0,1,-60)
+    Content.Position = UDim2.new(0,0,0,60)
+    Content.BackgroundTransparency = 1
+
+    local Tabs = {}
+    local ActiveTab = nil
+
+    -- CREATE TAB
+    function NoirUI:CreateTab(name)
+
+        local TabFrame = Instance.new("Frame", Content)
+        TabFrame.Size = UDim2.new(1,0,1,0)
+        TabFrame.BackgroundTransparency = 1
+        TabFrame.Visible = false
+
+        local Container = Instance.new("ScrollingFrame", TabFrame)
+        Container.Size = UDim2.new(1,0,1,0)
+        Container.BackgroundTransparency = 1
+        Container.ScrollBarThickness = 3
+        Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+        local Layout = Instance.new("UIListLayout", Container)
+        Layout.Padding = UDim.new(0,6)
+
+        -- TAB BUTTON
+        local TabBtn = Instance.new("TextButton", TabBar)
+        TabBtn.Size = UDim2.new(0,80,1,0)
+        TabBtn.Text = name
+        TabBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        TabBtn.TextColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", TabBtn)
+
+        Tabs[name] = TabFrame
+
+        TabBtn.MouseButton1Click:Connect(function()
+            if ActiveTab then
+                Tabs[ActiveTab].Visible = false
+            end
+            ActiveTab = name
+            TabFrame.Visible = true
+        end)
+
+        -- auto first tab
+        if not ActiveTab then
+            ActiveTab = name
+            TabFrame.Visible = true
         end
-    end
 
-    -- 💥 BURST
-    local function Burst(obj)
-        if not settings.IconEffect then return end
+        -- ELEMENT API inside tab
+        local TabAPI = {}
 
-        for i=1,8 do
-            local p = Instance.new("Frame", obj)
-            p.Size = UDim2.new(0,4,0,4)
-            p.BackgroundColor3 = ACCENT
-            p.BorderSizePixel = 0
+        function TabAPI:CreateButton(opt)
+            local b = Instance.new("TextButton", Container)
+            b.Size = UDim2.new(1,0,0,35)
+            b.Text = opt.Name
+            b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+            b.TextColor3 = Color3.new(1,1,1)
+            Instance.new("UICorner", b)
 
-            local a = (i/8)*math.pi*2
-            p.Position = UDim2.new(0.5,0,0.5,0)
-
-            TweenService:Create(p, TweenInfo.new(0.35), {
-                Position = UDim2.new(0.5+math.cos(a)*0.2,0,0.5+math.sin(a)*0.2,0),
-                BackgroundTransparency = 1
-            }):Play()
-
-            Debris:AddItem(p,0.5)
+            b.MouseButton1Click:Connect(function()
+                if opt.Callback then opt.Callback() end
+            end)
         end
+
+        function TabAPI:CreateToggle(opt)
+            local b = Instance.new("TextButton", Container)
+            b.Size = UDim2.new(1,0,0,35)
+            b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+            b.TextColor3 = Color3.new(1,1,1)
+            Instance.new("UICorner", b)
+
+            local state = false
+            b.Text = opt.Name..": OFF"
+
+            b.MouseButton1Click:Connect(function()
+                state = not state
+                b.Text = opt.Name..": "..(state and "ON" or "OFF")
+                if opt.Callback then opt.Callback(state) end
+            end)
+        end
+
+        function TabAPI:CreateTextBox(opt)
+            local box = Instance.new("TextBox", Container)
+            box.Size = UDim2.new(1,0,0,35)
+            box.BackgroundColor3 = Color3.fromRGB(25,25,25)
+            box.TextColor3 = Color3.new(1,1,1)
+            box.PlaceholderText = opt.Placeholder or "Enter..."
+            Instance.new("UICorner", box)
+
+            box.FocusLost:Connect(function()
+                if opt.Callback then opt.Callback(box.Text) end
+            end)
+        end
+
+        function TabAPI:CreateLabel(text)
+            local l = Instance.new("TextLabel", Container)
+            l.Size = UDim2.new(1,0,0,20)
+            l.BackgroundTransparency = 1
+            l.TextColor3 = Color3.fromRGB(200,200,200)
+            l.Text = text
+            l.TextXAlignment = Enum.TextXAlignment.Left
+        end
+
+        function TabAPI:CreateSlider(opt)
+            local min,max = opt.Min or 0, opt.Max or 100
+            local step = opt.Step or 1
+            local value = opt.Default or min
+
+            local holder = Instance.new("Frame", Container)
+            holder.Size = UDim2.new(1,0,0,40)
+            holder.BackgroundTransparency = 1
+
+            local label = Instance.new("TextLabel", holder)
+            label.Size = UDim2.new(1,0,0,18)
+            label.BackgroundTransparency = 1
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            label.TextColor3 = Color3.new(1,1,1)
+            label.Text = opt.Name..": "..value
+
+            local bar = Instance.new("Frame", holder)
+            bar.Position = UDim2.new(0,0,0,22)
+            bar.Size = UDim2.new(1,0,0,8)
+            bar.BackgroundColor3 = Color3.fromRGB(30,30,30)
+            Instance.new("UICorner", bar)
+
+            local fill = Instance.new("Frame", bar)
+            fill.Size = UDim2.new((value-min)/(max-min),0,1,0)
+            fill.BackgroundColor3 = ACCENT
+            Instance.new("UICorner", fill)
+
+            local dragging = false
+
+            bar.InputBegan:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                    dragging = true
+                end
+            end)
+
+            UIS.InputChanged:Connect(function(i)
+                if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+
+                    local x = math.clamp(
+                        (i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X,
+                        0,1
+                    )
+
+                    value = math.floor((min + (max-min)*x)/step + 0.5)*step
+
+                    fill.Size = UDim2.new((value-min)/(max-min),0,1,0)
+                    label.Text = opt.Name..": "..value
+
+                    if opt.Callback then opt.Callback(value) end
+                end
+            end)
+        end
+
+        return TabAPI
     end
-
-    -- 🖱 DRAG
-    local function Drag(gui)
-        local dragging,start,pos
-
-        gui.InputBegan:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = true
-                start = i.Position
-                pos = gui.Position
-            end
-        end)
-
-        UIS.InputChanged:Connect(function(i)
-            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-                local d = i.Position - start
-                gui.Position = UDim2.new(pos.X.Scale,pos.X.Offset+d.X,pos.Y.Scale,pos.Y.Offset+d.Y)
-            end
-        end)
-    end
-
-    -- ⚙ GEAR PAGE SWITCH
-    local isSettings = false
-
-    local Gear = Instance.new("TextButton", Main)
-    Gear.Size = UDim2.new(0,22,0,22)
-    Gear.Position = UDim2.new(1,-28,0,5)
-    Gear.Text = "⚙"
-    Gear.BackgroundColor3 = Color3.fromRGB(25,25,25)
-    Gear.TextColor3 = Color3.new(1,1,1)
-    Instance.new("UICorner", Gear)
-
-    Gear.MouseButton1Click:Connect(function()
-        PlaySound()
-        Burst(Gear)
-
-        isSettings = not isSettings
-        MainPage.Visible = not isSettings
-        SettingsPage.Visible = isSettings
-
-        TweenService:Create(Blur,TweenInfo.new(0.2),{
-            Size = isSettings and 14 or 12
-        }):Play()
-    end)
-
-    -- 🧠 CREATE UI
-
-    function NoirUI:CreateButton(opt)
-        local b = Instance.new("TextButton", getParent(opt.Page))
-        b.Size = UDim2.new(1,0,0,35)
-        b.Text = opt.Name
-        b.BackgroundColor3 = Color3.fromRGB(25,25,25)
-        b.TextColor3 = Color3.new(1,1,1)
-        Instance.new("UICorner", b)
-
-        b.MouseButton1Click:Connect(function()
-            PlaySound()
-            Burst(b)
-            if opt.Callback then opt.Callback() end
-        end)
-    end
-
-    function NoirUI:CreateToggle(opt)
-        local b = Instance.new("TextButton", getParent(opt.Page))
-        b.Size = UDim2.new(1,0,0,35)
-        b.BackgroundColor3 = Color3.fromRGB(25,25,25)
-        b.TextColor3 = Color3.new(1,1,1)
-        Instance.new("UICorner", b)
-
-        local state = false
-        b.Text = opt.Name..": OFF"
-
-        b.MouseButton1Click:Connect(function()
-            PlaySound()
-            Burst(b)
-
-            state = not state
-            b.Text = opt.Name..": "..(state and "ON" or "OFF")
-            if opt.Callback then opt.Callback(state) end
-        end)
-    end
-
-    function NoirUI:CreateTextBox(opt)
-        local box = Instance.new("TextBox", getParent(opt.Page))
-        box.Size = UDim2.new(1,0,0,35)
-        box.BackgroundColor3 = Color3.fromRGB(25,25,25)
-        box.TextColor3 = Color3.new(1,1,1)
-        box.PlaceholderText = opt.Placeholder or "Enter..."
-        Instance.new("UICorner", box)
-
-        box.FocusLost:Connect(function()
-            if opt.Callback then opt.Callback(box.Text) end
-        end)
-    end
-
-    function NoirUI:CreateLabel(text, page)
-        local l = Instance.new("TextLabel", getParent(page))
-        l.Size = UDim2.new(1,0,0,20)
-        l.BackgroundTransparency = 1
-        l.TextColor3 = Color3.fromRGB(200,200,200)
-        l.Text = text
-        l.TextXAlignment = Enum.TextXAlignment.Left
-    end
-
-    function NoirUI:CreateSlider(opt)
-        local p = getParent(opt.Page)
-
-        local min,max = opt.Min or 0, opt.Max or 100
-        local step = opt.Step or 1
-        local value = opt.Default or min
-
-        local holder = Instance.new("Frame", p)
-        holder.Size = UDim2.new(1,0,0,40)
-        holder.BackgroundTransparency = 1
-
-        local label = Instance.new("TextLabel", holder)
-        label.Size = UDim2.new(1,0,0,18)
-        label.BackgroundTransparency = 1
-        label.TextXAlignment = Enum.TextXAlignment.Left
-        label.TextColor3 = Color3.new(1,1,1)
-        label.Text = opt.Name..": "..value
-
-        local bar = Instance.new("Frame", holder)
-        bar.Position = UDim2.new(0,0,0,22)
-        bar.Size = UDim2.new(1,0,0,8)
-        bar.BackgroundColor3 = Color3.fromRGB(30,30,30)
-        Instance.new("UICorner", bar)
-
-        local fill = Instance.new("Frame", bar)
-        fill.Size = UDim2.new((value-min)/(max-min),0,1,0)
-        fill.BackgroundColor3 = ACCENT
-        Instance.new("UICorner", fill)
-
-        local dragging = false
-
-        bar.InputBegan:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = true
-            end
-        end)
-
-        bar.InputEnded:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = false
-            end
-        end)
-
-        UIS.InputChanged:Connect(function(i)
-            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-
-                local x = math.clamp(
-                    (i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X,
-                    0,1
-                )
-
-                value = math.floor((min + (max-min)*x)/step + 0.5)*step
-
-                fill.Size = UDim2.new((value-min)/(max-min),0,1,0)
-                label.Text = opt.Name..": "..value
-
-                if opt.Callback then opt.Callback(value) end
-            end
-        end)
-    end
-
-    Drag(Main)
 
     return NoirUI
 end
