@@ -1,5 +1,3 @@
--- Noir UI v1 (FINAL - Gear Toggle Mode)
-
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 
@@ -7,87 +5,88 @@ local NoirUI = {}
 
 function NoirUI:CreateWindow(settings)
 
-    -- remove old
     local old = game.CoreGui:FindFirstChild("NoirUI")
     if old then old:Destroy() end
 
     local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
     ScreenGui.Name = "NoirUI"
 
+    local ACCENT = settings.Accent or Color3.fromRGB(170,85,255)
+
+    -- MAIN FRAME
     local Main = Instance.new("Frame", ScreenGui)
     Main.Size = UDim2.new(0,320,0,260)
     Main.Position = UDim2.new(0.5,-160,0.5,-130)
     Main.BackgroundColor3 = Color3.fromRGB(10,10,10)
     Instance.new("UICorner", Main)
 
-    local Container = Instance.new("ScrollingFrame", Main)
-    Container.Size = UDim2.new(1,-10,1,-40)
-    Container.Position = UDim2.new(0,5,0,35)
-    Container.BackgroundTransparency = 1
-    Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    Container.ScrollBarThickness = 3
+    -- PAGES
+    local MainPage = Instance.new("Frame", Main)
+    MainPage.Size = UDim2.new(1,0,1,-30)
+    MainPage.Position = UDim2.new(0,0,0,30)
+    MainPage.BackgroundTransparency = 1
+    MainPage.Visible = true
 
-    local Layout = Instance.new("UIListLayout", Container)
-    Layout.Padding = UDim.new(0,6)
+    local SettingsPage = Instance.new("Frame", Main)
+    SettingsPage.Size = UDim2.new(1,0,1,-30)
+    SettingsPage.Position = UDim2.new(0,0,0,30)
+    SettingsPage.BackgroundTransparency = 1
+    SettingsPage.Visible = false
 
-    local ACCENT = settings.Accent or Color3.fromRGB(170,85,255)
+    local function getParent(page)
+        return (page == "Settings") and SettingsPage or MainPage
+    end
 
-    -- MODE (MAIN / SETTINGS)
-    local SettingsMode = false
+    -- HEADER
+    local Title = Instance.new("TextLabel", Main)
+    Title.Size = UDim2.new(1,0,0,30)
+    Title.BackgroundTransparency = 1
+    Title.Text = settings.Name or "Noir UI"
+    Title.TextColor3 = Color3.new(1,1,1)
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 16
 
-    -- GEAR ICON (TOP RIGHT)
+    -- GEAR (PAGE SWITCH)
+    local isSettings = false
+
     local Gear = Instance.new("TextButton", Main)
     Gear.Size = UDim2.new(0,22,0,22)
-    Gear.Position = UDim2.new(1,-28,0,6)
+    Gear.Position = UDim2.new(1,-28,0,5)
     Gear.Text = "⚙"
-    Gear.BackgroundColor3 = Color3.fromRGB(20,20,20)
+    Gear.BackgroundColor3 = Color3.fromRGB(25,25,25)
     Gear.TextColor3 = Color3.new(1,1,1)
     Instance.new("UICorner", Gear)
 
-    -- FILTER FUNCTION
-    local function RefreshUI()
-        for _,v in ipairs(Container:GetChildren()) do
-            if v:IsA("GuiObject") then
-                local page = v:GetAttribute("Page") or "Main"
-
-                if SettingsMode then
-                    v.Visible = (page == "Settings")
-                else
-                    v.Visible = (page == "Main")
-                end
-            end
-        end
-    end
-
     Gear.MouseButton1Click:Connect(function()
-        SettingsMode = not SettingsMode
-        RefreshUI()
+        isSettings = not isSettings
+        MainPage.Visible = not isSettings
+        SettingsPage.Visible = isSettings
     end)
 
-    -- CREATE FUNCTIONS
-
+    -- BUTTON
     function NoirUI:CreateButton(opt)
-        local b = Instance.new("TextButton", Container)
+        local p = getParent(opt.Page)
+
+        local b = Instance.new("TextButton", p)
         b.Size = UDim2.new(1,0,0,35)
-        b.Text = opt.Name
         b.BackgroundColor3 = Color3.fromRGB(25,25,25)
         b.TextColor3 = Color3.new(1,1,1)
-        b:SetAttribute("Page", opt.Page or "Main")
+        b.Text = opt.Name
         Instance.new("UICorner", b)
 
         b.MouseButton1Click:Connect(function()
             if opt.Callback then opt.Callback() end
         end)
-
-        RefreshUI()
     end
 
+    -- TOGGLE
     function NoirUI:CreateToggle(opt)
-        local b = Instance.new("TextButton", Container)
+        local p = getParent(opt.Page)
+
+        local b = Instance.new("TextButton", p)
         b.Size = UDim2.new(1,0,0,35)
         b.BackgroundColor3 = Color3.fromRGB(25,25,25)
         b.TextColor3 = Color3.new(1,1,1)
-        b:SetAttribute("Page", opt.Page or "Main")
         Instance.new("UICorner", b)
 
         local state = false
@@ -98,64 +97,103 @@ function NoirUI:CreateWindow(settings)
             b.Text = opt.Name..": "..(state and "ON" or "OFF")
             if opt.Callback then opt.Callback(state) end
         end)
-
-        RefreshUI()
     end
 
+    -- TEXTBOX
     function NoirUI:CreateTextBox(opt)
-        local box = Instance.new("TextBox", Container)
+        local p = getParent(opt.Page)
+
+        local box = Instance.new("TextBox", p)
         box.Size = UDim2.new(1,0,0,35)
         box.BackgroundColor3 = Color3.fromRGB(25,25,25)
         box.TextColor3 = Color3.new(1,1,1)
         box.PlaceholderText = opt.Placeholder or "Enter..."
-        box:SetAttribute("Page", opt.Page or "Main")
         Instance.new("UICorner", box)
 
         box.FocusLost:Connect(function()
             if opt.Callback then opt.Callback(box.Text) end
         end)
-
-        RefreshUI()
     end
 
+    -- LABEL
     function NoirUI:CreateLabel(text, page)
-        local l = Instance.new("TextLabel", Container)
-        l.Size = UDim2.new(1,0,0,22)
+        local p = getParent(page)
+
+        local l = Instance.new("TextLabel", p)
+        l.Size = UDim2.new(1,0,0,20)
         l.BackgroundTransparency = 1
         l.TextColor3 = Color3.fromRGB(200,200,200)
         l.Text = text
-        l:SetAttribute("Page", page or "Main")
-
-        RefreshUI()
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.Font = Enum.Font.Gotham
+        l.TextSize = 13
     end
 
-    function NoirUI:Notify(title, text, time)
-        local g = Instance.new("ScreenGui", game.CoreGui)
-        local f = Instance.new("Frame", g)
-        f.Size = UDim2.new(0,220,0,55)
-        f.Position = UDim2.new(1,-240,0.1,0)
-        f.BackgroundColor3 = Color3.fromRGB(20,20,20)
-        Instance.new("UICorner", f)
+    -- SLIDER (STEP INCLUDED)
+    function NoirUI:CreateSlider(opt)
+        local p = getParent(opt.Page)
 
-        local t1 = Instance.new("TextLabel", f)
-        t1.Size = UDim2.new(1,0,0,25)
-        t1.Text = title
-        t1.BackgroundTransparency = 1
-        t1.TextColor3 = Color3.new(1,1,1)
+        local min = opt.Min or 0
+        local max = opt.Max or 100
+        local step = opt.Step or 1
+        local value = opt.Default or min
 
-        local t2 = Instance.new("TextLabel", f)
-        t2.Size = UDim2.new(1,0,0,25)
-        t2.Position = UDim2.new(0,0,0,25)
-        t2.Text = text
-        t2.BackgroundTransparency = 1
-        t2.TextColor3 = ACCENT
+        local holder = Instance.new("Frame", p)
+        holder.Size = UDim2.new(1,0,0,40)
+        holder.BackgroundTransparency = 1
 
-        task.delay(time or 2, function()
-            g:Destroy()
+        local label = Instance.new("TextLabel", holder)
+        label.Size = UDim2.new(1,0,0,18)
+        label.BackgroundTransparency = 1
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        label.TextColor3 = Color3.fromRGB(220,220,220)
+        label.Text = opt.Name..": "..value
+
+        local bar = Instance.new("Frame", holder)
+        bar.Position = UDim2.new(0,0,0,22)
+        bar.Size = UDim2.new(1,0,0,8)
+        bar.BackgroundColor3 = Color3.fromRGB(30,30,30)
+        Instance.new("UICorner", bar)
+
+        local fill = Instance.new("Frame", bar)
+        fill.Size = UDim2.new((value-min)/(max-min),0,1,0)
+        fill.BackgroundColor3 = ACCENT
+        Instance.new("UICorner", fill)
+
+        local dragging = false
+
+        bar.InputBegan:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+            end
+        end)
+
+        bar.InputEnded:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
+        end)
+
+        UIS.InputChanged:Connect(function(i)
+            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+
+                local x = (i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X
+                x = math.clamp(x,0,1)
+
+                local raw = min + (max-min)*x
+                value = math.floor(raw/step + 0.5)*step
+
+                local percent = (value-min)/(max-min)
+                fill.Size = UDim2.new(percent,0,1,0)
+
+                label.Text = opt.Name..": "..value
+
+                if opt.Callback then
+                    opt.Callback(value)
+                end
+            end
         end)
     end
-
-    RefreshUI()
 
     return NoirUI
 end
