@@ -1,0 +1,282 @@
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+
+local NoirUI = {}
+
+function NoirUI:CreateWindow(settings)
+
+    -- AUTO REMOVE
+    local old = game.CoreGui:FindFirstChild("NoirUI")
+    if old then old:Destroy() end
+
+    _G.NoirFloatPos = _G.NoirFloatPos or UDim2.new(0,20,0.5,-20)
+
+    local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+    ScreenGui.Name = "NoirUI"
+
+    -- BLUR
+    local Blur = Instance.new("BlurEffect", game.Lighting)
+    Blur.Size = 0
+    TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 12}):Play()
+
+    -- MAIN
+    local Main = Instance.new("Frame", ScreenGui)
+    Main.Size = UDim2.new(0, 320, 0, 260)
+    Main.Position = UDim2.new(0.5, -160, 0.5, -130)
+    Main.BackgroundColor3 = Color3.fromRGB(8,8,8)
+    Main.BackgroundTransparency = 1
+    Instance.new("UICorner", Main)
+
+    TweenService:Create(Main, TweenInfo.new(0.3), {
+        BackgroundTransparency = 0
+    }):Play()
+
+    -- RGB GLOW
+    local Stroke = Instance.new("UIStroke", Main)
+    Stroke.Thickness = 2
+
+    local Glow = Instance.new("UIStroke", Main)
+    Glow.Thickness = 6
+    Glow.Transparency = 0.7
+
+    task.spawn(function()
+        while true do
+            for i = 0,1,0.01 do
+                local c = Color3.fromHSV(i,1,1)
+                Stroke.Color = c
+                Glow.Color = c
+                task.wait()
+            end
+        end
+    end)
+
+    -- DRAG
+    local function Drag(obj, save)
+        local dragging, start, pos
+
+        obj.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                start = input.Position
+                pos = obj.Position
+
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                        if save then _G.NoirFloatPos = obj.Position end
+                    end
+                end)
+            end
+        end)
+
+        UIS.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local delta = input.Position - start
+                obj.Position = UDim2.new(
+                    pos.X.Scale, pos.X.Offset + delta.X,
+                    pos.Y.Scale, pos.Y.Offset + delta.Y
+                )
+            end
+        end)
+    end
+
+    Drag(Main)
+
+    -- TITLE
+    local Title = Instance.new("TextLabel", Main)
+    Title.Size = UDim2.new(1,0,0,35)
+    Title.Text = settings.Name or "Noir Hub ⚡"
+    Title.TextColor3 = Color3.new(1,1,1)
+    Title.BackgroundTransparency = 1
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 16
+
+    -- SCROLL
+    local Container = Instance.new("ScrollingFrame", Main)
+    Container.Size = UDim2.new(1,-10,1,-40)
+    Container.Position = UDim2.new(0,5,0,35)
+    Container.BackgroundTransparency = 1
+    Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Container.ScrollBarThickness = 3
+
+    local Layout = Instance.new("UIListLayout", Container)
+    Layout.Padding = UDim.new(0,6)
+
+    local ACCENT = Color3.fromRGB(170,85,255)
+
+    local Window = {}
+
+    -- BUTTON
+    function Window:CreateButton(opt)
+        local Btn = Instance.new("TextButton", Container)
+        Btn.Size = UDim2.new(1,0,0,35)
+        Btn.Text = opt.Name
+        Btn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+        Btn.TextColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", Btn)
+
+        Btn.MouseButton1Click:Connect(function()
+            TweenService:Create(Btn, TweenInfo.new(0.1), {BackgroundColor3 = ACCENT}):Play()
+            task.wait(0.1)
+            TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(20,20,20)}):Play()
+            if opt.Callback then opt.Callback() end
+        end)
+    end
+
+    -- TOGGLE
+    function Window:CreateToggle(opt)
+        local Btn = Instance.new("TextButton", Container)
+        Btn.Size = UDim2.new(1,0,0,35)
+        Btn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+        Btn.TextColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", Btn)
+
+        local state = false
+        Btn.Text = opt.Name..": OFF"
+
+        Btn.MouseButton1Click:Connect(function()
+            state = not state
+            Btn.Text = opt.Name..": "..(state and "ON" or "OFF")
+            TweenService:Create(Btn, TweenInfo.new(0.2), {
+                BackgroundColor3 = state and ACCENT or Color3.fromRGB(20,20,20)
+            }):Play()
+            if opt.Callback then opt.Callback(state) end
+        end)
+    end
+
+    -- SLIDER
+    function Window:CreateSlider(opt)
+        local Frame = Instance.new("Frame", Container)
+        Frame.Size = UDim2.new(1,0,0,50)
+        Frame.BackgroundTransparency = 1
+
+        local Label = Instance.new("TextLabel", Frame)
+        Label.Size = UDim2.new(1,0,0,20)
+        Label.Text = opt.Name..": "..opt.Default
+        Label.TextColor3 = Color3.new(1,1,1)
+        Label.BackgroundTransparency = 1
+
+        local Bar = Instance.new("Frame", Frame)
+        Bar.Size = UDim2.new(1,0,0,10)
+        Bar.Position = UDim2.new(0,0,0,30)
+        Bar.BackgroundColor3 = Color3.fromRGB(40,40,40)
+        Instance.new("UICorner", Bar)
+
+        local Fill = Instance.new("Frame", Bar)
+        Fill.BackgroundColor3 = ACCENT
+        Fill.Size = UDim2.new(0,0,1,0)
+        Instance.new("UICorner", Fill)
+
+        local dragging = false
+        local min,max = opt.Min,opt.Max
+
+        Bar.InputBegan:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
+        end)
+
+        Bar.InputEnded:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        end)
+
+        UIS.InputChanged:Connect(function(i)
+            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+                local pos = (i.Position.X - Bar.AbsolutePosition.X)/Bar.AbsoluteSize.X
+                pos = math.clamp(pos,0,1)
+
+                Fill.Size = UDim2.new(pos,0,1,0)
+
+                local val = math.floor(min+(max-min)*pos)
+                Label.Text = opt.Name..": "..val
+
+                if opt.Callback then opt.Callback(val) end
+            end
+        end)
+    end
+
+    -- COLOR PICKER
+    function Window:CreateColorPicker(opt)
+        local Frame = Instance.new("Frame", Container)
+        Frame.Size = UDim2.new(1,0,0,60)
+        Frame.BackgroundTransparency = 1
+
+        local Label = Instance.new("TextLabel", Frame)
+        Label.Size = UDim2.new(1,0,0,20)
+        Label.Text = opt.Name
+        Label.TextColor3 = Color3.new(1,1,1)
+        Label.BackgroundTransparency = 1
+
+        local Preview = Instance.new("Frame", Frame)
+        Preview.Size = UDim2.new(0,30,0,30)
+        Preview.Position = UDim2.new(1,-35,0,25)
+        Preview.BackgroundColor3 = Color3.new(1,0,0)
+        Instance.new("UICorner", Preview)
+
+        local Picker = Instance.new("ImageButton", Frame)
+        Picker.Size = UDim2.new(1,-40,0,30)
+        Picker.Position = UDim2.new(0,0,0,25)
+        Picker.Image = "rbxassetid://4155801252"
+        Picker.BackgroundColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", Picker)
+
+        local dragging = false
+
+        Picker.InputBegan:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
+        end)
+
+        Picker.InputEnded:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        end)
+
+        UIS.InputChanged:Connect(function(i)
+            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+                local x = (i.Position.X - Picker.AbsolutePosition.X)/Picker.AbsoluteSize.X
+                local y = (i.Position.Y - Picker.AbsolutePosition.Y)/Picker.AbsoluteSize.Y
+
+                x = math.clamp(x,0,1)
+                y = math.clamp(y,0,1)
+
+                local color = Color3.fromHSV(x,1,1-y)
+                Preview.BackgroundColor3 = color
+
+                if opt.Callback then opt.Callback(color) end
+            end
+        end)
+    end
+
+    -- FLOAT
+    local Float = Instance.new("TextButton", ScreenGui)
+    Float.Size = UDim2.new(0,0,0,0)
+    Float.Position = _G.NoirFloatPos
+    Float.Text = "⚡"
+    Float.BackgroundColor3 = Color3.fromRGB(10,10,10)
+    Float.TextColor3 = Color3.new(1,1,1)
+    Instance.new("UICorner", Float)
+
+    TweenService:Create(Float, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+        Size = UDim2.new(0,40,0,40)
+    }):Play()
+
+    Drag(Float, true)
+
+    local visible = true
+
+    Float.MouseButton1Click:Connect(function()
+        visible = not visible
+
+        TweenService:Create(Main, TweenInfo.new(0.2), {
+            BackgroundTransparency = visible and 0 or 1
+        }):Play()
+
+        TweenService:Create(Blur, TweenInfo.new(0.2), {
+            Size = visible and 12 or 0
+        }):Play()
+
+        task.wait(0.2)
+        Main.Visible = visible
+    end)
+
+    return Window
+end
+
+return NoirUI
