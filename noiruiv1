@@ -58,6 +58,7 @@ function NoirUI:CreateWindow(settings)
 
     local function Burst(parent)
         if not settings.IconEffect then return end
+
         for i = 1,8 do
             local d = Instance.new("Frame")
             d.Size = UDim2.new(0,4,0,4)
@@ -166,126 +167,31 @@ function NoirUI:CreateWindow(settings)
         end)
     end
 
-    function Window:CreateSlider(opt)
-        local f = Instance.new("Frame", Container)
-        f.Size = UDim2.new(1,0,0,55)
-        f.BackgroundTransparency = 1
+    function Window:CreateTextBox(opt)
 
-        local label = Instance.new("TextLabel", f)
-        label.Size = UDim2.new(1,0,0,20)
-        label.Text = opt.Name
-        label.TextColor3 = Color3.new(1,1,1)
-        label.BackgroundTransparency = 1
-        label.TextXAlignment = Enum.TextXAlignment.Left
-
-        local valueLabel = Instance.new("TextLabel", f)
-        valueLabel.Size = UDim2.new(1,0,0,20)
-        valueLabel.Position = UDim2.new(0,0,0,15)
-        valueLabel.Text = tostring(opt.Default or opt.Min)
-        valueLabel.TextColor3 = Color3.fromRGB(180,180,180)
-        valueLabel.BackgroundTransparency = 1
-        valueLabel.TextXAlignment = Enum.TextXAlignment.Right
-
-        local bar = Instance.new("Frame", f)
-        bar.Size = UDim2.new(1,0,0,6)
-        bar.Position = UDim2.new(0,0,0,40)
-        bar.BackgroundColor3 = Color3.fromRGB(35,35,35)
-        Instance.new("UICorner", bar)
-
-        local fill = Instance.new("Frame", bar)
-        fill.Size = UDim2.new(0,0,1,0)
-        fill.BackgroundColor3 = ACCENT
-        Instance.new("UICorner", fill)
-
-        local dragging = false
-        local min, max = opt.Min, opt.Max
-
-        local function set(v)
-            v = math.clamp(v, min, max)
-            if opt.Step then
-                v = math.floor(v / opt.Step + 0.5) * opt.Step
-            end
-
-            local p = (v - min) / (max - min)
-            fill.Size = UDim2.new(p,0,1,0)
-            valueLabel.Text = tostring(v)
-
-            if opt.Callback then opt.Callback(v) end
-        end
-
-        bar.InputBegan:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = true
-            end
-        end)
-
-        bar.InputEnded:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = false
-            end
-        end)
-
-        UIS.InputChanged:Connect(function(i)
-            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-                local p = (i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X
-                set(min + (max - min) * p)
-            end
-        end)
-    end
-
-    function Window:CreateColorPicker(opt)
-        local f = Instance.new("Frame", Container)
-        f.Size = UDim2.new(1,0,0,70)
-        f.BackgroundTransparency = 1
-
-        local label = Instance.new("TextLabel", f)
-        label.Size = UDim2.new(1,0,0,20)
-        label.Text = opt.Name
-        label.TextColor3 = Color3.new(1,1,1)
-        label.BackgroundTransparency = 1
-        label.TextXAlignment = Enum.TextXAlignment.Left
-
-        local preview = Instance.new("Frame", f)
-        preview.Size = UDim2.new(0,30,0,30)
-        preview.Position = UDim2.new(1,-35,0,25)
-        preview.BackgroundColor3 = Color3.new(1,1,1)
-        Instance.new("UICorner", preview)
-
-        local box = Instance.new("Frame", f)
-        box.Size = UDim2.new(1,-40,0,30)
-        box.Position = UDim2.new(0,0,0,25)
-        box.BackgroundColor3 = Color3.fromRGB(30,30,30)
+        local box = Instance.new("TextBox", Container)
+        box.Size = UDim2.new(1,0,0,35)
+        box.BackgroundColor3 = Color3.fromRGB(20,20,20)
+        box.TextColor3 = Color3.new(1,1,1)
+        box.PlaceholderText = opt.Placeholder or "Enter..."
+        box.Text = ""
+        box.ClearTextOnFocus = false
+        box.Font = Enum.Font.Gotham
+        box.TextSize = 14
         Instance.new("UICorner", box)
 
-        local dragging = false
+        local label = Instance.new("TextLabel", box)
+        label.Size = UDim2.new(1,0,1,0)
+        label.BackgroundTransparency = 1
+        label.Text = opt.Name or "TextBox"
+        label.TextColor3 = Color3.fromRGB(180,180,180)
+        label.Font = Enum.Font.Gotham
+        label.TextSize = 12
+        label.TextXAlignment = Enum.TextXAlignment.Left
 
-        local function setColor(x,y)
-            x = math.clamp(x,0,1)
-            y = math.clamp(y,0,1)
-
-            local c = Color3.fromHSV(x,1,1-y)
-            preview.BackgroundColor3 = c
-
-            if opt.Callback then opt.Callback(c) end
-        end
-
-        box.InputBegan:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = true
-            end
-        end)
-
-        box.InputEnded:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = false
-            end
-        end)
-
-        UIS.InputChanged:Connect(function(i)
-            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-                local x = (i.Position.X - box.AbsolutePosition.X) / box.AbsoluteSize.X
-                local y = (i.Position.Y - box.AbsolutePosition.Y) / box.AbsoluteSize.Y
-                setColor(x,y)
+        box.FocusLost:Connect(function(enterPressed)
+            if opt.Callback then
+                opt.Callback(box.Text, enterPressed)
             end
         end)
     end
