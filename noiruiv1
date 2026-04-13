@@ -5,18 +5,21 @@ local NoirUI = {}
 
 function NoirUI:CreateWindow(settings)
 
+    -- xoá UI cũ
     local old = game.CoreGui:FindFirstChild("NoirUI")
     if old then old:Destroy() end
-
-    _G.NoirFloatPos = _G.NoirFloatPos or UDim2.new(0,20,0.5,-20)
 
     local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
     ScreenGui.Name = "NoirUI"
 
+    local ACCENT = settings.Accent or Color3.fromRGB(170,85,255)
+
+    -- blur
     local Blur = Instance.new("BlurEffect", game.Lighting)
     Blur.Size = 0
     TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 12}):Play()
 
+    -- main frame
     local Main = Instance.new("Frame", ScreenGui)
     Main.Size = UDim2.new(0, 320, 0, 260)
     Main.Position = UDim2.new(0.5, -160, 0.5, -130)
@@ -28,6 +31,7 @@ function NoirUI:CreateWindow(settings)
         BackgroundTransparency = 0
     }):Play()
 
+    -- glow border
     local Stroke = Instance.new("UIStroke", Main)
     Stroke.Thickness = 2
 
@@ -46,6 +50,7 @@ function NoirUI:CreateWindow(settings)
         end
     end)
 
+    -- sound
     local function PlaySound()
         if not settings.SoundId then return end
         local s = Instance.new("Sound")
@@ -56,13 +61,14 @@ function NoirUI:CreateWindow(settings)
         game:GetService("Debris"):AddItem(s, 2)
     end
 
+    -- burst effect
     local function Burst(parent)
         if not settings.IconEffect then return end
 
         for i = 1,8 do
             local d = Instance.new("Frame")
             d.Size = UDim2.new(0,4,0,4)
-            d.BackgroundColor3 = Color3.fromRGB(170,85,255)
+            d.BackgroundColor3 = ACCENT
             d.BorderSizePixel = 0
             d.Parent = parent
 
@@ -79,32 +85,43 @@ function NoirUI:CreateWindow(settings)
         end
     end
 
-    local function Drag(obj,save)
-        local dragging,start,pos
+    -- FIX DRAG (NO LOCK VERSION)
+    local function Drag(obj)
 
-        obj.InputBegan:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+        local dragging = false
+        local dragStart
+        local startPos
+
+        obj.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 dragging = true
-                start = i.Position
-                pos = obj.Position
-
-                i.Changed:Connect(function()
-                    if i.UserInputState == Enum.UserInputState.End then
-                        dragging = false
-                        if save then _G.NoirFloatPos = obj.Position end
-                    end
-                end)
+                dragStart = input.Position
+                startPos = obj.Position
             end
         end)
 
-        UIS.InputChanged:Connect(function(i)
-            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-                local d = i.Position - start
-                obj.Position = UDim2.new(pos.X.Scale,pos.X.Offset+d.X,pos.Y.Scale,pos.Y.Offset+d.Y)
+        obj.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
+        end)
+
+        UIS.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+
+                local delta = input.Position - dragStart
+
+                obj.Position = UDim2.new(
+                    startPos.X.Scale,
+                    startPos.X.Offset + delta.X,
+                    startPos.Y.Scale,
+                    startPos.Y.Offset + delta.Y
+                )
             end
         end)
     end
 
+    -- title
     local Title = Instance.new("TextLabel", Main)
     Title.Size = UDim2.new(1,0,0,35)
     Title.Text = settings.Name or "Noir UI"
@@ -113,6 +130,7 @@ function NoirUI:CreateWindow(settings)
     Title.Font = Enum.Font.GothamBold
     Title.TextSize = 16
 
+    -- container
     local Container = Instance.new("ScrollingFrame", Main)
     Container.Size = UDim2.new(1,-10,1,-40)
     Container.Position = UDim2.new(0,5,0,35)
@@ -123,10 +141,9 @@ function NoirUI:CreateWindow(settings)
     local Layout = Instance.new("UIListLayout", Container)
     Layout.Padding = UDim.new(0,6)
 
-    local ACCENT = Color3.fromRGB(170,85,255)
-
     local Window = {}
 
+    -- BUTTON
     function Window:CreateButton(opt)
         local b = Instance.new("TextButton", Container)
         b.Size = UDim2.new(1,0,0,35)
@@ -137,13 +154,17 @@ function NoirUI:CreateWindow(settings)
 
         b.MouseButton1Click:Connect(function()
             PlaySound()
+            Burst(b)
+
             TweenService:Create(b,TweenInfo.new(0.1),{BackgroundColor3=ACCENT}):Play()
             task.wait(0.1)
             TweenService:Create(b,TweenInfo.new(0.2),{BackgroundColor3=Color3.fromRGB(20,20,20)}):Play()
+
             if opt.Callback then opt.Callback() end
         end)
     end
 
+    -- TOGGLE
     function Window:CreateToggle(opt)
         local b = Instance.new("TextButton", Container)
         b.Size = UDim2.new(1,0,0,35)
@@ -156,6 +177,8 @@ function NoirUI:CreateWindow(settings)
 
         b.MouseButton1Click:Connect(function()
             PlaySound()
+            Burst(b)
+
             s = not s
             b.Text = opt.Name..": "..(s and "ON" or "OFF")
 
@@ -167,6 +190,7 @@ function NoirUI:CreateWindow(settings)
         end)
     end
 
+    -- TEXTBOX (RAW INPUT)
     function Window:CreateTextBox(opt)
 
         local box = Instance.new("TextBox", Container)
@@ -196,15 +220,64 @@ function NoirUI:CreateWindow(settings)
         end)
     end
 
+    -- NOTIFY (SYNC ACCENT)
+    function Window:Notify(title, text, duration)
+
+        duration = duration or 2
+
+        local gui = Instance.new("ScreenGui", game.CoreGui)
+        gui.Name = "NoirNotify"
+
+        local frame = Instance.new("Frame", gui)
+        frame.Size = UDim2.new(0, 240, 0, 60)
+        frame.Position = UDim2.new(1, -260, 0.1, 0)
+        frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
+        frame.BackgroundTransparency = 1
+        Instance.new("UICorner", frame)
+
+        local t1 = Instance.new("TextLabel", frame)
+        t1.Size = UDim2.new(1,-10,0,25)
+        t1.Position = UDim2.new(0,5,0,5)
+        t1.BackgroundTransparency = 1
+        t1.Text = title or "Noir"
+        t1.TextColor3 = Color3.new(1,1,1)
+        t1.Font = Enum.Font.GothamBold
+        t1.TextSize = 14
+        t1.TextXAlignment = Enum.TextXAlignment.Left
+
+        local t2 = Instance.new("TextLabel", frame)
+        t2.Size = UDim2.new(1,-10,0,25)
+        t2.Position = UDim2.new(0,5,0,30)
+        t2.BackgroundTransparency = 1
+        t2.Text = text or ""
+        t2.TextColor3 = ACCENT
+        t2.Font = Enum.Font.Gotham
+        t2.TextSize = 12
+        t2.TextXAlignment = Enum.TextXAlignment.Left
+
+        TweenService:Create(frame,TweenInfo.new(0.25),{
+            BackgroundTransparency = 0
+        }):Play()
+
+        task.delay(duration,function()
+            TweenService:Create(frame,TweenInfo.new(0.25),{
+                BackgroundTransparency = 1
+            }):Play()
+            task.wait(0.3)
+            gui:Destroy()
+        end)
+    end
+
+    -- FLOAT ICON (DRAG FIXED)
     local Float = Instance.new("TextButton", ScreenGui)
     Float.Size = UDim2.new(0,40,0,40)
-    Float.Position = _G.NoirFloatPos
+    Float.Position = UDim2.new(0,20,0.5,-20)
     Float.Text = "⚡"
     Float.BackgroundColor3 = Color3.fromRGB(10,10,10)
     Float.TextColor3 = Color3.new(1,1,1)
     Instance.new("UICorner", Float)
 
-    Drag(Float,true)
+    Drag(Float)
 
     local visible = true
 
@@ -219,6 +292,9 @@ function NoirUI:CreateWindow(settings)
             Size = visible and 12 or 0
         }):Play()
     end)
+
+    -- AUTO NOTIFY
+    Window:Notify("Noir UI", "Loaded successfully ⚡", 3)
 
     return Window
 end
