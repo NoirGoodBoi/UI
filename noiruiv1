@@ -46,15 +46,14 @@ function NoirUI:CreateWindow(settings)
         end
     end)
 
-    local Sound
     local function PlaySound()
         if not settings.SoundId then return end
-        Sound = Instance.new("Sound")
-        Sound.SoundId = settings.SoundId
-        Sound.Volume = 1
-        Sound.Parent = game:GetService("SoundService")
-        Sound:Play()
-        game:GetService("Debris"):AddItem(Sound, 2)
+        local s = Instance.new("Sound")
+        s.SoundId = settings.SoundId
+        s.Volume = 1
+        s.Parent = game:GetService("SoundService")
+        s:Play()
+        game:GetService("Debris"):AddItem(s, 2)
     end
 
     local function Burst(parent)
@@ -81,24 +80,26 @@ function NoirUI:CreateWindow(settings)
 
     local function Drag(obj,save)
         local dragging,start,pos
+
         obj.InputBegan:Connect(function(i)
             if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging=true
-                start=i.Position
-                pos=obj.Position
+                dragging = true
+                start = i.Position
+                pos = obj.Position
+
                 i.Changed:Connect(function()
-                    if i.UserInputState==Enum.UserInputState.End then
-                        dragging=false
-                        if save then _G.NoirFloatPos=obj.Position end
+                    if i.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                        if save then _G.NoirFloatPos = obj.Position end
                     end
                 end)
             end
         end)
 
         UIS.InputChanged:Connect(function(i)
-            if dragging and i.UserInputType==Enum.UserInputType.MouseMovement then
-                local d=i.Position-start
-                obj.Position=UDim2.new(pos.X.Scale,pos.X.Offset+d.X,pos.Y.Scale,pos.Y.Offset+d.Y)
+            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+                local d = i.Position - start
+                obj.Position = UDim2.new(pos.X.Scale,pos.X.Offset+d.X,pos.Y.Scale,pos.Y.Offset+d.Y)
             end
         end)
     end
@@ -126,12 +127,12 @@ function NoirUI:CreateWindow(settings)
     local Window = {}
 
     function Window:CreateButton(opt)
-        local b=Instance.new("TextButton",Container)
-        b.Size=UDim2.new(1,0,0,35)
-        b.Text=opt.Name
-        b.BackgroundColor3=Color3.fromRGB(20,20,20)
-        b.TextColor3=Color3.new(1,1,1)
-        Instance.new("UICorner",b)
+        local b = Instance.new("TextButton", Container)
+        b.Size = UDim2.new(1,0,0,35)
+        b.Text = opt.Name
+        b.BackgroundColor3 = Color3.fromRGB(20,20,20)
+        b.TextColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", b)
 
         b.MouseButton1Click:Connect(function()
             PlaySound()
@@ -143,140 +144,174 @@ function NoirUI:CreateWindow(settings)
     end
 
     function Window:CreateToggle(opt)
-        local b=Instance.new("TextButton",Container)
-        b.Size=UDim2.new(1,0,0,35)
-        b.BackgroundColor3=Color3.fromRGB(20,20,20)
-        b.TextColor3=Color3.new(1,1,1)
-        Instance.new("UICorner",b)
+        local b = Instance.new("TextButton", Container)
+        b.Size = UDim2.new(1,0,0,35)
+        b.BackgroundColor3 = Color3.fromRGB(20,20,20)
+        b.TextColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", b)
 
-        local s=false
-        b.Text=opt.Name..": OFF"
+        local s = false
+        b.Text = opt.Name..": OFF"
 
         b.MouseButton1Click:Connect(function()
             PlaySound()
-            s=not s
-            b.Text=opt.Name..": "..(s and "ON" or "OFF")
+            s = not s
+            b.Text = opt.Name..": "..(s and "ON" or "OFF")
+
             TweenService:Create(b,TweenInfo.new(0.2),{
-                BackgroundColor3=s and ACCENT or Color3.fromRGB(20,20,20)
+                BackgroundColor3 = s and ACCENT or Color3.fromRGB(20,20,20)
             }):Play()
+
             if opt.Callback then opt.Callback(s) end
         end)
     end
 
     function Window:CreateSlider(opt)
-        local f=Instance.new("Frame",Container)
-        f.Size=UDim2.new(1,0,0,50)
-        f.BackgroundTransparency=1
+        local f = Instance.new("Frame", Container)
+        f.Size = UDim2.new(1,0,0,55)
+        f.BackgroundTransparency = 1
 
-        local l=Instance.new("TextLabel",f)
-        l.Size=UDim2.new(1,0,0,20)
-        l.Text=opt.Name..": "..opt.Default
-        l.TextColor3=Color3.new(1,1,1)
-        l.BackgroundTransparency=1
+        local label = Instance.new("TextLabel", f)
+        label.Size = UDim2.new(1,0,0,20)
+        label.Text = opt.Name
+        label.TextColor3 = Color3.new(1,1,1)
+        label.BackgroundTransparency = 1
+        label.TextXAlignment = Enum.TextXAlignment.Left
 
-        local bar=Instance.new("Frame",f)
-        bar.Size=UDim2.new(1,0,0,10)
-        bar.Position=UDim2.new(0,0,0,30)
-        bar.BackgroundColor3=Color3.fromRGB(40,40,40)
-        Instance.new("UICorner",bar)
+        local valueLabel = Instance.new("TextLabel", f)
+        valueLabel.Size = UDim2.new(1,0,0,20)
+        valueLabel.Position = UDim2.new(0,0,0,15)
+        valueLabel.Text = tostring(opt.Default or opt.Min)
+        valueLabel.TextColor3 = Color3.fromRGB(180,180,180)
+        valueLabel.BackgroundTransparency = 1
+        valueLabel.TextXAlignment = Enum.TextXAlignment.Right
 
-        local fill=Instance.new("Frame",bar)
-        fill.BackgroundColor3=ACCENT
-        fill.Size=UDim2.new(0,0,1,0)
-        Instance.new("UICorner",fill)
+        local bar = Instance.new("Frame", f)
+        bar.Size = UDim2.new(1,0,0,6)
+        bar.Position = UDim2.new(0,0,0,40)
+        bar.BackgroundColor3 = Color3.fromRGB(35,35,35)
+        Instance.new("UICorner", bar)
 
-        local d=false
-        local min,max=opt.Min,opt.Max
+        local fill = Instance.new("Frame", bar)
+        fill.Size = UDim2.new(0,0,1,0)
+        fill.BackgroundColor3 = ACCENT
+        Instance.new("UICorner", fill)
+
+        local dragging = false
+        local min, max = opt.Min, opt.Max
+
+        local function set(v)
+            v = math.clamp(v, min, max)
+            if opt.Step then
+                v = math.floor(v / opt.Step + 0.5) * opt.Step
+            end
+
+            local p = (v - min) / (max - min)
+            fill.Size = UDim2.new(p,0,1,0)
+            valueLabel.Text = tostring(v)
+
+            if opt.Callback then opt.Callback(v) end
+        end
 
         bar.InputBegan:Connect(function(i)
-            if i.UserInputType==Enum.UserInputType.MouseButton1 then d=true end
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+            end
         end)
 
         bar.InputEnded:Connect(function(i)
-            if i.UserInputType==Enum.UserInputType.MouseButton1 then d=false end
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
         end)
 
         UIS.InputChanged:Connect(function(i)
-            if d and i.UserInputType==Enum.UserInputType.MouseMovement then
-                local p=(i.Position.X-bar.AbsolutePosition.X)/bar.AbsoluteSize.X
-                p=math.clamp(p,0,1)
-
-                local v=math.floor(min+(max-min)*p)
-                l.Text=opt.Name..": "..v
-                fill.Size=UDim2.new(p,0,1,0)
-
-                if opt.Callback then opt.Callback(v) end
+            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+                local p = (i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X
+                set(min + (max - min) * p)
             end
         end)
     end
 
     function Window:CreateColorPicker(opt)
-        local f=Instance.new("Frame",Container)
-        f.Size=UDim2.new(1,0,0,60)
-        f.BackgroundTransparency=1
+        local f = Instance.new("Frame", Container)
+        f.Size = UDim2.new(1,0,0,70)
+        f.BackgroundTransparency = 1
 
-        local l=Instance.new("TextLabel",f)
-        l.Size=UDim2.new(1,0,0,20)
-        l.Text=opt.Name
-        l.TextColor3=Color3.new(1,1,1)
-        l.BackgroundTransparency=1
+        local label = Instance.new("TextLabel", f)
+        label.Size = UDim2.new(1,0,0,20)
+        label.Text = opt.Name
+        label.TextColor3 = Color3.new(1,1,1)
+        label.BackgroundTransparency = 1
+        label.TextXAlignment = Enum.TextXAlignment.Left
 
-        local prev=Instance.new("Frame",f)
-        prev.Size=UDim2.new(0,30,0,30)
-        prev.Position=UDim2.new(1,-35,0,25)
-        prev.BackgroundColor3=Color3.new(1,0,0)
-        Instance.new("UICorner",prev)
+        local preview = Instance.new("Frame", f)
+        preview.Size = UDim2.new(0,30,0,30)
+        preview.Position = UDim2.new(1,-35,0,25)
+        preview.BackgroundColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", preview)
 
-        local pick=Instance.new("Frame",f)
-        pick.Size=UDim2.new(1,-40,0,30)
-        pick.Position=UDim2.new(0,0,0,25)
-        pick.BackgroundColor3=Color3.fromRGB(255,255,255)
-        Instance.new("UICorner",pick)
+        local box = Instance.new("Frame", f)
+        box.Size = UDim2.new(1,-40,0,30)
+        box.Position = UDim2.new(0,0,0,25)
+        box.BackgroundColor3 = Color3.fromRGB(30,30,30)
+        Instance.new("UICorner", box)
 
-        local d=false
+        local dragging = false
 
-        pick.InputBegan:Connect(function(i)
-            if i.UserInputType==Enum.UserInputType.MouseButton1 then d=true end
+        local function setColor(x,y)
+            x = math.clamp(x,0,1)
+            y = math.clamp(y,0,1)
+
+            local c = Color3.fromHSV(x,1,1-y)
+            preview.BackgroundColor3 = c
+
+            if opt.Callback then opt.Callback(c) end
+        end
+
+        box.InputBegan:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+            end
         end)
 
-        pick.InputEnded:Connect(function(i)
-            if i.UserInputType==Enum.UserInputType.MouseButton1 then d=false end
+        box.InputEnded:Connect(function(i)
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
         end)
 
         UIS.InputChanged:Connect(function(i)
-            if d and i.UserInputType==Enum.UserInputType.MouseMovement then
-                local x=(i.Position.X-pick.AbsolutePosition.X)/pick.AbsoluteSize.X
-                local y=(i.Position.Y-pick.AbsolutePosition.Y)/pick.AbsoluteSize.Y
-
-                x=math.clamp(x,0,1)
-                y=math.clamp(y,0,1)
-
-                local c=Color3.fromHSV(x,1,1-y)
-                prev.BackgroundColor3=c
-                if opt.Callback then opt.Callback(c) end
+            if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+                local x = (i.Position.X - box.AbsolutePosition.X) / box.AbsoluteSize.X
+                local y = (i.Position.Y - box.AbsolutePosition.Y) / box.AbsoluteSize.Y
+                setColor(x,y)
             end
         end)
     end
 
-    local Float=Instance.new("TextButton",ScreenGui)
-    Float.Size=UDim2.new(0,40,0,40)
-    Float.Position=_G.NoirFloatPos
-    Float.Text="⚡"
-    Float.BackgroundColor3=Color3.fromRGB(10,10,10)
-    Float.TextColor3=Color3.new(1,1,1)
-    Instance.new("UICorner",Float)
+    local Float = Instance.new("TextButton", ScreenGui)
+    Float.Size = UDim2.new(0,40,0,40)
+    Float.Position = _G.NoirFloatPos
+    Float.Text = "⚡"
+    Float.BackgroundColor3 = Color3.fromRGB(10,10,10)
+    Float.TextColor3 = Color3.new(1,1,1)
+    Instance.new("UICorner", Float)
 
     Drag(Float,true)
 
-    local visible=true
+    local visible = true
 
     Float.MouseButton1Click:Connect(function()
         PlaySound()
         Burst(Float)
-        visible=not visible
 
-        Main.Visible=visible
-        TweenService:Create(Blur,TweenInfo.new(0.2),{Size=visible and 12 or 0}):Play()
+        visible = not visible
+        Main.Visible = visible
+
+        TweenService:Create(Blur,TweenInfo.new(0.2),{
+            Size = visible and 12 or 0
+        }):Play()
     end)
 
     return Window
