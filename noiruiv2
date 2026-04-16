@@ -1,0 +1,248 @@
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+
+local NoirUI = {}
+
+function NoirUI:CreateWindow(settings)
+
+-- CLEAN
+local old = game.CoreGui:FindFirstChild("NoirUI")
+if old then old:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "NoirUI"
+
+local ACCENT = settings.Accent or Color3.fromRGB(170,85,255)
+
+-- BLUR
+local Blur = Instance.new("BlurEffect", game.Lighting)
+Blur.Size = 0
+TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 12}):Play()
+
+-- MAIN
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0,340,0,280)
+Main.Position = UDim2.new(0.5,-170,0.5,-140)
+Main.BackgroundColor3 = Color3.fromRGB(10,10,10)
+Instance.new("UICorner", Main)
+
+-- TITLE
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1,0,0,30)
+Title.Text = settings.Name or "Noir UI"
+Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.new(1,1,1)
+
+-- TAB BAR
+local TabBar = Instance.new("Frame", Main)
+TabBar.Size = UDim2.new(1,0,0,30)
+TabBar.Position = UDim2.new(0,0,0,30)
+TabBar.BackgroundTransparency = 1
+
+local TabLayout = Instance.new("UIListLayout", TabBar)
+TabLayout.FillDirection = Enum.FillDirection.Horizontal
+TabLayout.Padding = UDim.new(0,5)
+
+-- PAGES
+local Pages = Instance.new("Frame", Main)
+Pages.Size = UDim2.new(1,0,1,-60)
+Pages.Position = UDim2.new(0,0,0,60)
+Pages.BackgroundTransparency = 1
+
+-- DRAG
+local function Drag(obj)
+    local dragging, start, pos
+
+    obj.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            start = i.Position
+            pos = obj.Position
+        end
+    end)
+
+    UIS.InputChanged:Connect(function(i)
+        if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+            local d = i.Position - start
+            obj.Position = UDim2.new(
+                pos.X.Scale, pos.X.Offset + d.X,
+                pos.Y.Scale, pos.Y.Offset + d.Y
+            )
+        end
+    end)
+
+    obj.InputEnded:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+end
+
+Drag(Main)
+
+-- FLOAT ICON
+local Float = Instance.new("TextButton", ScreenGui)
+Float.Size = UDim2.new(0,40,0,40)
+Float.Position = UDim2.new(0,20,0.5,-20)
+Float.Text = ""
+Float.BackgroundColor3 = Color3.fromRGB(10,10,10)
+Instance.new("UICorner", Float)
+
+local icon = Instance.new("ImageLabel", Float)
+icon.Size = UDim2.new(1,-10,1,-10)
+icon.Position = UDim2.new(0,5,0,5)
+icon.BackgroundTransparency = 1
+icon.Image = settings.Icon or "rbxassetid://6031094678"
+
+Drag(Float)
+
+local visible = true
+Float.MouseButton1Click:Connect(function()
+    Float:TweenSize(UDim2.new(0,35,0,35),"Out","Quad",0.1,true)
+    task.wait(0.1)
+    Float:TweenSize(UDim2.new(0,40,0,40),"Out","Quad",0.1,true)
+
+    visible = not visible
+    Main.Visible = visible
+
+    TweenService:Create(Blur,TweenInfo.new(0.2),{
+        Size = visible and 12 or 0
+    }):Play()
+end)
+
+-- TAB SYSTEM
+local Tabs = {}
+local CurrentTab = nil
+
+local Window = {}
+
+function Window:CreateTab(name, iconId)
+    local Tab = {}
+
+    local btn = Instance.new("TextButton", TabBar)
+    btn.Size = UDim2.new(0,100,1,0)
+    btn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+    btn.Text = ""
+    Instance.new("UICorner", btn)
+
+    local img = Instance.new("ImageLabel", btn)
+    img.Size = UDim2.new(0,18,0,18)
+    img.Position = UDim2.new(0,5,0.5,-9)
+    img.BackgroundTransparency = 1
+    img.Image = iconId or "rbxassetid://6031094678"
+
+    local txt = Instance.new("TextLabel", btn)
+    txt.Size = UDim2.new(1,-25,1,0)
+    txt.Position = UDim2.new(0,25,0,0)
+    txt.BackgroundTransparency = 1
+    txt.Text = name
+    txt.TextColor3 = Color3.new(1,1,1)
+    txt.TextXAlignment = Enum.TextXAlignment.Left
+
+    local page = Instance.new("ScrollingFrame", Pages)
+    page.Size = UDim2.new(1,0,1,0)
+    page.Visible = false
+    page.BackgroundTransparency = 1
+    page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+    local layout = Instance.new("UIListLayout", page)
+    layout.Padding = UDim.new(0,8)
+
+    btn.MouseButton1Click:Connect(function()
+        if CurrentTab == Tab then return end
+
+        if CurrentTab then
+            CurrentTab.Page.Visible = false
+        end
+
+        page.Visible = true
+        page.Position = UDim2.new(0.1,0,0,0)
+
+        TweenService:Create(page,TweenInfo.new(0.25),{
+            Position = UDim2.new(0,0,0,0)
+        }):Play()
+
+        CurrentTab = Tab
+    end)
+
+    if not CurrentTab then
+        page.Visible = true
+        CurrentTab = Tab
+    end
+
+    Tab.Page = page
+    table.insert(Tabs, Tab)
+
+    function Tab:CreateSection(title)
+        local Section = {}
+
+        local frame = Instance.new("Frame", page)
+        frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
+        Instance.new("UICorner", frame)
+
+        local titleLabel = Instance.new("TextLabel", frame)
+        titleLabel.Size = UDim2.new(1,0,0,25)
+        titleLabel.Text = "  "..title
+        titleLabel.BackgroundTransparency = 1
+        titleLabel.TextColor3 = Color3.new(1,1,1)
+        titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+        local container = Instance.new("Frame", frame)
+        container.Position = UDim2.new(0,0,0,25)
+        container.BackgroundTransparency = 1
+
+        local list = Instance.new("UIListLayout", container)
+        list.Padding = UDim.new(0,5)
+
+        list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            container.Size = UDim2.new(1,0,0,list.AbsoluteContentSize.Y)
+            frame.Size = UDim2.new(1,0,0,list.AbsoluteContentSize.Y + 25)
+        end)
+
+        function Section:CreateButton(opt)
+            local b = Instance.new("TextButton", container)
+            b.Size = UDim2.new(1,0,0,30)
+            b.Text = opt.Name
+            b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+            Instance.new("UICorner", b)
+
+            b.MouseButton1Click:Connect(function()
+                if opt.Callback then opt.Callback() end
+            end)
+        end
+
+        function Section:CreateToggle(opt)
+            local state = false
+
+            local b = Instance.new("TextButton", container)
+            b.Size = UDim2.new(1,0,0,30)
+            b.Text = opt.Name..": OFF"
+            b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+            Instance.new("UICorner", b)
+
+            b.MouseButton1Click:Connect(function()
+                state = not state
+                b.Text = opt.Name..": "..(state and "ON" or "OFF")
+                if opt.Callback then opt.Callback(state) end
+            end)
+        end
+
+        function Section:CreateLabel(opt)
+            local l = Instance.new("TextLabel", container)
+            l.Size = UDim2.new(1,0,0,20)
+            l.Text = opt.Text
+            l.BackgroundTransparency = 1
+            l.TextColor3 = Color3.fromRGB(200,200,200)
+            l.TextXAlignment = Enum.TextXAlignment.Left
+        end
+
+        return Section
+    end
+
+    return Tab
+end
+
+return Window
+end
+
+return NoirUI
