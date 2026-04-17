@@ -1,10 +1,9 @@
-local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local Http = game:GetService("HttpService")
 
-local NoirUI = {}
+local UI = {}
 
-function NoirUI:CreateWindow(settings)
+function UI:CreateWindow(settings)
 
 -- CONFIG
 local Config = {}
@@ -24,81 +23,76 @@ end
 Load()
 
 -- ROOT
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-local ACCENT = settings.Accent or Color3.fromRGB(170,85,255)
+local gui = Instance.new("ScreenGui", game.CoreGui)
 
 -- MAIN
-local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0,360,0,320)
-Main.Position = UDim2.new(0.5,-180,0.5,-160)
-Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
-Instance.new("UICorner", Main)
+local Main = Instance.new("Frame", gui)
+Main.Size = UDim2.new(0,350,0,300)
+Main.Position = UDim2.new(0.5,-175,0.5,-150)
+Main.BackgroundColor3 = Color3.fromRGB(20,20,20)
 
--- DRAG
-local dragging, dragStart, startPos
-Main.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = i.Position
-        startPos = Main.Position
-    end
-end)
-UIS.InputChanged:Connect(function(i)
-    if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-        local d = i.Position - dragStart
-        Main.Position = UDim2.new(
-            startPos.X.Scale, startPos.X.Offset + d.X,
-            startPos.Y.Scale, startPos.Y.Offset + d.Y
-        )
-    end
-end)
-UIS.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
+local originalPos = Main.Position
 
--- RESIZE
-local resize = Instance.new("Frame", Main)
-resize.Size = UDim2.new(0,15,0,15)
-resize.Position = UDim2.new(1,-15,1,-15)
-resize.BackgroundColor3 = ACCENT
+-- DRAG FUNCTION (FIX CHUẨN)
+local function MakeDraggable(obj)
+    local dragging = false
+    local startPos, startFrame
 
-local resizing = false
-resize.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = true
-    end
-end)
-UIS.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = false
-    end
-end)
-UIS.InputChanged:Connect(function(i)
-    if resizing then
-        local size = i.Position - Main.AbsolutePosition
-        Main.Size = UDim2.new(0,size.X,0,size.Y)
-    end
-end)
+    obj.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            startPos = i.Position
+            startFrame = obj.Position
+        end
+    end)
 
--- FLOAT
-local Float = Instance.new("TextButton", ScreenGui)
+    obj.InputChanged:Connect(function(i)
+        if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = i.Position - startPos
+            obj.Position = UDim2.new(
+                startFrame.X.Scale,
+                startFrame.X.Offset + delta.X,
+                startFrame.Y.Scale,
+                startFrame.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    obj.InputEnded:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+end
+
+MakeDraggable(Main)
+
+-- FLOAT ICON
+local Float = Instance.new("TextButton", gui)
 Float.Size = UDim2.new(0,40,0,40)
 Float.Position = UDim2.new(0,20,0.5,-20)
+Float.Text = "⚡"
 Float.BackgroundColor3 = Color3.fromRGB(10,10,10)
-Instance.new("UICorner", Float)
+
+MakeDraggable(Float)
 
 local visible = true
+
 Float.MouseButton1Click:Connect(function()
     visible = not visible
     Main.Visible = visible
+
+    if visible then
+        Main.Position = originalPos -- 🔥 luôn về vị trí ban đầu
+    end
 end)
 
 -- SIDEBAR
 local Side = Instance.new("Frame", Main)
 Side.Size = UDim2.new(0,100,1,0)
-Side.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Side.BackgroundColor3 = Color3.fromRGB(25,25,25)
+
+local Layout = Instance.new("UIListLayout", Side)
 
 -- PAGES
 local Pages = Instance.new("Frame", Main)
@@ -106,10 +100,11 @@ Pages.Size = UDim2.new(1,-100,1,0)
 Pages.Position = UDim2.new(0,100,0,0)
 
 local Tabs = {}
-local CurrentTab
+local CurrentTab = nil
+
 local Window = {}
 
--- TAB
+-- TAB SYSTEM (FIX)
 function Window:CreateTab(name)
     local Tab = {}
 
@@ -120,18 +115,13 @@ function Window:CreateTab(name)
 
     local page = Instance.new("ScrollingFrame", Pages)
     page.Size = UDim2.new(1,0,1,0)
-    page.CanvasSize = UDim2.new(0,0,0,0)
-    page.ScrollBarThickness = 4
-    page.ScrollBarImageColor3 = ACCENT
-    page.BorderSizePixel = 0
     page.Visible = false
+    page.CanvasSize = UDim2.new(0,0,0,0)
 
     local layout = Instance.new("UIListLayout", page)
-    layout.Padding = UDim.new(0,6)
 
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        local size = math.max(layout.AbsoluteContentSize.Y + 10, page.AbsoluteSize.Y)
-        page.CanvasSize = UDim2.new(0,0,0,size)
+        page.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
     end)
 
     btn.MouseButton1Click:Connect(function()
@@ -139,14 +129,16 @@ function Window:CreateTab(name)
             t.Page.Visible = false
             t.Button.BackgroundColor3 = Color3.fromRGB(30,30,30)
         end
+
         page.Visible = true
-        btn.BackgroundColor3 = ACCENT
+        btn.BackgroundColor3 = Color3.fromRGB(170,85,255)
         CurrentTab = Tab
     end)
 
+    -- 🔥 AUTO SELECT TAB 1
     if not CurrentTab then
         page.Visible = true
-        btn.BackgroundColor3 = ACCENT
+        btn.BackgroundColor3 = Color3.fromRGB(170,85,255)
         CurrentTab = Tab
     end
 
@@ -155,16 +147,16 @@ function Window:CreateTab(name)
     table.insert(Tabs, Tab)
 
     -- SECTION
-    function Tab:CreateSection(title)
+    function Tab:CreateSection(name)
         local Section = {}
 
         local frame = Instance.new("Frame", page)
-        frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
 
-        local titleL = Instance.new("TextLabel", frame)
-        titleL.Text = title
-        titleL.Size = UDim2.new(1,0,0,25)
-        titleL.BackgroundTransparency = 1
+        local title = Instance.new("TextLabel", frame)
+        title.Text = name
+        title.Size = UDim2.new(1,0,0,25)
+        title.BackgroundTransparency = 1
 
         local container = Instance.new("Frame", frame)
         container.Position = UDim2.new(0,0,0,25)
@@ -181,6 +173,7 @@ function Window:CreateTab(name)
             local b = Instance.new("TextButton", container)
             b.Size = UDim2.new(1,0,0,30)
             b.Text = opt.Name
+
             b.MouseButton1Click:Connect(function()
                 if opt.Callback then opt.Callback() end
             end)
@@ -198,129 +191,13 @@ function Window:CreateTab(name)
                 state = not state
                 Config[opt.Name] = state
                 Save()
+
                 b.Text = opt.Name..": "..(state and "ON" or "OFF")
+
                 if opt.Callback then opt.Callback(state) end
             end)
 
             if opt.Callback then opt.Callback(state) end
-        end
-
-        -- TEXTBOX
-        function Section:CreateTextBox(opt)
-            local val = Config[opt.Name] or ""
-
-            local box = Instance.new("TextBox", container)
-            box.Size = UDim2.new(1,0,0,30)
-            box.Text = val
-
-            box.FocusLost:Connect(function()
-                Config[opt.Name] = box.Text
-                Save()
-                if opt.Callback then opt.Callback(box.Text) end
-            end)
-        end
-
-        -- DROPDOWN
-        function Section:CreateDropdown(opt)
-            local list = opt.List or {}
-            local selected = Config[opt.Name] or list[1] or ""
-
-            local frame = Instance.new("Frame", container)
-            frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-            frame.Size = UDim2.new(1,0,0,30)
-
-            local btn = Instance.new("TextButton", frame)
-            btn.Size = UDim2.new(1,0,0,30)
-            btn.Text = opt.Name..": "..selected
-            btn.BackgroundTransparency = 1
-
-            local drop = Instance.new("Frame", frame)
-            drop.Position = UDim2.new(0,0,0,30)
-            drop.Size = UDim2.new(1,0,0,0)
-            drop.ClipsDescendants = true
-
-            local dlayout = Instance.new("UIListLayout", drop)
-
-            local opened = false
-
-            btn.MouseButton1Click:Connect(function()
-                opened = not opened
-                local size = opened and (#list * 25) or 0
-                drop.Size = UDim2.new(1,0,0,size)
-                frame.Size = UDim2.new(1,0,0,30 + size)
-            end)
-
-            for _,v in pairs(list) do
-                local o = Instance.new("TextButton", drop)
-                o.Size = UDim2.new(1,0,0,25)
-                o.Text = v
-
-                o.MouseButton1Click:Connect(function()
-                    selected = v
-                    Config[opt.Name] = v
-                    Save()
-                    btn.Text = opt.Name..": "..v
-                    drop.Size = UDim2.new(1,0,0,0)
-                    frame.Size = UDim2.new(1,0,0,30)
-                    if opt.Callback then opt.Callback(v) end
-                end)
-            end
-
-            if opt.Callback then opt.Callback(selected) end
-        end
-
-        -- SLIDER
-        function Section:CreateSlider(opt)
-            local min = opt.Min or 0
-            local max = opt.Max or 100
-            local val = Config[opt.Name] or min
-
-            local frame = Instance.new("Frame", container)
-            frame.Size = UDim2.new(1,0,0,45)
-
-            local label = Instance.new("TextLabel", frame)
-            label.Size = UDim2.new(1,0,0,20)
-            label.Text = opt.Name..": "..val
-
-            local bar = Instance.new("Frame", frame)
-            bar.Size = UDim2.new(1,-10,0,6)
-            bar.Position = UDim2.new(0,5,1,-10)
-
-            local fill = Instance.new("Frame", bar)
-            fill.Size = UDim2.new((val-min)/(max-min),0,1,0)
-            fill.BackgroundColor3 = ACCENT
-
-            local dragging = false
-
-            bar.InputBegan:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = true
-                end
-            end)
-
-            UIS.InputEnded:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 then
-                    dragging = false
-                end
-            end)
-
-            UIS.InputChanged:Connect(function(i)
-                if dragging then
-                    local pos = (i.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X
-                    pos = math.clamp(pos,0,1)
-
-                    val = math.floor(min + (max-min)*pos)
-                    fill.Size = UDim2.new(pos,0,1,0)
-                    label.Text = opt.Name..": "..val
-
-                    Config[opt.Name] = val
-                    Save()
-
-                    if opt.Callback then opt.Callback(val) end
-                end
-            end)
-
-            if opt.Callback then opt.Callback(val) end
         end
 
         return Section
@@ -332,4 +209,4 @@ end
 return Window
 end
 
-return NoirUI
+return UI
