@@ -1,345 +1,359 @@
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
+local Debris = game:GetService("Debris")
 
 local NoirUI = {}
 
 function NoirUI:CreateWindow(settings)
+    -- =========================
+    -- 🧹 CLEAN OLD UI
+    -- =========================
+    local old = game.CoreGui:FindFirstChild("NoirUI")
+    if old then old:Destroy() end
 
--- =========================
--- 🧹 CLEAN OLD UI
--- =========================
-local old = game.CoreGui:FindFirstChild("NoirUI")
-if old then old:Destroy() end
+    local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+    ScreenGui.Name = "NoirUI"
 
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "NoirUI"
+    local ACCENT = settings.Accent or Color3.fromRGB(170, 85, 255)
+    local Window = { Dots = {} }
 
-local ACCENT = settings.Accent or Color3.fromRGB(170,85,255)
+    -- =========================
+    -- 🧱 MAIN FRAME (RGB & Glow)
+    -- =========================
+    local Main = Instance.new("Frame", ScreenGui)
+    Main.Size = UDim2.new(0, 350, 0, 420)
+    Main.Position = UDim2.new(0.5, -175, 0.5, -210)
+    Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    Main.ClipsDescendants = true
+    Instance.new("UICorner", Main)
 
--- =========================
--- 🌫 BLUR
--- =========================
-local Blur = Instance.new("BlurEffect", game.Lighting)
-Blur.Size = 0
-TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 12}):Play()
+    -- Hiệu ứng viền RGB
+    local Stroke = Instance.new("UIStroke", Main)
+    Stroke.Thickness = 2
+    local Glow = Instance.new("UIStroke", Main)
+    Glow.Thickness = 6
+    Glow.Transparency = 0.7
 
--- =========================
--- 🧱 MAIN FRAME
--- =========================
-local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0,320,0,260)
-Main.Position = UDim2.new(0.5,-160,0.5,-130)
-Main.BackgroundColor3 = Color3.fromRGB(10,10,10)
-Main.BackgroundTransparency = 1
-Instance.new("UICorner", Main)
-
-TweenService:Create(Main, TweenInfo.new(0.3), {
-    BackgroundTransparency = 0
-}):Play()
-
--- =========================
--- ✨ GLOW BORDER
--- =========================
-local Stroke = Instance.new("UIStroke", Main)
-Stroke.Thickness = 2
-
-local Glow = Instance.new("UIStroke", Main)
-Glow.Thickness = 6
-Glow.Transparency = 0.7
-
-task.spawn(function()
-    while Main and Main.Parent do
-        for i = 0,1,0.01 do
-            local c = Color3.fromHSV(i,1,1)
-            Stroke.Color = c
-            Glow.Color = c
-            task.wait()
-        end
-    end
-end)
-
--- =========================
--- 🔊 SOUND
--- =========================
-local function PlaySound()
-    if not settings.SoundId then return end
-    local s = Instance.new("Sound")
-    s.SoundId = settings.SoundId
-    s.Volume = 1
-    s.Parent = game:GetService("SoundService")
-    s:Play()
-    game:GetService("Debris"):AddItem(s,2)
-end
-
--- =========================
--- 💥 BURST EFFECT
--- =========================
-local function Burst(obj)
-    if not settings.IconEffect then return end
-
-    for i = 1,8 do
-        local p = Instance.new("Frame")
-        p.Size = UDim2.new(0,4,0,4)
-        p.BackgroundColor3 = ACCENT
-        p.BorderSizePixel = 0
-        p.Parent = obj
-
-        local a = (i/8)*math.pi*2
-        p.Position = UDim2.new(0.5,0,0.5,0)
-
-        TweenService:Create(p,TweenInfo.new(0.35),{
-            Position = UDim2.new(
-                0.5 + math.cos(a)*0.25,0,
-                0.5 + math.sin(a)*0.25,0
-            ),
-            BackgroundTransparency = 1
-        }):Play()
-
-        game:GetService("Debris"):AddItem(p,0.5)
-    end
-end
-
--- =========================
--- 🖱 DRAG SYSTEM (WINDOW)
--- =========================
-local function Drag(obj)
-    local dragging,start,pos
-
-    obj.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            start = i.Position
-            pos = obj.Position
+    task.spawn(function()
+        while Main and Main.Parent do
+            for i = 0, 1, 0.01 do
+                if not Main or not Main.Parent then break end
+                local c = Color3.fromHSV(i, 0.8, 1)
+                Stroke.Color = c
+                Glow.Color = c
+                task.wait(0.04)
+            end
         end
     end)
 
-    obj.InputEnded:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
+    -- =========================
+    -- 🛠 INTERNAL UTILS
+    -- =========================
+    local function PlaySound()
+        if not settings.SoundId then return end
+        local s = Instance.new("Sound", game:GetService("SoundService"))
+        s.SoundId = settings.SoundId
+        s.Volume = 0.5
+        s:Play()
+        Debris:AddItem(s, 2)
+    end
+
+    local function Burst(obj)
+        for i = 1, 6 do
+            local p = Instance.new("Frame", obj)
+            p.Size = UDim2.new(0, 4, 0, 4)
+            p.BackgroundColor3 = ACCENT
+            p.Position = UDim2.new(0.5, 0, 0.5, 0)
+            Instance.new("UICorner", p).CornerRadius = UDim.new(1, 0)
+            local ang = (i/6) * math.pi * 2
+            TweenService:Create(p, TweenInfo.new(0.4), {
+                Position = UDim2.new(0.5 + math.cos(ang)*0.4, 0, 0.5 + math.sin(ang)*0.4, 0),
+                BackgroundTransparency = 1
+            }):Play()
+            Debris:AddItem(p, 0.4)
+        end
+    end
+
+    -- =========================
+    -- 📌 HEADER & TAB SYSTEM
+    -- =========================
+    local Title = Instance.new("TextLabel", Main)
+    Title.Size = UDim2.new(1, 0, 0, 45)
+    Title.BackgroundTransparency = 1
+    Title.Text = settings.Name or "NOIR UI V2"
+    Title.TextColor3 = Color3.new(1, 1, 1)
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 18
+
+    local TabContainer = Instance.new("Frame", Main)
+    TabContainer.Size = UDim2.new(1, -20, 1, -95)
+    TabContainer.Position = UDim2.new(0, 10, 0, 45)
+    TabContainer.BackgroundTransparency = 1
+
+    local PageLayout = Instance.new("UIPageLayout", TabContainer)
+    PageLayout.Padding = UDim.new(0, 20)
+    PageLayout.TweenTime = 0.4
+    PageLayout.EasingStyle = Enum.EasingStyle.Quint
+
+    local DotContainer = Instance.new("Frame", Main)
+    DotContainer.Size = UDim2.new(1, 0, 0, 30)
+    DotContainer.Position = UDim2.new(0, 0, 1, -35)
+    DotContainer.BackgroundTransparency = 1
+    local DotList = Instance.new("UIListLayout", DotContainer)
+    DotList.FillDirection = "Horizontal"
+    DotList.HorizontalAlignment = "Center"
+    DotList.Padding = UDim.new(0, 8)
+
+    -- =========================
+    -- 📂 CREATE TAB FUNCTION
+    -- =========================
+    function Window:CreateTab(name)
+        local Page = Instance.new("ScrollingFrame", TabContainer)
+        Page.Name = name
+        Page.Size = UDim2.new(1, 0, 1, 0)
+        Page.BackgroundTransparency = 1
+        Page.ScrollBarThickness = 0
+        Page.AutomaticCanvasSize = "Y"
+        
+        local Layout = Instance.new("UIListLayout", Page)
+        Layout.Padding = UDim.new(0, 8)
+        Layout.HorizontalAlignment = "Center"
+        Layout.SortOrder = Enum.SortOrder.LayoutOrder -- Đảm bảo thứ tự
+
+        local orderCount = 0
+
+        -- Dot logic
+        local Dot = Instance.new("Frame", DotContainer)
+        Dot.Size = UDim2.new(0, 8, 0, 8)
+        Dot.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+        Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
+        table.insert(self.Dots, {Dot = Dot, Page = Page})
+
+        local Tab = {}
+
+        -- 1. SECTION
+        function Tab:CreateSection(text)
+            orderCount = orderCount + 1
+            local s = Instance.new("TextLabel", Page)
+            s.LayoutOrder = orderCount
+            s.Size = UDim2.new(0.95, 0, 0, 30)
+            s.BackgroundTransparency = 1
+            s.Text = "— " .. text .. " —"
+            s.TextColor3 = ACCENT
+            s.Font = Enum.Font.GothamBold
+            s.TextSize = 13
+        end
+
+        -- 2. LABEL
+        function Tab:CreateLabel(text)
+            orderCount = orderCount + 1
+            local l = Instance.new("TextLabel", Page)
+            l.LayoutOrder = orderCount
+            l.Size = UDim2.new(0.95, 0, 0, 22)
+            l.BackgroundTransparency = 1
+            l.Text = text
+            l.TextColor3 = Color3.fromRGB(200, 200, 200)
+            l.Font = Enum.Font.Gotham
+            l.TextSize = 14
+            l.TextXAlignment = "Left"
+        end
+
+        -- 3. BUTTON
+        function Tab:CreateButton(name, callback)
+            orderCount = orderCount + 1
+            local b = Instance.new("TextButton", Page)
+            b.LayoutOrder = orderCount
+            b.Size = UDim2.new(0.95, 0, 0, 38)
+            b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            b.Text = name
+            b.TextColor3 = Color3.new(1, 1, 1)
+            b.Font = Enum.Font.GothamMedium
+            Instance.new("UICorner", b)
+
+            b.MouseButton1Click:Connect(function()
+                PlaySound(); Burst(b); callback()
+            end)
+        end
+
+        -- 4. TOGGLE
+        function Tab:CreateToggle(name, callback)
+            orderCount = orderCount + 1
+            local state = false
+            local t = Instance.new("TextButton", Page)
+            t.LayoutOrder = orderCount
+            t.Size = UDim2.new(0.95, 0, 0, 38)
+            t.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            t.Text = name .. " [OFF]"
+            t.TextColor3 = Color3.fromRGB(180, 180, 180)
+            Instance.new("UICorner", t)
+
+            t.MouseButton1Click:Connect(function()
+                state = not state
+                PlaySound(); Burst(t)
+                t.Text = name .. (state and " [ON]" or " [OFF]")
+                TweenService:Create(t, TweenInfo.new(0.2), {
+                    BackgroundColor3 = state and ACCENT or Color3.fromRGB(25, 25, 25),
+                    TextColor3 = state and Color3.new(1, 1, 1) or Color3.fromRGB(180, 180, 180)
+                }):Play()
+                callback(state)
+            end)
+        end
+
+        -- 5. TEXTBOX
+        function Tab:CreateTextBox(placeholder, callback)
+            orderCount = orderCount + 1
+            local boxFrame = Instance.new("Frame", Page)
+            boxFrame.LayoutOrder = orderCount
+            boxFrame.Size = UDim2.new(0.95, 0, 0, 38)
+            boxFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            Instance.new("UICorner", boxFrame)
+
+            local input = Instance.new("TextBox", boxFrame)
+            input.Size = UDim2.new(1, -20, 1, 0)
+            input.Position = UDim2.new(0, 10, 0, 0)
+            input.BackgroundTransparency = 1
+            input.PlaceholderText = placeholder or "Nhập nội dung..."
+            input.Text = ""
+            input.TextColor3 = Color3.new(1, 1, 1)
+            input.ClearTextOnFocus = false
+
+            input.FocusLost:Connect(function(enter)
+                if enter then PlaySound(); callback(input.Text) end
+            end)
+        end
+
+        -- 6. RUNBOX (CMD Style)
+        function Tab:CreateRunBox(placeholder, callback)
+            orderCount = orderCount + 1
+            local f = Instance.new("Frame", Page)
+            f.LayoutOrder = orderCount
+            f.Size = UDim2.new(0.95, 0, 0, 38)
+            f.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+            Instance.new("UICorner", f)
+            
+            local i = Instance.new("TextBox", f)
+            i.Size = UDim2.new(1, -70, 1, 0)
+            i.Position = UDim2.new(0, 10, 0, 0)
+            i.BackgroundTransparency = 1
+            i.PlaceholderText = placeholder or "Lệnh..."
+            i.Text = ""
+            i.TextColor3 = Color3.new(1, 1, 1)
+            i.Font = "Code"
+            i.TextXAlignment = "Left"
+
+            local r = Instance.new("TextButton", f)
+            r.Size = UDim2.new(0, 55, 0, 28)
+            r.Position = UDim2.new(1, -60, 0.5, -14)
+            r.BackgroundColor3 = ACCENT
+            r.Text = "RUN"
+            r.TextColor3 = Color3.new(1, 1, 1)
+            r.Font = "GothamBold"
+            r.TextSize = 12
+            Instance.new("UICorner", r)
+
+            local function exec() if i.Text ~= "" then PlaySound(); Burst(r); callback(i.Text) end end
+            r.MouseButton1Click:Connect(exec)
+            i.FocusLost:Connect(function(e) if e then exec() end end)
+        end
+
+        -- 7. DROPDOWN
+        function Tab:CreateDropdown(name, options, callback)
+            orderCount = orderCount + 1
+            local dropped = false
+            local d = Instance.new("TextButton", Page)
+            d.LayoutOrder = orderCount
+            d.Size = UDim2.new(0.95, 0, 0, 38)
+            d.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            d.Text = name .. " ▼"
+            d.TextColor3 = Color3.new(1, 1, 1)
+            Instance.new("UICorner", d)
+
+            local optFrame = Instance.new("Frame", Page)
+            optFrame.LayoutOrder = orderCount + 1 -- Luôn nằm dưới nút dropdown
+            orderCount = orderCount + 1
+            optFrame.Size = UDim2.new(0.95, 0, 0, 0)
+            optFrame.Visible = false
+            optFrame.ClipsDescendants = true
+            optFrame.BackgroundTransparency = 1
+            Instance.new("UIListLayout", optFrame).Padding = UDim.new(0, 4)
+
+            d.MouseButton1Click:Connect(function()
+                dropped = not dropped
+                optFrame.Visible = true
+                TweenService:Create(optFrame, TweenInfo.new(0.3), {
+                    Size = dropped and UDim2.new(0.95, 0, 0, #options * 34) or UDim2.new(0.95, 0, 0, 0)
+                }):Play()
+                d.Text = name .. (dropped and " ▲" or " ▼")
+            end)
+
+            for _, v in pairs(options) do
+                local o = Instance.new("TextButton", optFrame)
+                o.Size = UDim2.new(1, 0, 0, 30)
+                o.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                o.Text = v
+                o.TextColor3 = Color3.fromRGB(200, 200, 200)
+                Instance.new("UICorner", o)
+                o.MouseButton1Click:Connect(function()
+                    d.Text = name .. " [" .. v .. "]"
+                    dropped = false
+                    TweenService:Create(optFrame, TweenInfo.new(0.3), {Size = UDim2.new(0.95, 0, 0, 0)}):Play()
+                    callback(v)
+                end)
+            end
+        end
+
+        return Tab
+    end
+
+    -- =========================
+    -- 🔔 GLOBAL NOTIFY
+    -- =========================
+    function Window:Notify(title, msg)
+        local n = Instance.new("Frame", ScreenGui)
+        n.Size = UDim2.new(0, 240, 0, 65)
+        n.Position = UDim2.new(1, 20, 0.8, 0)
+        n.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+        Instance.new("UICorner", n)
+        local s = Instance.new("UIStroke", n); s.Color = ACCENT
+
+        local t = Instance.new("TextLabel", n)
+        t.Size = UDim2.new(1, 0, 0, 30); t.Text = title; t.TextColor3 = ACCENT; t.BackgroundTransparency = 1; t.Font = "GothamBold"
+        local m = Instance.new("TextLabel", n)
+        m.Size = UDim2.new(1, 0, 0, 30); m.Position = UDim2.new(0, 0, 0, 30); m.Text = msg; m.TextColor3 = Color3.new(1, 1, 1); m.BackgroundTransparency = 1
+
+        TweenService:Create(n, TweenInfo.new(0.5), {Position = UDim2.new(1, -260, 0.8, 0)}):Play()
+        task.delay(3, function()
+            TweenService:Create(n, TweenInfo.new(0.5), {Position = UDim2.new(1, 20, 0.8, 0)}):Play()
+            Debris:AddItem(n, 0.5)
+        end)
+    end
+
+    -- Dot update logic
+    PageLayout.PageEnter:Connect(function(p)
+        for _, item in pairs(Window.Dots) do
+            local isCurrent = (item.Page == p)
+            TweenService:Create(item.Dot, TweenInfo.new(0.3), {
+                BackgroundColor3 = isCurrent and Color3.new(1, 1, 1) or Color3.fromRGB(80, 80, 80),
+                Size = isCurrent and UDim2.new(0, 12, 0, 12) or UDim2.new(0, 8, 0, 8)
+            }):Play()
         end
     end)
 
-    UIS.InputChanged:Connect(function(i)
-        if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-            local d = i.Position - start
-            obj.Position = UDim2.new(
-                pos.X.Scale,pos.X.Offset+d.X,
-                pos.Y.Scale,pos.Y.Offset+d.Y
-            )
-        end
+    -- Nút bật/tắt UI (Floating)
+    local Float = Instance.new("TextButton", ScreenGui)
+    Float.Size = UDim2.new(0, 45, 0, 45)
+    Float.Position = UDim2.new(0, 10, 0.5, 0)
+    Float.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    Float.Text = "N"; Float.TextColor3 = ACCENT; Float.TextSize = 20; Instance.new("UICorner", Float).CornerRadius = UDim.new(1, 0)
+    Instance.new("UIStroke", Float).Color = ACCENT
+
+    Float.MouseButton1Click:Connect(function()
+        Main.Visible = not Main.Visible
+        Burst(Float); PlaySound()
     end)
-end
 
--- =========================
--- 📌 TITLE
--- =========================
-local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1,0,0,35)
-Title.BackgroundTransparency = 1
-Title.Text = settings.Name or "Noir UI"
-Title.TextColor3 = Color3.new(1,1,1)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 16
-
--- =========================
--- 📦 CONTAINER
--- =========================
-local Container = Instance.new("ScrollingFrame", Main)
-Container.Size = UDim2.new(1,-10,1,-40)
-Container.Position = UDim2.new(0,5,0,35)
-Container.BackgroundTransparency = 1
-Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
-Container.ScrollBarThickness = 3
-
-Instance.new("UIListLayout", Container).Padding = UDim.new(0,6)
-
-local Window = {}
-
--- =========================
--- 🔘 BUTTON
--- =========================
-function Window:CreateButton(opt)
-    local b = Instance.new("TextButton", Container)
-    b.Size = UDim2.new(1,0,0,35)
-    b.Text = opt.Name
-    b.BackgroundColor3 = Color3.fromRGB(25,25,25)
-    b.TextColor3 = Color3.new(1,1,1)
-    Instance.new("UICorner", b)
-
-    b.MouseButton1Click:Connect(function()
-        PlaySound()
-        Burst(b)
-
-        TweenService:Create(b,TweenInfo.new(0.1),{
-            BackgroundColor3 = ACCENT
-        }):Play()
-
-        task.wait(0.1)
-
-        TweenService:Create(b,TweenInfo.new(0.2),{
-            BackgroundColor3 = Color3.fromRGB(25,25,25)
-        }):Play()
-
-        if opt.Callback then opt.Callback() end
-    end)
-end
-
--- =========================
--- 🔁 TOGGLE
--- =========================
-function Window:CreateToggle(opt)
-    local b = Instance.new("TextButton", Container)
-    b.Size = UDim2.new(1,0,0,35)
-    b.BackgroundColor3 = Color3.fromRGB(25,25,25)
-    b.TextColor3 = Color3.new(1,1,1)
-    Instance.new("UICorner", b)
-
-    local s = false
-    b.Text = opt.Name..": OFF"
-
-    b.MouseButton1Click:Connect(function()
-        PlaySound()
-        Burst(b)
-
-        s = not s
-        b.Text = opt.Name..": "..(s and "ON" or "OFF")
-
-        TweenService:Create(b,TweenInfo.new(0.2),{
-            BackgroundColor3 = s and ACCENT or Color3.fromRGB(25,25,25)
-        }):Play()
-
-        if opt.Callback then opt.Callback(s) end
-    end)
-end
-
--- =========================
--- ⌨ TEXTBOX
--- =========================
-function Window:CreateTextBox(opt)
-    local box = Instance.new("TextBox", Container)
-    box.Size = UDim2.new(1,0,0,35)
-    box.BackgroundColor3 = Color3.fromRGB(25,25,25)
-    box.TextColor3 = Color3.new(1,1,1)
-    box.PlaceholderText = opt.Placeholder or "Enter..."
-    Instance.new("UICorner", box)
-
-    box.FocusLost:Connect(function()
-        if opt.Callback then
-            opt.Callback(box.Text)
-        end
-    end)
-end
-
--- =========================
--- 🏷 LABEL
--- =========================
-function Window:CreateLabel(opt)
-    local l = Instance.new("TextLabel", Container)
-    l.Size = UDim2.new(1,0,0,22)
-    l.BackgroundTransparency = 1
-    l.Text = opt.Text
-    l.TextColor3 = opt.Color or Color3.fromRGB(180,180,180)
-    l.Font = Enum.Font.Gotham
-    l.TextSize = 13
-    l.TextXAlignment = Enum.TextXAlignment.Left
-end
-
--- =========================
--- 🔔 NOTIFY
--- =========================
-function Window:Notify(title,text)
-    local g = Instance.new("ScreenGui", game.CoreGui)
-
-    local f = Instance.new("Frame", g)
-    f.Size = UDim2.new(0,240,0,60)
-    f.Position = UDim2.new(1,-260,0.1,0)
-    f.BackgroundColor3 = Color3.fromRGB(20,20,20)
-    Instance.new("UICorner", f)
-
-    local t1 = Instance.new("TextLabel", f)
-    t1.Size = UDim2.new(1,0,0,25)
-    t1.BackgroundTransparency = 1
-    t1.Text = title
-    t1.TextColor3 = Color3.new(1,1,1)
-
-    local t2 = Instance.new("TextLabel", f)
-    t2.Size = UDim2.new(1,0,0,25)
-    t2.Position = UDim2.new(0,0,0,25)
-    t2.BackgroundTransparency = 1
-    t2.Text = text
-    t2.TextColor3 = ACCENT
-
-    task.delay(2,function()
-        g:Destroy()
-    end)
-end
-
--- =========================
--- ⚡ FLOAT ICON DRAG FINAL
--- =========================
-local Float = Instance.new("TextButton", ScreenGui)
-Float.Size = UDim2.new(0,40,0,40)
-Float.Position = UDim2.new(0,20,0.5,-20)
-Float.Text = "⚡"
-Float.BackgroundColor3 = Color3.fromRGB(10,10,10)
-Float.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", Float)
-
-local dragging = false
-local dragStart
-local startPos
-
-Float.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = i.Position
-        startPos = Float.Position
-        Burst(Float)
-    end
-end)
-
-Float.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
-UIS.InputChanged:Connect(function(i)
-    if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-        local d = i.Position - dragStart
-        Float.Position = UDim2.new(
-            startPos.X.Scale,
-            startPos.X.Offset + d.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + d.Y
-        )
-    end
-end)
-
--- toggle UI
-local visible = true
-
-Float.MouseButton1Click:Connect(function()
-    if dragging then return end
-
-    PlaySound()
-    Burst(Float)
-
-    visible = not visible
-    Main.Visible = visible
-
-    TweenService:Create(Blur,TweenInfo.new(0.2),{
-        Size = visible and 12 or 0
-    }):Play()
-end)
-
--- =========================
--- 🚀 START NOTIFY
--- =========================
-Window:Notify("Noir UI","Loaded successfully ⚡")
-
-return Window
-
+    Window:Notify("Noir UI", "Loaded successfully! ⚡")
+    return Window
 end
 
 return NoirUI
