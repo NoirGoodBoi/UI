@@ -1,10 +1,11 @@
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local Debris = game:GetService("Debris")
+local Players = game:GetService("Players")
 
 local NoirUI = { Notifications = {} }
 
--- [[ HÀM KÉO THẢ NÚT NỔI ]]
+-- [[ HÀM KÉO THẢ ]]
 local function MakeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
     frame.InputBegan:Connect(function(input)
@@ -32,101 +33,104 @@ function NoirUI:CreateWindow(settings)
     ScreenGui.Name = "NoirUI"; ScreenGui.ResetOnSpawn = false
 
     local ACCENT = settings.Accent or Color3.fromRGB(170, 85, 255)
-    local Window = { Dots = {} }
-
-    -- MAIN FRAME
+    
+    -- MAIN FRAME (Chiều cao thấp 280-300px)
     local Main = Instance.new("Frame", ScreenGui)
-    Main.Size = UDim2.new(0, 330, 0, 350); Main.Position = UDim2.new(0.5, -165, 0.5, -175)
-    Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Main.ClipsDescendants = true; Main.Active = true
+    Main.Size = UDim2.new(0, 400, 0, 300); Main.Position = UDim2.new(0.5, -200, 0.5, -150)
+    Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Main.BorderSizePixel = 0
     Instance.new("UICorner", Main)
     local Stroke = Instance.new("UIStroke", Main); Stroke.Thickness = 2
-    local Glow = Instance.new("UIStroke", Main); Glow.Thickness = 5; Glow.Transparency = 0.7
-
+    
     task.spawn(function()
         while Main and Main.Parent do
             for i = 0, 1, 0.01 do
                 if not Main or not Main.Parent then break end
-                local c = Color3.fromHSV(i, 0.8, 1); Stroke.Color = c; Glow.Color = c; task.wait(0.04)
+                Stroke.Color = Color3.fromHSV(i, 0.8, 1); task.wait(0.04)
             end
         end
     end)
 
-    -- HEADER
+    -- TITLE
     local Title = Instance.new("TextLabel", Main)
-    Title.Size = UDim2.new(1, 0, 0, 40); Title.BackgroundTransparency = 1; Title.Text = (settings.Icon or "⚡") .. " " .. (settings.Name or "Noir UI")
-    Title.TextColor3 = Color3.new(1, 1, 1); Title.Font = "GothamBold"; Title.TextSize = 16
+    Title.Size = UDim2.new(1, 0, 0, 40); Title.BackgroundTransparency = 1; Title.Text = (settings.Name or "Noir UI")
+    Title.TextColor3 = Color3.new(1,1,1); Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"; Title.Position = UDim2.new(0, 15, 0, 0)
 
-    local TabContainer = Instance.new("Frame", Main)
-    TabContainer.Size = UDim2.new(1, 0, 1, -85); TabContainer.Position = UDim2.new(0, 0, 0, 40)
-    TabContainer.BackgroundTransparency = 1
+    -- SIDEBAR CONTAINER (Chia đôi: Trên cuộn, Dưới Avatar)
+    local SidebarArea = Instance.new("Frame", Main)
+    SidebarArea.Size = UDim2.new(0, 100, 1, -50); SidebarArea.Position = UDim2.new(0, 5, 0, 40); SidebarArea.BackgroundTransparency = 1
 
-    local PageLayout = Instance.new("UIPageLayout", TabContainer)
-    PageLayout.Padding = UDim.new(0, 20); PageLayout.TweenTime = 0.4; PageLayout.TouchInputEnabled = true
+    -- 1. PHẦN TAB (CÓ THỂ CUỘN)
+    local TabScroll = Instance.new("ScrollingFrame", SidebarArea)
+    TabScroll.Size = UDim2.new(1, 0, 1, -50); TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0; TabScroll.AutomaticCanvasSize = "Y"
+    Instance.new("UIListLayout", TabScroll).Padding = UDim.new(0, 5)
 
-    local DotContainer = Instance.new("Frame", Main)
-    DotContainer.Size = UDim2.new(1, 0, 0, 25); DotContainer.Position = UDim2.new(0, 0, 1, -30); DotContainer.BackgroundTransparency = 1
-    Instance.new("UIListLayout", DotContainer).FillDirection = "Horizontal"; DotContainer.UIListLayout.HorizontalAlignment = "Center"; DotContainer.UIListLayout.Padding = UDim.new(0, 8)
-
-    -- FLOATING ICON (DRAGGABLE)
-    local ToggleBtn = Instance.new("TextButton", ScreenGui)
-    ToggleBtn.Size = UDim2.new(0, 45, 0, 45); ToggleBtn.Position = UDim2.new(0, 15, 0.5, -22)
-    ToggleBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15); ToggleBtn.Text = settings.Icon or "N"
-    ToggleBtn.TextColor3 = ACCENT; ToggleBtn.TextSize = 20; Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
-    Instance.new("UIStroke", ToggleBtn).Color = ACCENT; ToggleBtn.UIStroke.Thickness = 2
-    MakeDraggable(ToggleBtn)
+    -- 2. PHẦN AVATAR (CỐ ĐỊNH PHÍA DƯỚI)
+    local UserArea = Instance.new("Frame", SidebarArea)
+    UserArea.Size = UDim2.new(1, 0, 0, 50); UserArea.Position = UDim2.new(0, 0, 1, -45); UserArea.BackgroundTransparency = 1
     
-    ToggleBtn.MouseButton1Click:Connect(function()
-        Main.Visible = not Main.Visible
-        ToggleBtn.Text = Main.Visible and "X" or (settings.Icon or "N")
-    end)
+    local AvatarImg = Instance.new("ImageLabel", UserArea)
+    AvatarImg.Size = UDim2.new(0, 40, 0, 40); AvatarImg.Position = UDim2.new(0.5, -20, 0, 0)
+    AvatarImg.BackgroundColor3 = Color3.fromRGB(20, 20, 20); AvatarImg.Image = Players:GetUserThumbnailAsync(Players.LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+    Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(1, 0) -- Bo tròn avatar
+    local AvStroke = Instance.new("UIStroke", AvatarImg); AvStroke.Color = ACCENT; AvStroke.Thickness = 1.5
 
-    -- COMPONENTS FACTORY
-    function Window:CreateTab()
-        local Page = Instance.new("ScrollingFrame", TabContainer)
-        -- FIXED: Mép trái (40%) là vùng Scroll nút, mép phải (60%) là vùng trống để Vuốt Tab
-        Page.Size = UDim2.new(0.4, 0, 1, 0); Page.Position = UDim2.new(0, 10, 0, 0)
-        Page.BackgroundTransparency = 1; Page.ScrollBarThickness = 1; Page.AutomaticCanvasSize = "Y"
-        local Layout = Instance.new("UIListLayout", Page); Layout.Padding = UDim.new(0, 8); Layout.HorizontalAlignment = "Center"; Layout.SortOrder = "LayoutOrder"
+    -- CONTAINER TÍNH NĂNG (BÊN PHẢI)
+    local Container = Instance.new("Frame", Main)
+    Container.Size = UDim2.new(1, -115, 1, -50); Container.Position = UDim2.new(0, 110, 0, 40); Container.BackgroundTransparency = 1
 
-        local orderCount = 0
-        local Dot = Instance.new("Frame", DotContainer)
-        Dot.Size = UDim2.new(0, 7, 0, 7); Dot.BackgroundColor3 = Color3.fromRGB(60, 60, 60); Instance.new("UICorner", Dot)
-        table.insert(Window.Dots, {Dot = Dot, Page = Page})
+    -- ICON NỔI (KÉO THẢ)
+    local ToggleBtn = Instance.new("TextButton", ScreenGui)
+    ToggleBtn.Size = UDim2.new(0, 40, 0, 40); ToggleBtn.Position = UDim2.new(0, 10, 0.5, -20); ToggleBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15); ToggleBtn.Text = settings.Icon or "N"
+    ToggleBtn.TextColor3 = ACCENT; Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1,0); Instance.new("UIStroke", ToggleBtn).Color = ACCENT
+    MakeDraggable(ToggleBtn); ToggleBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
 
-        local Tab = {}
+    local Window = { Tabs = {} }
 
-        function Tab:CreateSection(name)
-            orderCount = orderCount + 1
-            local s = Instance.new("TextLabel", Page); s.LayoutOrder = orderCount; s.Size = UDim2.new(0.9, 0, 0, 25); s.BackgroundTransparency = 1
-            s.Text = name; s.TextColor3 = ACCENT; s.Font = "GothamBold"; s.TextSize = 11
-        end
+    function Window:CreateTab(name)
+        local TabBtn = Instance.new("TextButton", TabScroll)
+        TabBtn.Size = UDim2.new(1, -5, 0, 30); TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        TabBtn.Text = name; TabBtn.TextColor3 = Color3.fromRGB(150, 150, 150); TabBtn.Font = "GothamMedium"; TabBtn.TextSize = 11; Instance.new("UICorner", TabBtn)
+
+        local Page = Instance.new("ScrollingFrame", Container)
+        Page.Size = UDim2.new(1, 0, 1, 0); Page.BackgroundTransparency = 1; Page.Visible = false; Page.ScrollBarThickness = 1; Page.AutomaticCanvasSize = "Y"
+        Instance.new("UIListLayout", Page).Padding = UDim.new(0, 6); Page.UIListLayout.HorizontalAlignment = "Center"
+
+        TabBtn.MouseButton1Click:Connect(function()
+            for _, v in pairs(Container:GetChildren()) do if v:IsA("ScrollingFrame") then v.Visible = false end end
+            for _, v in pairs(TabScroll:GetChildren()) do if v:IsA("TextButton") then v.TextColor3 = Color3.fromRGB(150, 150, 150) end end
+            Page.Visible = true; TabBtn.TextColor3 = ACCENT
+        end)
+
+        if #TabScroll:GetChildren() == 2 then Page.Visible = true; TabBtn.TextColor3 = ACCENT end
+
+        local Tab = { order = 0 }
 
         function Tab:CreateButton(opt)
-            orderCount = orderCount + 1
-            local b = Instance.new("TextButton", Page); b.LayoutOrder = orderCount; b.Size = UDim2.new(0.9, 0, 0, 35); b.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+            Tab.order = Tab.order + 1
+            local b = Instance.new("TextButton", Page); b.Size = UDim2.new(0.95, 0, 0, 35); b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
             b.Text = opt.Name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamMedium"; b.TextSize = 12; Instance.new("UICorner", b)
             b.MouseButton1Click:Connect(opt.Callback)
         end
 
         function Tab:CreateToggle(opt)
-            orderCount = orderCount + 1
+            Tab.order = Tab.order + 1
             local state = false
-            local t = Instance.new("TextButton", Page); t.LayoutOrder = orderCount; t.Size = UDim2.new(0.9, 0, 0, 35); t.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
-            t.Text = opt.Name .. " [OFF]"; t.TextColor3 = Color3.fromRGB(150, 150, 150); t.TextSize = 12; Instance.new("UICorner", t)
+            local t = Instance.new("TextButton", Page); t.Size = UDim2.new(0.95, 0, 0, 35); t.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            t.Text = opt.Name .. " [OFF]"; t.TextColor3 = Color3.fromRGB(180,180,180); t.TextSize = 12; Instance.new("UICorner", t)
             t.MouseButton1Click:Connect(function()
                 state = not state
                 t.Text = opt.Name .. (state and " [ON]" or " [OFF]")
-                TweenService:Create(t, TweenInfo.new(0.2), {BackgroundColor3 = state and ACCENT or Color3.fromRGB(22,22,22), TextColor3 = state and Color3.new(1,1,1) or Color3.fromRGB(150,150,150)}):Play()
+                t.TextColor3 = state and ACCENT or Color3.fromRGB(180,180,180)
                 opt.Callback(state)
             end)
         end
 
         function Tab:CreateRunBox(opt)
-            orderCount = orderCount + 1
-            local f = Instance.new("Frame", Page); f.LayoutOrder = orderCount; f.Size = UDim2.new(0.9, 0, 0, 35); f.BackgroundColor3 = Color3.fromRGB(18, 18, 18); Instance.new("UICorner", f)
-            local i = Instance.new("TextBox", f); i.Size = UDim2.new(1, -50, 1, 0); i.Position = UDim2.new(0, 5, 0, 0); i.BackgroundTransparency = 1
-            i.PlaceholderText = "Cmd..."; i.Text = ""; i.TextColor3 = Color3.new(1,1,1); i.TextSize = 10; i.TextXAlignment = "Left"; i.ClearTextOnFocus = false
-            local r = Instance.new("TextButton", f); r.Size = UDim2.new(0, 40, 0, 25); r.Position = UDim2.new(1, -45, 0.5, -12.5); r.BackgroundColor3 = ACCENT
+            Tab.order = Tab.order + 1
+            local f = Instance.new("Frame", Page); f.Size = UDim2.new(0.95, 0, 0, 35); f.BackgroundColor3 = Color3.fromRGB(18, 18, 18); Instance.new("UICorner", f)
+            local i = Instance.new("TextBox", f); i.Size = UDim2.new(1, -55, 1, 0); i.Position = UDim2.new(0, 8, 0, 0); i.BackgroundTransparency = 1
+            i.PlaceholderText = "Cmd..."; i.Text = ""; i.TextColor3 = Color3.new(1,1,1); i.TextSize = 11; i.TextXAlignment = "Left"; i.ClearTextOnFocus = false
+            local r = Instance.new("TextButton", f); r.Size = UDim2.new(0, 45, 0, 25); r.Position = UDim2.new(1, -50, 0.5, -12.5); r.BackgroundColor3 = ACCENT
             r.Text = "RUN"; r.TextColor3 = Color3.new(1,1,1); r.Font = "GothamBold"; r.TextSize = 10; Instance.new("UICorner", r)
             r.MouseButton1Click:Connect(function() if i.Text ~= "" then opt.Callback(i.Text) end end)
         end
@@ -134,29 +138,20 @@ function NoirUI:CreateWindow(settings)
         return Tab
     end
 
-    -- NOTIFY SYSTEM (STACK + WRAPPED)
     function NoirUI:Notify(title, msg)
-        local n = Instance.new("Frame", ScreenGui); n.Size = UDim2.new(0, 210, 0, 65); n.Position = UDim2.new(1, 20, 0.8, 0)
+        local n = Instance.new("Frame", ScreenGui); n.Size = UDim2.new(0, 200, 0, 60); n.Position = UDim2.new(1, 20, 0.8, 0)
         n.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Instance.new("UICorner", n); Instance.new("UIStroke", n).Color = ACCENT
         local t = Instance.new("TextLabel", n); t.Size = UDim2.new(1, -10, 0, 20); t.Position = UDim2.new(0, 10, 0, 5); t.Text = title; t.TextColor3 = ACCENT; t.BackgroundTransparency = 1; t.Font = "GothamBold"
-        local m = Instance.new("TextLabel", n); m.Size = UDim2.new(1, -15, 0, 40); m.Position = UDim2.new(0, 10, 0, 22)
-        m.Text = msg; m.TextColor3 = Color3.new(1,1,1); m.BackgroundTransparency = 1; m.TextSize = 12; m.TextWrapped = true; m.TextXAlignment = "Left"; m.TextYAlignment = "Top"
-
-        for i, old in ipairs(NoirUI.Notifications) do TweenService:Create(old, TweenInfo.new(0.3), {Position = UDim2.new(1, -230, 0.8, -(i * 75))}):Play() end
+        local m = Instance.new("TextLabel", n); m.Size = UDim2.new(1, -15, 0, 35); m.Position = UDim2.new(0, 10, 0, 22); m.Text = msg; m.TextColor3 = Color3.new(1,1,1); m.BackgroundTransparency = 1; m.TextWrapped = true; m.TextXAlignment = "Left"; m.TextYAlignment = "Top"
+        
+        for i, old in ipairs(NoirUI.Notifications) do TweenService:Create(old, TweenInfo.new(0.3), {Position = UDim2.new(1, -220, 0.8, -(i * 65))}):Play() end
         table.insert(NoirUI.Notifications, 1, n)
-        TweenService:Create(n, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(1, -230, 0.8, 0)}):Play()
+        TweenService:Create(n, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(1, -220, 0.8, 0)}):Play()
         task.delay(4, function()
             TweenService:Create(n, TweenInfo.new(0.5), {Position = UDim2.new(1, 20, n.Position.Y.Scale, n.Position.Y.Offset), BackgroundTransparency = 1}):Play()
             task.wait(0.5); for i, val in ipairs(NoirUI.Notifications) do if val == n then table.remove(NoirUI.Notifications, i) break end end; n:Destroy()
         end)
     end
-
-    PageLayout.PageEnter:Connect(function(p)
-        for _, item in pairs(Window.Dots) do
-            local isCur = (item.Page == p)
-            TweenService:Create(item.Dot, TweenInfo.new(0.3), {BackgroundColor3 = isCur and Color3.new(1, 1, 1) or Color3.fromRGB(60, 60, 60), Size = isCur and UDim2.new(0, 10, 0, 10) or UDim2.new(0, 7, 0, 7)}):Play()
-        end
-    end)
 
     return Window
 end
