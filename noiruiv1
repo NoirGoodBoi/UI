@@ -5,28 +5,39 @@ local NoirUI = {}
 
 function NoirUI:CreateWindow(settings)
 
--- 🧹 CLEAN
+-- CLEAN UI
 if game.CoreGui:FindFirstChild("NoirUI") then
     game.CoreGui.NoirUI:Destroy()
 end
+
+-- FIX BLUR STACK
+local oldBlur = game.Lighting:FindFirstChild("NoirBlur")
+if oldBlur then oldBlur:Destroy() end
 
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 ScreenGui.Name = "NoirUI"
 
 local ACCENT = settings.Accent or Color3.fromRGB(170,85,255)
 
--- 🌫 BLUR
+-- BLUR
 local Blur = Instance.new("BlurEffect", game.Lighting)
+Blur.Name = "NoirBlur"
+Blur.Size = 0
 TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 12}):Play()
 
--- 🧱 MAIN
+-- MAIN
 local Main = Instance.new("Frame", ScreenGui)
 Main.Size = UDim2.new(0,320,0,260)
 Main.Position = UDim2.new(0.5,-160,0.5,-130)
 Main.BackgroundColor3 = Color3.fromRGB(10,10,10)
 Instance.new("UICorner", Main)
 
--- 📌 TITLE
+-- ACCENT GLOW
+local Stroke = Instance.new("UIStroke", Main)
+Stroke.Thickness = 2
+Stroke.Color = ACCENT
+
+-- TITLE
 local Title = Instance.new("TextLabel", Main)
 Title.Size = UDim2.new(1,0,0,35)
 Title.BackgroundTransparency = 1
@@ -35,7 +46,7 @@ Title.TextColor3 = Color3.new(1,1,1)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
 
--- 📱 TAB CONTAINER
+-- TAB CONTAINER
 local Tabs = Instance.new("Frame", Main)
 Tabs.Size = UDim2.new(1,0,1,-45)
 Tabs.Position = UDim2.new(0,0,0,35)
@@ -45,8 +56,10 @@ local UIPage = Instance.new("UIPageLayout", Tabs)
 UIPage.FillDirection = Enum.FillDirection.Horizontal
 UIPage.TweenTime = 0.25
 UIPage.EasingStyle = Enum.EasingStyle.Quad
+UIPage.ScrollWheelInputEnabled = false
+UIPage.TouchInputEnabled = false -- tắt mặc định để dùng snap custom
 
--- 🔘 DOTS
+-- DOTS
 local Dots = Instance.new("Frame", Main)
 Dots.Size = UDim2.new(1,0,0,10)
 Dots.Position = UDim2.new(0,0,1,-10)
@@ -58,22 +71,22 @@ dotLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 dotLayout.Padding = UDim.new(0,5)
 
 local dots = {}
-local tabCount = 0
+local pages = {}
+local currentIndex = 1
 
 local Window = {}
 
--- 🧠 UPDATE DOT
+-- UPDATE DOT
 UIPage:GetPropertyChangedSignal("CurrentPage"):Connect(function()
     for i,v in ipairs(dots) do
-        v.BackgroundColor3 = (Tabs:GetChildren()[i] == UIPage.CurrentPage)
+        v.BackgroundColor3 = (pages[i] == UIPage.CurrentPage)
             and Color3.new(1,1,1)
             or Color3.fromRGB(120,120,120)
     end
 end)
 
--- 📦 CREATE TAB
+-- CREATE TAB
 function Window:CreateTab()
-    tabCount += 1
 
     local Page = Instance.new("ScrollingFrame", Tabs)
     Page.Size = UDim2.new(1,0,1,0)
@@ -83,9 +96,10 @@ function Window:CreateTab()
 
     local layout = Instance.new("UIListLayout", Page)
     layout.Padding = UDim.new(0,6)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
 
-    -- dot
+    table.insert(pages, Page)
+
+    -- DOT
     local dot = Instance.new("Frame", Dots)
     dot.Size = UDim2.new(0,8,0,8)
     dot.BackgroundColor3 = Color3.fromRGB(120,120,120)
@@ -94,7 +108,6 @@ function Window:CreateTab()
 
     local Tab = {}
 
-    -- 🏷 SECTION
     function Tab:CreateSection(name)
         local l = Instance.new("TextLabel", Page)
         l.Size = UDim2.new(1,0,0,20)
@@ -104,7 +117,15 @@ function Window:CreateTab()
         l.TextXAlignment = Enum.TextXAlignment.Left
     end
 
-    -- 🔘 BUTTON
+    function Tab:CreateLabel(opt)
+        local l = Instance.new("TextLabel", Page)
+        l.Size = UDim2.new(1,0,0,20)
+        l.BackgroundTransparency = 1
+        l.Text = opt.Text or "Label"
+        l.TextColor3 = opt.Color or Color3.fromRGB(180,180,180)
+        l.TextXAlignment = Enum.TextXAlignment.Left
+    end
+
     function Tab:CreateButton(opt)
         local b = Instance.new("TextButton", Page)
         b.Size = UDim2.new(1,0,0,35)
@@ -128,7 +149,6 @@ function Window:CreateTab()
         end)
     end
 
-    -- 🔁 TOGGLE
     function Tab:CreateToggle(opt)
         local state = false
 
@@ -151,7 +171,6 @@ function Window:CreateTab()
         end)
     end
 
-    -- ⌨ TEXTBOX
     function Tab:CreateTextBox(opt)
         local box = Instance.new("TextBox", Page)
         box.Size = UDim2.new(1,0,0,35)
@@ -167,7 +186,6 @@ function Window:CreateTab()
         end)
     end
 
-    -- ⚡ RUN BOX
     function Tab:CreateRunBox(opt)
         local frame = Instance.new("Frame", Page)
         frame.Size = UDim2.new(1,0,0,35)
@@ -176,14 +194,15 @@ function Window:CreateTab()
 
         local box = Instance.new("TextBox", frame)
         box.Size = UDim2.new(0.7,0,1,0)
-        box.PlaceholderText = "Command..."
         box.BackgroundTransparency = 1
         box.TextColor3 = Color3.new(1,1,1)
+        box.PlaceholderText = "Command..."
 
         local run = Instance.new("TextButton", frame)
         run.Size = UDim2.new(0.3,0,1,0)
         run.Position = UDim2.new(0.7,0,0,0)
         run.Text = "RUN"
+        Instance.new("UICorner", run)
 
         run.MouseButton1Click:Connect(function()
             if opt.Callback then
@@ -195,7 +214,36 @@ function Window:CreateTab()
     return Tab
 end
 
--- ⚡ FLOAT ICON (DRAG FIX)
+-- SNAP SCROLL
+local dragging = false
+local startPos
+
+Tabs.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        startPos = input.Position
+    end
+end)
+
+Tabs.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+
+        local dx = input.Position.X - startPos.X
+
+        if math.abs(dx) > 50 then
+            if dx < 0 then
+                currentIndex = math.clamp(currentIndex + 1, 1, #pages)
+            else
+                currentIndex = math.clamp(currentIndex - 1, 1, #pages)
+            end
+        end
+
+        UIPage:JumpTo(pages[currentIndex])
+    end
+end)
+
+-- FLOAT ICON
 local Float = Instance.new("TextButton", ScreenGui)
 Float.Size = UDim2.new(0,40,0,40)
 Float.Position = UDim2.new(0,20,0.5,-20)
@@ -204,54 +252,38 @@ Float.BackgroundColor3 = Color3.fromRGB(10,10,10)
 Float.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", Float)
 
-local dragging = false
-local dragInput, dragStart, startPos
+local draggingIcon = false
+local dragStart, startPosIcon
 
 Float.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-    or input.UserInputType == Enum.UserInputType.Touch then
-        
-        dragging = true
+    if input.UserInputType == Enum.UserInputType.Touch then
+        draggingIcon = true
         dragStart = input.Position
-        startPos = Float.Position
-
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-Float.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement
-    or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
+        startPosIcon = Float.Position
     end
 end)
 
 UIS.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
+    if draggingIcon and input.UserInputType == Enum.UserInputType.Touch then
         local delta = input.Position - dragStart
-
         Float.Position = UDim2.new(
-            startPos.X.Scale,
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + delta.Y
+            startPosIcon.X.Scale,
+            startPosIcon.X.Offset + delta.X,
+            startPosIcon.Y.Scale,
+            startPosIcon.Y.Offset + delta.Y
         )
     end
 end)
 
--- toggle UI
+Float.InputEnded:Connect(function()
+    draggingIcon = false
+end)
+
 local visible = true
-
 Float.MouseButton1Click:Connect(function()
-    if dragging then return end
-
+    if draggingIcon then return end
     visible = not visible
     Main.Visible = visible
-
     TweenService:Create(Blur,TweenInfo.new(0.2),{
         Size = visible and 12 or 0
     }):Play()
