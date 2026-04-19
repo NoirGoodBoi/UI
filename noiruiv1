@@ -26,87 +26,52 @@ end
 
 function NoirUI:CreateWindow(settings)
     local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-    ScreenGui.Name = "NoirUI"
-    ScreenGui.ResetOnSpawn = false
-    
+    ScreenGui.Name = "NoirUI"; ScreenGui.ResetOnSpawn = false
     local ACCENT = settings.Accent or Color3.fromRGB(170, 85, 255)
     
-    -- MAIN FRAME
     local Main = Instance.new("Frame", ScreenGui)
-    Main.Size = UDim2.new(0, 420, 0, 300)
-    Main.Position = UDim2.new(0.5, -210, 0.5, -150)
-    Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-    Main.ClipsDescendants = true
-    Instance.new("UICorner", Main)
-    
-    local Stroke = Instance.new("UIStroke", Main)
-    Stroke.Thickness = 2
+    Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150)
+    Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Main.ClipsDescendants = true
+    Instance.new("UICorner", Main); local Stroke = Instance.new("UIStroke", Main); Stroke.Thickness = 2
     
     task.spawn(function()
         while Main and Main.Parent do
             for i = 0, 1, 0.01 do
                 if not Main or not Main.Parent then break end
-                Stroke.Color = Color3.fromHSV(i, 0.8, 1)
-                task.wait(0.04)
+                Stroke.Color = Color3.fromHSV(i, 0.8, 1); task.wait(0.04)
             end
         end
     end)
 
     -- HEADER
     local Header = Instance.new("Frame", Main)
-    Header.Size = UDim2.new(1, 0, 0, 40)
-    Header.BackgroundTransparency = 1
-    
+    Header.Size = UDim2.new(1, 0, 0, 40); Header.BackgroundTransparency = 1
     if settings.LogoID then
         local Logo = Instance.new("ImageLabel", Header)
-        Logo.Size = UDim2.new(0, 24, 0, 24)
-        Logo.Position = UDim2.new(0, 12, 0.5, -12)
-        Logo.BackgroundTransparency = 1
-        Logo.Image = "rbxassetid://" .. settings.LogoID
+        Logo.Size = UDim2.new(0, 24, 0, 24); Logo.Position = UDim2.new(0, 12, 0.5, -12); Logo.BackgroundTransparency = 1; Logo.Image = "rbxassetid://" .. settings.LogoID
     end
-
     local Title = Instance.new("TextLabel", Header)
-    Title.Size = UDim2.new(1, -50, 1, 0)
-    Title.Position = UDim2.new(0, (settings.LogoID and 42 or 15), 0, 0)
-    Title.BackgroundTransparency = 1
-    Title.Text = settings.Name or "NOIR HUB"
-    Title.TextColor3 = Color3.new(1,1,1)
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 14
-    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Size = UDim2.new(1, -50, 1, 0); Title.Position = UDim2.new(0, (settings.LogoID and 42 or 15), 0, 0); Title.BackgroundTransparency = 1; Title.Text = settings.Name or "NOIR HUB"; Title.TextColor3 = Color3.new(1,1,1); Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
 
     -- SIDEBAR
     local SidebarArea = Instance.new("Frame", Main)
-    SidebarArea.Size = UDim2.new(0, 110, 1, -50)
-    SidebarArea.Position = UDim2.new(0, 5, 0, 40)
-    SidebarArea.BackgroundTransparency = 1
-
+    SidebarArea.Size = UDim2.new(0, 110, 1, -50); SidebarArea.Position = UDim2.new(0, 5, 0, 40); SidebarArea.BackgroundTransparency = 1
     local TabScroll = Instance.new("ScrollingFrame", SidebarArea)
-    TabScroll.Size = UDim2.new(1, 0, 1, -55)
-    TabScroll.BackgroundTransparency = 1
-    TabScroll.ScrollBarThickness = 0
-    TabScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    TabScroll.Size = UDim2.new(1, 0, 1, -55); TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0; TabScroll.AutomaticCanvasSize = "Y"
     Instance.new("UIListLayout", TabScroll).Padding = UDim.new(0, 5)
 
     local UserArea = Instance.new("Frame", SidebarArea)
-    UserArea.Size = UDim2.new(1, 0, 0, 50)
-    UserArea.Position = UDim2.new(0, 0, 1, -45)
-    UserArea.BackgroundTransparency = 1
-    
+    UserArea.Size = UDim2.new(1, 0, 0, 50); UserArea.Position = UDim2.new(0, 0, 1, -45); UserArea.BackgroundTransparency = 1
     local AvatarImg = Instance.new("ImageLabel", UserArea)
-    AvatarImg.Size = UDim2.new(0, 42, 0, 42)
-    AvatarImg.Position = UDim2.new(0.5, -21, 0, 0)
+    AvatarImg.Size = UDim2.new(0, 42, 0, 42); AvatarImg.Position = UDim2.new(0.5, -21, 0, 0)
     AvatarImg.Image = Players:GetUserThumbnailAsync(Players.LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
-    Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(1, 0)
-    Instance.new("UIStroke", AvatarImg).Color = ACCENT
+    Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(1, 0); Instance.new("UIStroke", AvatarImg).Color = ACCENT
 
     -- CONTAINER
     local Container = Instance.new("Frame", Main)
-    Container.Size = UDim2.new(1, -125, 1, -50)
-    Container.Position = UDim2.new(0, 120, 0, 40)
-    Container.BackgroundTransparency = 1
+    Container.Size = UDim2.new(1, -125, 1, -50); Container.Position = UDim2.new(0, 120, 0, 40); Container.BackgroundTransparency = 1
 
-    -- TOGGLE UI BUTTON
+    -- TOGGLE BUTTON
     local isOpen = true
     local function ToggleUI(state)
         isOpen = state
@@ -114,23 +79,18 @@ function NoirUI:CreateWindow(settings)
         task.delay(state and 0 or 0.4, function() Main.Visible = state end)
     end
     local ToggleBtn = Instance.new("TextButton", ScreenGui)
-    ToggleBtn.Size = UDim2.new(0, 45, 0, 45); ToggleBtn.Position = UDim2.new(0, 15, 0.5, -22); ToggleBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    ToggleBtn.Text = settings.Icon or "N"; ToggleBtn.TextColor3 = ACCENT; ToggleBtn.TextSize = 18; Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1,0)
-    Instance.new("UIStroke", ToggleBtn).Color = ACCENT
+    ToggleBtn.Size = UDim2.new(0, 45, 0, 45); ToggleBtn.Position = UDim2.new(0, 15, 0.5, -22); ToggleBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15); ToggleBtn.Text = settings.Icon or "N"; ToggleBtn.TextColor3 = ACCENT; ToggleBtn.TextSize = 18; Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1,0); Instance.new("UIStroke", ToggleBtn).Color = ACCENT
     MakeDraggable(ToggleBtn); ToggleBtn.MouseButton1Click:Connect(function() ToggleUI(not isOpen) end)
 
     local Window = {}
     function Window:CreateTab(name)
         local TabBtn = Instance.new("TextButton", TabScroll)
         TabBtn.Size = UDim2.new(1, -5, 0, 32); TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20); TabBtn.Text = name; TabBtn.TextColor3 = Color3.fromRGB(150, 150, 150); TabBtn.Font = "GothamMedium"; TabBtn.TextSize = 11; Instance.new("UICorner", TabBtn)
-
         local Page = Instance.new("ScrollingFrame", Container)
         Page.Size = UDim2.new(1, 0, 1, 0); Page.BackgroundTransparency = 1; Page.Visible = false; Page.ScrollBarThickness = 1; Page.AutomaticCanvasSize = "Y"
         
         local PageList = Instance.new("UIListLayout", Page)
-        PageList.Padding = UDim.new(0, 8)
-        PageList.HorizontalAlignment = "Center"
-        PageList.SortOrder = Enum.SortOrder.LayoutOrder -- SỬA LỖI THỨ TỰ TẠI ĐÂY
+        PageList.Padding = UDim.new(0, 8); PageList.HorizontalAlignment = "Center"; PageList.SortOrder = Enum.SortOrder.LayoutOrder
 
         TabBtn.MouseButton1Click:Connect(function()
             for _, v in pairs(Container:GetChildren()) do if v:IsA("ScrollingFrame") then v.Visible = false end end
@@ -140,29 +100,31 @@ function NoirUI:CreateWindow(settings)
         if #TabScroll:GetChildren() == 2 then Page.Visible = true; TabBtn.TextColor3 = ACCENT end
 
         local Tab = { Count = 0 }
-        
-        local function GetOrder()
-            Tab.Count = Tab.Count + 1
-            return Tab.Count
-        end
+        local function GetOrder() Tab.Count = Tab.Count + 1 return Tab.Count end
 
         function Tab:CreateSection(txt)
-            local s = Instance.new("Frame", Page)
-            s.Size = UDim2.new(0.95, 0, 0, 25); s.BackgroundTransparency = 1; s.LayoutOrder = GetOrder()
-            local t = Instance.new("TextLabel", s)
-            t.Size = UDim2.new(1, 0, 1, 0); t.Text = txt:upper(); t.TextColor3 = ACCENT; t.Font = "GothamBold"; t.TextSize = 10; t.TextXAlignment = "Left"; t.BackgroundTransparency = 1
+            local s = Instance.new("Frame", Page); s.Size = UDim2.new(0.95, 0, 0, 25); s.BackgroundTransparency = 1; s.LayoutOrder = GetOrder()
+            local t = Instance.new("TextLabel", s); t.Size = UDim2.new(1, 0, 1, 0); t.Text = txt:upper(); t.TextColor3 = ACCENT; t.Font = "GothamBold"; t.TextSize = 10; t.TextXAlignment = "Left"; t.BackgroundTransparency = 1
             local line = Instance.new("Frame", s); line.Size = UDim2.new(1, 0, 0, 1); line.Position = UDim2.new(0, 0, 1, 0); line.BackgroundColor3 = ACCENT; line.BackgroundTransparency = 0.5
         end
 
         function Tab:CreateLabel(txt)
-            local l = Instance.new("TextLabel", Page)
-            l.Size = UDim2.new(0.95, 0, 0, 20); l.BackgroundTransparency = 1; l.Text = txt; l.TextColor3 = Color3.fromRGB(200, 200, 200); l.Font = "GothamMedium"; l.TextSize = 12; l.TextXAlignment = "Left"; l.LayoutOrder = GetOrder()
+            local l = Instance.new("TextLabel", Page); l.Size = UDim2.new(0.95, 0, 0, 20); l.BackgroundTransparency = 1; l.Text = txt; l.TextColor3 = Color3.fromRGB(200, 200, 200); l.Font = "GothamMedium"; l.TextSize = 12; l.TextXAlignment = "Left"; l.LayoutOrder = GetOrder()
         end
 
-        function Tab:CreateParagraph(title, desc)
-            local f = Instance.new("Frame", Page); f.Size = UDim2.new(0.95, 0, 0, 65); f.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Instance.new("UICorner", f); f.LayoutOrder = GetOrder()
-            local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1, -10, 0, 20); t.Position = UDim2.new(0, 10, 0, 5); t.Text = title; t.TextColor3 = ACCENT; t.BackgroundTransparency = 1; t.Font = "GothamBold"; t.TextXAlignment = "Left"
-            local d = Instance.new("TextLabel", f); d.Size = UDim2.new(1, -10, 0, 35); d.Position = UDim2.new(0, 10, 0, 25); d.Text = desc; d.TextColor3 = Color3.new(0.8,0.8,0.8); d.BackgroundTransparency = 1; d.TextWrapped = true; d.TextXAlignment = "Left"; d.TextYAlignment = "Top"; d.TextSize = 11
+        function Tab:CreateParagraph(opt)
+            local titleText = type(opt) == "table" and opt.Title or "Note"
+            local contentText = type(opt) == "table" and opt.Content or "No content provided."
+            
+            local f = Instance.new("Frame", Page); f.Size = UDim2.new(0.95, 0, 0, 75); f.BackgroundColor3 = Color3.fromRGB(15, 15, 15); f.LayoutOrder = GetOrder()
+            Instance.new("UICorner", f).CornerRadius = UDim.new(0, 6)
+            
+            local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1, -20, 0, 25); t.Position = UDim2.new(0, 10, 0, 5); t.Text = titleText; t.TextColor3 = ACCENT; t.BackgroundTransparency = 1; t.Font = "GothamBold"; t.TextXAlignment = "Left"; t.TextSize = 13
+            
+            local bg = Instance.new("Frame", f); bg.Size = UDim2.new(1, -20, 0, 35); bg.Position = UDim2.new(0, 10, 0, 32); bg.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+            Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 6); local s = Instance.new("UIStroke", bg); s.Color = Color3.fromRGB(30, 30, 30)
+            
+            local d = Instance.new("TextLabel", bg); d.Size = UDim2.new(1, -10, 1, -4); d.Position = UDim2.new(0, 5, 0, 2); d.Text = contentText; d.TextColor3 = Color3.fromRGB(180, 180, 180); d.BackgroundTransparency = 1; d.TextWrapped = true; d.TextXAlignment = "Left"; d.TextYAlignment = "Top"; d.TextSize = 11; d.Font = "GothamMedium"
         end
 
         function Tab:CreateButton(opt)
