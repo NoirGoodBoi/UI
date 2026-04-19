@@ -38,7 +38,7 @@ TweenService:Create(Main,TweenInfo.new(0.25),{
 
 TweenService:Create(Blur,TweenInfo.new(0.3),{Size = 12}):Play()
 
--- RGB STROKE
+-- RGB BORDER
 local Stroke = Instance.new("UIStroke", Main)
 Stroke.Thickness = 2
 
@@ -87,7 +87,7 @@ local currentIndex = 1
 
 local Window = {}
 
--- NOTIFY HOLDER
+-- NOTIFY STACK
 local NotifyHolder = Instance.new("Frame", ScreenGui)
 NotifyHolder.Size = UDim2.new(0,260,1,0)
 NotifyHolder.Position = UDim2.new(1,-270,0,10)
@@ -114,7 +114,7 @@ function Window:Notify(title,text)
     t2.Position = UDim2.new(0,0,0,25)
     t2.BackgroundTransparency = 1
     t2.Text = text
-    t2.TextColor3 = Color3.new(1,1,1)
+    t2.TextColor3 = Color3.fromRGB(200,200,200)
 
     TweenService:Create(f,TweenInfo.new(0.3),{
         Position = UDim2.new(0,0,0,0)
@@ -141,6 +141,9 @@ function Window:CreateTab()
 
     local layout = Instance.new("UIListLayout", Page)
     layout.Padding = UDim.new(0,6)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local order = 0
 
     table.insert(pages, Page)
 
@@ -153,56 +156,77 @@ function Window:CreateTab()
     local Tab = {}
 
     function Tab:CreateSection(text)
+        order += 1
         local l = Instance.new("TextLabel", Page)
         l.Size = UDim2.new(1,0,0,20)
         l.BackgroundTransparency = 1
         l.Text = text
         l.TextColor3 = Color3.new(1,1,1)
+        l.LayoutOrder = order
+    end
+
+    local function pulse(obj)
+        TweenService:Create(obj,TweenInfo.new(0.08),{
+            Size = UDim2.new(1,-6,0,32)
+        }):Play()
+        task.wait(0.08)
+        TweenService:Create(obj,TweenInfo.new(0.1,Enum.EasingStyle.Back),{
+            Size = UDim2.new(1,0,0,35)
+        }):Play()
     end
 
     function Tab:CreateButton(opt)
+        order += 1
+
         local b = Instance.new("TextButton", Page)
         b.Size = UDim2.new(1,0,0,35)
         b.Text = opt.Name
+        b.TextColor3 = Color3.new(1,1,1)
         b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        b.LayoutOrder = order
         Instance.new("UICorner", b)
 
         b.MouseButton1Click:Connect(function()
-            TweenService:Create(b,TweenInfo.new(0.1),{
-                Size = UDim2.new(1,-4,0,33)
-            }):Play()
-
-            task.wait(0.1)
-
-            TweenService:Create(b,TweenInfo.new(0.1),{
-                Size = UDim2.new(1,0,0,35)
-            }):Play()
-
+            pulse(b)
             if opt.Callback then opt.Callback() end
         end)
     end
 
     function Tab:CreateToggle(opt)
+        order += 1
         local state = false
 
         local b = Instance.new("TextButton", Page)
         b.Size = UDim2.new(1,0,0,35)
         b.Text = opt.Name..": OFF"
+        b.TextColor3 = Color3.new(1,1,1)
         b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        b.LayoutOrder = order
         Instance.new("UICorner", b)
 
         b.MouseButton1Click:Connect(function()
             state = not state
             b.Text = opt.Name..": "..(state and "ON" or "OFF")
+
+            TweenService:Create(b,TweenInfo.new(0.2),{
+                BackgroundColor3 = state and Color3.fromRGB(70,70,70) or Color3.fromRGB(25,25,25)
+            }):Play()
+
+            pulse(b)
+
             if opt.Callback then opt.Callback(state) end
         end)
     end
 
     function Tab:CreateTextBox(opt)
+        order += 1
+
         local box = Instance.new("TextBox", Page)
         box.Size = UDim2.new(1,0,0,35)
         box.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        box.TextColor3 = Color3.new(1,1,1)
         box.PlaceholderText = opt.Placeholder or "Enter..."
+        box.LayoutOrder = order
         Instance.new("UICorner", box)
 
         box.FocusLost:Connect(function()
@@ -211,40 +235,35 @@ function Window:CreateTab()
     end
 
     function Tab:CreateRunBox(opt)
+        order += 1
+
         local frame = Instance.new("Frame", Page)
         frame.Size = UDim2.new(1,0,0,35)
         frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        frame.LayoutOrder = order
         Instance.new("UICorner", frame)
 
         local box = Instance.new("TextBox", frame)
         box.Size = UDim2.new(0.7,0,1,0)
         box.BackgroundTransparency = 1
+        box.TextColor3 = Color3.new(1,1,1)
         box.PlaceholderText = "Command..."
 
         local run = Instance.new("TextButton", frame)
         run.Size = UDim2.new(0.3,0,1,0)
         run.Position = UDim2.new(0.7,0,0,0)
         run.Text = "RUN"
+        run.TextColor3 = Color3.new(1,1,1)
         Instance.new("UICorner", run)
 
         run.MouseButton1Click:Connect(function()
+            pulse(run)
             if opt.Callback then opt.Callback(box.Text) end
         end)
     end
 
     return Tab
 end
-
--- SNAP TAB
-Tabs.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        local dx = input.Position.X - input.Position.X
-        if dx < -50 then currentIndex += 1
-        elseif dx > 50 then currentIndex -= 1 end
-        currentIndex = math.clamp(currentIndex,1,#pages)
-        UIPage:JumpTo(pages[currentIndex])
-    end
-end)
 
 -- FLOAT ICON
 local Float = Instance.new("TextButton", ScreenGui)
