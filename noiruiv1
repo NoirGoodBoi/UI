@@ -39,7 +39,6 @@ function NoirUI:CreateWindow(settings)
     Instance.new("UICorner", Main)
     local Stroke = Instance.new("UIStroke", Main); Stroke.Thickness = 2
     
-    -- Hiệu ứng RGB cho Stroke
     task.spawn(function()
         while Main and Main.Parent do
             for i = 0, 1, 0.01 do
@@ -49,7 +48,22 @@ function NoirUI:CreateWindow(settings)
         end
     end)
 
-    -- SIDEBAR & CONTAINER
+    -- HEADER (Logo + Title)
+    local Header = Instance.new("Frame", Main)
+    Header.Size = UDim2.new(1, 0, 0, 40); Header.BackgroundTransparency = 1
+    
+    local Logo = Instance.new("ImageLabel", Header)
+    Logo.Size = UDim2.new(0, 24, 0, 24); Logo.Position = UDim2.new(0, 12, 0.5, -12)
+    Logo.BackgroundTransparency = 1; Logo.Image = "rbxassetid://" .. (settings.LogoID or 0)
+    Logo.Visible = settings.LogoID ~= nil
+
+    local Title = Instance.new("TextLabel", Header)
+    Title.Size = UDim2.new(1, -50, 1, 0)
+    Title.Position = UDim2.new(0, (settings.LogoID and 42 or 15), 0, 0)
+    Title.BackgroundTransparency = 1; Title.Text = settings.Name or "NOIR HUB"
+    Title.TextColor3 = Color3.new(1,1,1); Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
+
+    -- SIDEBAR & CONTAINER (Giữ nguyên logic Avatar của ông)
     local SidebarArea = Instance.new("Frame", Main)
     SidebarArea.Size = UDim2.new(0, 110, 1, -50); SidebarArea.Position = UDim2.new(0, 5, 0, 40); SidebarArea.BackgroundTransparency = 1
 
@@ -69,36 +83,20 @@ function NoirUI:CreateWindow(settings)
     local Container = Instance.new("Frame", Main)
     Container.Size = UDim2.new(1, -125, 1, -50); Container.Position = UDim2.new(0, 120, 0, 40); Container.BackgroundTransparency = 1
 
-    -- TITLE
-    local Title = Instance.new("TextLabel", Main)
-    Title.Size = UDim2.new(1, 0, 0, 40); Title.Position = UDim2.new(0, 15, 0, 0); Title.BackgroundTransparency = 1
-    Title.Text = settings.Name or "NOIR HUB"; Title.TextColor3 = Color3.new(1,1,1); Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
-
-    -- ANIMATION OPEN/CLOSE
+    -- ANIMATION TOGGLE
+    local isOpen = true
     local function ToggleUI(state)
-        if state then
-            Main.Visible = true
-            Main:TweenSize(UDim2.new(0, 420, 0, 300), "Out", "Back", 0.4, true)
-            TweenService:Create(Main, TweenInfo.new(0.4), {GroupTransparency = 0}):Play()
-        else
-            Main:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.4, true)
-            task.wait(0.4)
-            Main.Visible = false
-        end
+        isOpen = state
+        local targetSize = state and UDim2.new(0, 420, 0, 300) or UDim2.new(0, 0, 0, 0)
+        Main:TweenSize(targetSize, "Out", "Back", 0.4, true)
+        task.delay(state and 0 or 0.4, function() Main.Visible = state end)
     end
 
-    -- FLOATING ICON
     local ToggleBtn = Instance.new("TextButton", ScreenGui)
     ToggleBtn.Size = UDim2.new(0, 45, 0, 45); ToggleBtn.Position = UDim2.new(0, 15, 0.5, -22); ToggleBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     ToggleBtn.Text = settings.Icon or "N"; ToggleBtn.TextColor3 = ACCENT; ToggleBtn.TextSize = 18
     Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0); Instance.new("UIStroke", ToggleBtn).Color = ACCENT
-    MakeDraggable(ToggleBtn)
-    
-    local isOpen = true
-    ToggleBtn.MouseButton1Click:Connect(function()
-        isOpen = not isOpen
-        ToggleUI(isOpen)
-    end)
+    MakeDraggable(ToggleBtn); ToggleBtn.MouseButton1Click:Connect(function() ToggleUI(not isOpen) end)
 
     local Window = {}
 
@@ -121,30 +119,14 @@ function NoirUI:CreateWindow(settings)
 
         local Tab = {}
 
-        function Tab:CreateButton(opt)
-            local b = Instance.new("TextButton", Page); b.Size = UDim2.new(0.95, 0, 0, 35); b.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
-            b.Text = opt.Name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamMedium"; b.TextSize = 12; Instance.new("UICorner", b)
-            b.MouseButton1Click:Connect(opt.Callback)
-        end
-
-        function Tab:CreateToggle(opt)
-            local s = false
-            local t = Instance.new("TextButton", Page); t.Size = UDim2.new(0.95, 0, 0, 35); t.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
-            t.Text = opt.Name .. " [OFF]"; t.TextColor3 = Color3.fromRGB(180, 180, 180); t.TextSize = 12; Instance.new("UICorner", t)
-            t.MouseButton1Click:Connect(function()
-                s = not s
-                t.Text = opt.Name .. (s and " [ON]" or " [OFF]")
-                t.TextColor3 = s and ACCENT or Color3.fromRGB(180, 180, 180)
-                opt.Callback(s)
-            end)
-        end
-
+        -- [[ SLIDER BAR DÀY HƠN - FIXED ]]
         function Tab:CreateSlider(opt)
-            local f = Instance.new("Frame", Page); f.Size = UDim2.new(0.95, 0, 0, 45); f.BackgroundColor3 = Color3.fromRGB(22, 22, 22); Instance.new("UICorner", f)
-            local l = Instance.new("TextLabel", f); l.Size = UDim2.new(1, 0, 0, 20); l.Position = UDim2.new(0, 10, 0, 2); l.BackgroundTransparency = 1
-            l.Text = opt.Name .. ": " .. opt.Default; l.TextColor3 = Color3.new(1,1,1); l.TextXAlignment = "Left"; l.TextSize = 11
+            local f = Instance.new("Frame", Page); f.Size = UDim2.new(0.95, 0, 0, 50); f.BackgroundColor3 = Color3.fromRGB(22, 22, 22); Instance.new("UICorner", f)
+            local l = Instance.new("TextLabel", f); l.Size = UDim2.new(1, 0, 0, 20); l.Position = UDim2.new(0, 12, 0, 5); l.BackgroundTransparency = 1
+            l.Text = opt.Name .. ": " .. opt.Default; l.TextColor3 = Color3.new(1,1,1); l.TextXAlignment = "Left"; l.Font = "GothamMedium"; l.TextSize = 11
 
-            local sbg = Instance.new("Frame", f); sbg.Size = UDim2.new(0.9, 0, 0, 5); sbg.Position = UDim2.new(0.05, 0, 0.7, 0); sbg.BackgroundColor3 = Color3.fromRGB(40, 40, 40); Instance.new("UICorner", sbg)
+            -- Dày lên một chút (từ 5px -> 8px)
+            local sbg = Instance.new("Frame", f); sbg.Size = UDim2.new(0.9, 0, 0, 8); sbg.Position = UDim2.new(0.05, 0, 0.7, 0); sbg.BackgroundColor3 = Color3.fromRGB(40, 40, 40); Instance.new("UICorner", sbg)
             local fill = Instance.new("Frame", sbg); fill.Size = UDim2.new((opt.Default - opt.Min)/(opt.Max - opt.Min), 0, 1, 0); fill.BackgroundColor3 = ACCENT; Instance.new("UICorner", fill)
             
             local function update()
@@ -169,13 +151,20 @@ function NoirUI:CreateWindow(settings)
             end)
         end
 
-        function Tab:CreateRunBox(opt)
-            local f = Instance.new("Frame", Page); f.Size = UDim2.new(0.95, 0, 0, 35); f.BackgroundColor3 = Color3.fromRGB(18, 18, 18); Instance.new("UICorner", f)
-            local i = Instance.new("TextBox", f); i.Size = UDim2.new(1, -55, 1, 0); i.Position = UDim2.new(0, 8, 0, 0); i.BackgroundTransparency = 1
-            i.PlaceholderText = "Command..."; i.Text = ""; i.TextColor3 = Color3.new(1,1,1); i.TextXAlignment = "Left"; i.ClearTextOnFocus = false
-            local r = Instance.new("TextButton", f); r.Size = UDim2.new(0, 45, 0, 25); r.Position = UDim2.new(1, -50, 0.5, -12.5); r.BackgroundColor3 = ACCENT
-            r.Text = "RUN"; r.TextColor3 = Color3.new(1,1,1); r.Font = "GothamBold"; Instance.new("UICorner", r)
-            r.MouseButton1Click:Connect(function() if i.Text ~= "" then opt.Callback(i.Text) end end)
+        function Tab:CreateButton(opt)
+            local b = Instance.new("TextButton", Page); b.Size = UDim2.new(0.95, 0, 0, 35); b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            b.Text = opt.Name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamMedium"; b.TextSize = 12; Instance.new("UICorner", b)
+            b.MouseButton1Click:Connect(opt.Callback)
+        end
+
+        function Tab:CreateToggle(opt)
+            local s = false
+            local t = Instance.new("TextButton", Page); t.Size = UDim2.new(0.95, 0, 0, 35); t.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            t.Text = opt.Name .. " [OFF]"; t.TextColor3 = Color3.fromRGB(180, 180, 180); t.TextSize = 12; Instance.new("UICorner", t)
+            t.MouseButton1Click:Connect(function()
+                s = not s; t.Text = opt.Name .. (s and " [ON]" or " [OFF]"); t.TextColor3 = s and ACCENT or Color3.fromRGB(180, 180, 180)
+                opt.Callback(s)
+            end)
         end
 
         return Tab
