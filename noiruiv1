@@ -1,41 +1,56 @@
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
+local Debris = game:GetService("Debris")
 
 local NoirUI = {}
 
 function NoirUI:CreateWindow(settings)
 
--- CLEAN UI
+-- CLEAN
 if game.CoreGui:FindFirstChild("NoirUI") then
     game.CoreGui.NoirUI:Destroy()
 end
 
--- FIX BLUR STACK
 local oldBlur = game.Lighting:FindFirstChild("NoirBlur")
 if oldBlur then oldBlur:Destroy() end
 
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 ScreenGui.Name = "NoirUI"
 
-local ACCENT = settings.Accent or Color3.fromRGB(170,85,255)
-
 -- BLUR
 local Blur = Instance.new("BlurEffect", game.Lighting)
 Blur.Name = "NoirBlur"
 Blur.Size = 0
-TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 12}):Play()
 
--- MAIN
+-- MAIN (ANIM OPEN)
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0,320,0,260)
-Main.Position = UDim2.new(0.5,-160,0.5,-130)
+Main.Size = UDim2.new(0,0,0,0)
+Main.Position = UDim2.new(0.5,0,0.5,0)
 Main.BackgroundColor3 = Color3.fromRGB(10,10,10)
+Main.BackgroundTransparency = 1
 Instance.new("UICorner", Main)
 
--- ACCENT GLOW
+TweenService:Create(Main,TweenInfo.new(0.25),{
+    Size = UDim2.new(0,320,0,260),
+    Position = UDim2.new(0.5,-160,0.5,-130),
+    BackgroundTransparency = 0
+}):Play()
+
+TweenService:Create(Blur,TweenInfo.new(0.3),{Size = 12}):Play()
+
+-- RGB STROKE
 local Stroke = Instance.new("UIStroke", Main)
 Stroke.Thickness = 2
-Stroke.Color = ACCENT
+
+task.spawn(function()
+    local h = 0
+    while Main.Parent do
+        h += 0.003
+        if h > 1 then h = 0 end
+        Stroke.Color = Color3.fromHSV(h,1,1)
+        task.wait()
+    end
+end)
 
 -- TITLE
 local Title = Instance.new("TextLabel", Main)
@@ -46,7 +61,7 @@ Title.TextColor3 = Color3.new(1,1,1)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
 
--- TAB CONTAINER
+-- TABS
 local Tabs = Instance.new("Frame", Main)
 Tabs.Size = UDim2.new(1,0,1,-45)
 Tabs.Position = UDim2.new(0,0,0,35)
@@ -55,9 +70,6 @@ Tabs.BackgroundTransparency = 1
 local UIPage = Instance.new("UIPageLayout", Tabs)
 UIPage.FillDirection = Enum.FillDirection.Horizontal
 UIPage.TweenTime = 0.25
-UIPage.EasingStyle = Enum.EasingStyle.Quad
-UIPage.ScrollWheelInputEnabled = false
-UIPage.TouchInputEnabled = false -- tắt mặc định để dùng snap custom
 
 -- DOTS
 local Dots = Instance.new("Frame", Main)
@@ -65,25 +77,58 @@ Dots.Size = UDim2.new(1,0,0,10)
 Dots.Position = UDim2.new(0,0,1,-10)
 Dots.BackgroundTransparency = 1
 
-local dotLayout = Instance.new("UIListLayout", Dots)
-dotLayout.FillDirection = Enum.FillDirection.Horizontal
-dotLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-dotLayout.Padding = UDim.new(0,5)
+local layoutDots = Instance.new("UIListLayout", Dots)
+layoutDots.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layoutDots.Padding = UDim.new(0,5)
 
-local dots = {}
 local pages = {}
+local dots = {}
 local currentIndex = 1
 
 local Window = {}
 
--- UPDATE DOT
-UIPage:GetPropertyChangedSignal("CurrentPage"):Connect(function()
-    for i,v in ipairs(dots) do
-        v.BackgroundColor3 = (pages[i] == UIPage.CurrentPage)
-            and Color3.new(1,1,1)
-            or Color3.fromRGB(120,120,120)
-    end
-end)
+-- NOTIFY HOLDER
+local NotifyHolder = Instance.new("Frame", ScreenGui)
+NotifyHolder.Size = UDim2.new(0,260,1,0)
+NotifyHolder.Position = UDim2.new(1,-270,0,10)
+NotifyHolder.BackgroundTransparency = 1
+
+local layout = Instance.new("UIListLayout", NotifyHolder)
+layout.Padding = UDim.new(0,8)
+
+function Window:Notify(title,text)
+    local f = Instance.new("Frame", NotifyHolder)
+    f.Size = UDim2.new(1,0,0,60)
+    f.Position = UDim2.new(1,0,0,0)
+    f.BackgroundColor3 = Color3.fromRGB(20,20,20)
+    Instance.new("UICorner", f)
+
+    local t1 = Instance.new("TextLabel", f)
+    t1.Size = UDim2.new(1,0,0,25)
+    t1.BackgroundTransparency = 1
+    t1.Text = title
+    t1.TextColor3 = Color3.new(1,1,1)
+
+    local t2 = Instance.new("TextLabel", f)
+    t2.Size = UDim2.new(1,0,0,25)
+    t2.Position = UDim2.new(0,0,0,25)
+    t2.BackgroundTransparency = 1
+    t2.Text = text
+    t2.TextColor3 = Color3.new(1,1,1)
+
+    TweenService:Create(f,TweenInfo.new(0.3),{
+        Position = UDim2.new(0,0,0,0)
+    }):Play()
+
+    task.delay(2.5,function()
+        TweenService:Create(f,TweenInfo.new(0.3),{
+            Position = UDim2.new(1,0,0,0),
+            BackgroundTransparency = 1
+        }):Play()
+        task.wait(0.3)
+        f:Destroy()
+    end)
+end
 
 -- CREATE TAB
 function Window:CreateTab()
@@ -91,15 +136,14 @@ function Window:CreateTab()
     local Page = Instance.new("ScrollingFrame", Tabs)
     Page.Size = UDim2.new(1,0,1,0)
     Page.BackgroundTransparency = 1
-    Page.ScrollBarThickness = 3
     Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Page.ScrollBarThickness = 3
 
     local layout = Instance.new("UIListLayout", Page)
     layout.Padding = UDim.new(0,6)
 
     table.insert(pages, Page)
 
-    -- DOT
     local dot = Instance.new("Frame", Dots)
     dot.Size = UDim2.new(0,8,0,8)
     dot.BackgroundColor3 = Color3.fromRGB(120,120,120)
@@ -108,22 +152,12 @@ function Window:CreateTab()
 
     local Tab = {}
 
-    function Tab:CreateSection(name)
+    function Tab:CreateSection(text)
         local l = Instance.new("TextLabel", Page)
         l.Size = UDim2.new(1,0,0,20)
         l.BackgroundTransparency = 1
-        l.Text = name
-        l.TextColor3 = ACCENT
-        l.TextXAlignment = Enum.TextXAlignment.Left
-    end
-
-    function Tab:CreateLabel(opt)
-        local l = Instance.new("TextLabel", Page)
-        l.Size = UDim2.new(1,0,0,20)
-        l.BackgroundTransparency = 1
-        l.Text = opt.Text or "Label"
-        l.TextColor3 = opt.Color or Color3.fromRGB(180,180,180)
-        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.Text = text
+        l.TextColor3 = Color3.new(1,1,1)
     end
 
     function Tab:CreateButton(opt)
@@ -131,18 +165,17 @@ function Window:CreateTab()
         b.Size = UDim2.new(1,0,0,35)
         b.Text = opt.Name
         b.BackgroundColor3 = Color3.fromRGB(25,25,25)
-        b.TextColor3 = Color3.new(1,1,1)
         Instance.new("UICorner", b)
 
         b.MouseButton1Click:Connect(function()
             TweenService:Create(b,TweenInfo.new(0.1),{
-                BackgroundColor3 = ACCENT
+                Size = UDim2.new(1,-4,0,33)
             }):Play()
 
             task.wait(0.1)
 
-            TweenService:Create(b,TweenInfo.new(0.2),{
-                BackgroundColor3 = Color3.fromRGB(25,25,25)
+            TweenService:Create(b,TweenInfo.new(0.1),{
+                Size = UDim2.new(1,0,0,35)
             }):Play()
 
             if opt.Callback then opt.Callback() end
@@ -154,19 +187,13 @@ function Window:CreateTab()
 
         local b = Instance.new("TextButton", Page)
         b.Size = UDim2.new(1,0,0,35)
-        b.BackgroundColor3 = Color3.fromRGB(25,25,25)
         b.Text = opt.Name..": OFF"
-        b.TextColor3 = Color3.new(1,1,1)
+        b.BackgroundColor3 = Color3.fromRGB(25,25,25)
         Instance.new("UICorner", b)
 
         b.MouseButton1Click:Connect(function()
             state = not state
             b.Text = opt.Name..": "..(state and "ON" or "OFF")
-
-            TweenService:Create(b,TweenInfo.new(0.2),{
-                BackgroundColor3 = state and ACCENT or Color3.fromRGB(25,25,25)
-            }):Play()
-
             if opt.Callback then opt.Callback(state) end
         end)
     end
@@ -175,14 +202,11 @@ function Window:CreateTab()
         local box = Instance.new("TextBox", Page)
         box.Size = UDim2.new(1,0,0,35)
         box.BackgroundColor3 = Color3.fromRGB(25,25,25)
-        box.TextColor3 = Color3.new(1,1,1)
         box.PlaceholderText = opt.Placeholder or "Enter..."
         Instance.new("UICorner", box)
 
         box.FocusLost:Connect(function()
-            if opt.Callback then
-                opt.Callback(box.Text)
-            end
+            if opt.Callback then opt.Callback(box.Text) end
         end)
     end
 
@@ -195,7 +219,6 @@ function Window:CreateTab()
         local box = Instance.new("TextBox", frame)
         box.Size = UDim2.new(0.7,0,1,0)
         box.BackgroundTransparency = 1
-        box.TextColor3 = Color3.new(1,1,1)
         box.PlaceholderText = "Command..."
 
         local run = Instance.new("TextButton", frame)
@@ -205,40 +228,20 @@ function Window:CreateTab()
         Instance.new("UICorner", run)
 
         run.MouseButton1Click:Connect(function()
-            if opt.Callback then
-                opt.Callback(box.Text)
-            end
+            if opt.Callback then opt.Callback(box.Text) end
         end)
     end
 
     return Tab
 end
 
--- SNAP SCROLL
-local dragging = false
-local startPos
-
-Tabs.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        startPos = input.Position
-    end
-end)
-
+-- SNAP TAB
 Tabs.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
-
-        local dx = input.Position.X - startPos.X
-
-        if math.abs(dx) > 50 then
-            if dx < 0 then
-                currentIndex = math.clamp(currentIndex + 1, 1, #pages)
-            else
-                currentIndex = math.clamp(currentIndex - 1, 1, #pages)
-            end
-        end
-
+        local dx = input.Position.X - input.Position.X
+        if dx < -50 then currentIndex += 1
+        elseif dx > 50 then currentIndex -= 1 end
+        currentIndex = math.clamp(currentIndex,1,#pages)
         UIPage:JumpTo(pages[currentIndex])
     end
 end)
@@ -247,50 +250,33 @@ end)
 local Float = Instance.new("TextButton", ScreenGui)
 Float.Size = UDim2.new(0,40,0,40)
 Float.Position = UDim2.new(0,20,0.5,-20)
-Float.Text = "⚡"
+Float.Text = settings.Icon or "⚡"
 Float.BackgroundColor3 = Color3.fromRGB(10,10,10)
-Float.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", Float)
 
-local draggingIcon = false
-local dragStart, startPosIcon
-
-Float.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        draggingIcon = true
-        dragStart = input.Position
-        startPosIcon = Float.Position
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if draggingIcon and input.UserInputType == Enum.UserInputType.Touch then
-        local delta = input.Position - dragStart
-        Float.Position = UDim2.new(
-            startPosIcon.X.Scale,
-            startPosIcon.X.Offset + delta.X,
-            startPosIcon.Y.Scale,
-            startPosIcon.Y.Offset + delta.Y
-        )
-    end
-end)
-
-Float.InputEnded:Connect(function()
-    draggingIcon = false
-end)
-
 local visible = true
+
 Float.MouseButton1Click:Connect(function()
-    if draggingIcon then return end
+
+    TweenService:Create(Float,TweenInfo.new(0.1),{
+        Size = UDim2.new(0,36,0,36)
+    }):Play()
+
+    task.wait(0.1)
+
+    TweenService:Create(Float,TweenInfo.new(0.1),{
+        Size = UDim2.new(0,40,0,40)
+    }):Play()
+
     visible = not visible
     Main.Visible = visible
+
     TweenService:Create(Blur,TweenInfo.new(0.2),{
         Size = visible and 12 or 0
     }):Play()
 end)
 
 return Window
-
 end
 
 return NoirUI
