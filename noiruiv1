@@ -120,14 +120,6 @@ function NoirUI:CreateWindow(settings)
 
         local Tab = {}
 
-        -- [[ THÀNH PHẦN MỚI 1: LABEL ]]
-        function Tab:CreateLabel(txt)
-            local l = Instance.new("TextLabel", Page)
-            l.Size = UDim2.new(0.95, 0, 0, 20); l.BackgroundTransparency = 1
-            l.Text = txt; l.TextColor3 = Color3.fromRGB(200, 200, 200); l.Font = "GothamMedium"; l.TextSize = 12
-        end
-
-        -- [[ THÀNH PHẦN MỚI 2: SECTION ]]
         function Tab:CreateSection(txt)
             local s = Instance.new("Frame", Page)
             s.Size = UDim2.new(0.95, 0, 0, 25); s.BackgroundTransparency = 1
@@ -136,7 +128,12 @@ function NoirUI:CreateWindow(settings)
             local line = Instance.new("Frame", s); line.Size = UDim2.new(1, 0, 0, 1); line.Position = UDim2.new(0, 0, 1, 0); line.BackgroundColor3 = ACCENT; line.BackgroundTransparency = 0.5
         end
 
-        -- [[ THÀNH PHẦN MỚI 3: PARAGRAPH ]]
+        function Tab:CreateLabel(txt)
+            local l = Instance.new("TextLabel", Page)
+            l.Size = UDim2.new(0.95, 0, 0, 20); l.BackgroundTransparency = 1
+            l.Text = txt; l.TextColor3 = Color3.fromRGB(200, 200, 200); l.Font = "GothamMedium"; l.TextSize = 12; l.TextXAlignment = "Left"
+        end
+
         function Tab:CreateParagraph(title, desc)
             local f = Instance.new("Frame", Page); f.Size = UDim2.new(0.95, 0, 0, 65); f.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Instance.new("UICorner", f)
             local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1, -10, 0, 20); t.Position = UDim2.new(0, 10, 0, 5); t.Text = title; t.TextColor3 = ACCENT; t.BackgroundTransparency = 1; t.Font = "GothamBold"; t.TextXAlignment = "Left"
@@ -161,8 +158,7 @@ function NoirUI:CreateWindow(settings)
 
         function Tab:CreateSlider(opt)
             local f = Instance.new("Frame", Page); f.Size = UDim2.new(0.95, 0, 0, 50); f.BackgroundColor3 = Color3.fromRGB(22, 22, 22); Instance.new("UICorner", f)
-            local l = Instance.new("TextLabel", f); l.Size = UDim2.new(1, 0, 0, 20); l.Position = UDim2.new(0, 12, 0, 5); l.BackgroundTransparency = 1
-            l.Text = opt.Name .. ": " .. opt.Default; l.TextColor3 = Color3.new(1,1,1); l.TextXAlignment = "Left"; l.TextSize = 11
+            local l = Instance.new("TextLabel", f); l.Size = UDim2.new(1, 0, 0, 20); l.Position = UDim2.new(0, 12, 0, 5); l.BackgroundTransparency = 1; l.Text = opt.Name .. ": " .. opt.Default; l.TextColor3 = Color3.new(1,1,1); l.TextXAlignment = "Left"; l.TextSize = 11
             local sbg = Instance.new("Frame", f); sbg.Size = UDim2.new(0.9, 0, 0, 8); sbg.Position = UDim2.new(0.05, 0, 0.7, 0); sbg.BackgroundColor3 = Color3.fromRGB(40, 40, 40); Instance.new("UICorner", sbg)
             local fill = Instance.new("Frame", sbg); fill.Size = UDim2.new((opt.Default - opt.Min)/(opt.Max - opt.Min), 0, 1, 0); fill.BackgroundColor3 = ACCENT; Instance.new("UICorner", fill)
             local function update()
@@ -180,12 +176,18 @@ function NoirUI:CreateWindow(settings)
             end)
         end
 
+        function Tab:CreateRunBox(opt)
+            local f = Instance.new("Frame", Page); f.Size = UDim2.new(0.95, 0, 0, 38); f.BackgroundColor3 = Color3.fromRGB(18, 18, 18); Instance.new("UICorner", f); local s = Instance.new("UIStroke", f); s.Color = Color3.fromRGB(40, 40, 40)
+            local i = Instance.new("TextBox", f); i.Size = UDim2.new(1, -65, 1, 0); i.Position = UDim2.new(0, 10, 0, 0); i.BackgroundTransparency = 1; i.PlaceholderText = opt.Placeholder or "Enter text..."; i.Text = ""; i.TextColor3 = Color3.new(1, 1, 1); i.Font = "GothamMedium"; i.TextSize = 12; i.TextXAlignment = "Left"; i.ClearTextOnFocus = false
+            local r = Instance.new("TextButton", f); r.Size = UDim2.new(0, 50, 0, 26); r.Position = UDim2.new(1, -55, 0.5, -13); r.BackgroundColor3 = ACCENT; r.Text = "RUN"; r.TextColor3 = Color3.new(1, 1, 1); r.Font = "GothamBold"; r.TextSize = 10; Instance.new("UICorner", r)
+            r.MouseButton1Click:Connect(function() if i.Text ~= "" then opt.Callback(i.Text) end end)
+        end
+
         return Tab
     end
 
     function NoirUI:Notify(title, msg)
-        local n = Instance.new("Frame", ScreenGui); n.Size = UDim2.new(0, 220, 0, 65); n.Position = UDim2.new(1, 20, 0.8, 0)
-        n.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Instance.new("UICorner", n); Instance.new("UIStroke", n).Color = ACCENT
+        local n = Instance.new("Frame", ScreenGui); n.Size = UDim2.new(0, 220, 0, 65); n.Position = UDim2.new(1, 20, 0.8, 0); n.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Instance.new("UICorner", n); Instance.new("UIStroke", n).Color = ACCENT
         local t = Instance.new("TextLabel", n); t.Size = UDim2.new(1, -10, 0, 20); t.Position = UDim2.new(0, 10, 0, 5); t.Text = title; t.TextColor3 = ACCENT; t.BackgroundTransparency = 1; t.Font = "GothamBold"
         local m = Instance.new("TextLabel", n); m.Size = UDim2.new(1, -15, 0, 40); m.Position = UDim2.new(0, 10, 0, 22); m.Text = msg; m.TextColor3 = Color3.new(1,1,1); m.BackgroundTransparency = 1; m.TextWrapped = true; m.TextXAlignment = "Left"; m.TextYAlignment = "Top"
         for i, old in ipairs(NoirUI.Notifications) do TweenService:Create(old, TweenInfo.new(0.3), {Position = UDim2.new(1, -240, 0.8, -(i * 75))}):Play() end
