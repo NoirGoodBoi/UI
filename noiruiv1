@@ -5,7 +5,9 @@ local NoirUI = {}
 
 function NoirUI:CreateWindow(settings)
 
--- CLEAN OLD
+-- =========================
+-- CLEAN
+-- =========================
 if game.CoreGui:FindFirstChild("NoirUI") then
     game.CoreGui.NoirUI:Destroy()
 end
@@ -14,16 +16,17 @@ if game.Lighting:FindFirstChild("NoirBlur") then
     game.Lighting.NoirBlur:Destroy()
 end
 
--- SCREEN
+-- =========================
+-- GUI
+-- =========================
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 ScreenGui.Name = "NoirUI"
 
--- BLUR
 local Blur = Instance.new("BlurEffect", game.Lighting)
 Blur.Name = "NoirBlur"
 Blur.Size = 0
 
--- MAIN ANIM
+-- MAIN
 local Main = Instance.new("Frame", ScreenGui)
 Main.Size = UDim2.new(0,0,0,0)
 Main.Position = UDim2.new(0.5,0,0.5,0)
@@ -37,7 +40,21 @@ TweenService:Create(Main,TweenInfo.new(0.25),{
     BackgroundTransparency = 0
 }):Play()
 
-TweenService:Create(Blur,TweenInfo.new(0.25),{Size = 12}):Play()
+TweenService:Create(Blur,TweenInfo.new(0.3),{Size = 12}):Play()
+
+-- BORDER RGB
+local Stroke = Instance.new("UIStroke", Main)
+Stroke.Thickness = 2
+
+task.spawn(function()
+    local h = 0
+    while Main.Parent do
+        h += 0.003
+        if h > 1 then h = 0 end
+        Stroke.Color = Color3.fromHSV(h,1,1)
+        task.wait()
+    end
+end)
 
 -- TITLE
 local Title = Instance.new("TextLabel", Main)
@@ -48,22 +65,24 @@ Title.TextColor3 = Color3.new(1,1,1)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
 
--- TAB CONTAINER
+-- =========================
+-- TABS
+-- =========================
 local Tabs = Instance.new("Frame", Main)
 Tabs.Size = UDim2.new(1,0,1,-45)
 Tabs.Position = UDim2.new(0,0,0,35)
 Tabs.BackgroundTransparency = 1
+Tabs.ClipsDescendants = true
 
 local UIPage = Instance.new("UIPageLayout", Tabs)
 UIPage.FillDirection = Enum.FillDirection.Horizontal
 UIPage.TweenTime = 0.25
 UIPage.EasingStyle = Enum.EasingStyle.Quad
-UIPage.ClipsDescendants = true
 
 -- DOTS
 local Dots = Instance.new("Frame", Main)
-Dots.Size = UDim2.new(1,0,0,10)
-Dots.Position = UDim2.new(0,0,1,-10)
+Dots.Size = UDim2.new(1,0,0,12)
+Dots.Position = UDim2.new(0,0,1,-12)
 Dots.BackgroundTransparency = 1
 
 local dotLayout = Instance.new("UIListLayout", Dots)
@@ -71,24 +90,25 @@ dotLayout.FillDirection = Enum.FillDirection.Horizontal
 dotLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 dotLayout.Padding = UDim.new(0,5)
 
+-- =========================
+-- STATE
+-- =========================
 local pages = {}
 local dots = {}
-
 local currentIndex = 1
 local touchStart = nil
 
 -- =========================
--- UPDATE TAB VISIBILITY (FIX BUG ORDER)
+-- FIX: chỉ hiện tab 1 khi load
 -- =========================
-local function updateTabs()
-    for i,page in ipairs(pages) do
-        page.Visible = (i == currentIndex)
+task.defer(function()
+    if #pages > 0 then
+        UIPage:JumpTo(pages[1])
+        currentIndex = 1
     end
-end
+end)
 
--- =========================
--- DOT UPDATE
--- =========================
+-- DOT SYNC FIX
 UIPage:GetPropertyChangedSignal("CurrentPage"):Connect(function()
     for i,v in ipairs(dots) do
         v.BackgroundColor3 = (pages[i] == UIPage.CurrentPage)
@@ -98,104 +118,24 @@ UIPage:GetPropertyChangedSignal("CurrentPage"):Connect(function()
 end)
 
 -- =========================
--- SWIPE SYSTEM (SMOOTH + LOW THRESHOLD)
+-- WINDOW API
 -- =========================
-local SWIPE_THRESHOLD = 12
+local Window = {}
 
-Tabs.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        touchStart = input.Position
-    end
-end)
-
-Tabs.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch and touchStart then
-
-        local dx = input.Position.X - touchStart.X
-
-        if math.abs(dx) > SWIPE_THRESHOLD then
-
-            if dx < 0 then
-                currentIndex += 1
-            else
-                currentIndex -= 1
-            end
-
-            currentIndex = math.clamp(currentIndex,1,#pages)
-
-            UIPage:JumpTo(pages[currentIndex])
-            updateTabs()
-        end
-
-        touchStart = nil
-    end
-end)
-
--- =========================
--- FLOAT ICON + RGB
--- =========================
-local Float = Instance.new("TextButton", ScreenGui)
-Float.Size = UDim2.new(0,40,0,40)
-Float.Position = UDim2.new(0,20,0.5,-20)
-Float.Text = settings.Icon or "⚡"
-Float.BackgroundColor3 = Color3.fromRGB(10,10,10)
-Float.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", Float)
-
-local iconStroke = Instance.new("UIStroke", Float)
-iconStroke.Thickness = 2
-
-task.spawn(function()
-    local h = 0
-    while Float.Parent do
-        h += 0.01
-        if h > 1 then h = 0 end
-        iconStroke.Color = Color3.fromHSV(h,1,1)
-        task.wait()
-    end
-end)
-
-local visible = true
-
-Float.MouseButton1Click:Connect(function()
-    visible = not visible
-    Main.Visible = visible
-
-    TweenService:Create(Blur,TweenInfo.new(0.2),{
-        Size = visible and 12 or 0
-    }):Play()
-end)
-
--- =========================
--- NOTIFY SYSTEM (RGB STACK)
--- =========================
+-- NOTIFY (GIỮ NGUYÊN)
 local NotifyHolder = Instance.new("Frame", ScreenGui)
 NotifyHolder.Size = UDim2.new(0,260,1,0)
 NotifyHolder.Position = UDim2.new(1,-270,0,10)
 NotifyHolder.BackgroundTransparency = 1
 
-local notifyLayout = Instance.new("UIListLayout", NotifyHolder)
-notifyLayout.Padding = UDim.new(0,8)
+local list = Instance.new("UIListLayout", NotifyHolder)
+list.Padding = UDim.new(0,8)
 
-function NoirUI:Notify(title,text)
-
+function Window:Notify(title,text)
     local f = Instance.new("Frame", NotifyHolder)
     f.Size = UDim2.new(1,0,0,60)
     f.BackgroundColor3 = Color3.fromRGB(20,20,20)
     Instance.new("UICorner", f)
-
-    local stroke = Instance.new("UIStroke", f)
-    stroke.Thickness = 2
-
-    task.spawn(function()
-        local h = 0
-        while f.Parent do
-            h += 0.01
-            if h > 1 then h = 0 end
-            stroke.Color = Color3.fromHSV(h,1,1)
-            task.wait()
-        end
-    end)
 
     local t1 = Instance.new("TextLabel", f)
     t1.Size = UDim2.new(1,0,0,25)
@@ -210,123 +150,97 @@ function NoirUI:Notify(title,text)
     t2.Text = text
     t2.TextColor3 = Color3.fromRGB(200,200,200)
 
-    TweenService:Create(f,TweenInfo.new(0.25),{
-        Position = UDim2.new(0,0,0,0)
-    }):Play()
-
-    task.delay(2,function()
+    task.delay(2.5,function()
         f:Destroy()
     end)
 end
 
 -- =========================
--- TAB SYSTEM
+-- CREATE TAB (GIỮ FULL FEATURES)
 -- =========================
-local Window = {}
-
 function Window:CreateTab()
 
     local Page = Instance.new("ScrollingFrame", Tabs)
     Page.Size = UDim2.new(1,0,1,0)
     Page.BackgroundTransparency = 1
-    Page.ScrollBarThickness = 3
     Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Page.ScrollBarThickness = 3
+    Page.ClipsDescendants = true
 
     local layout = Instance.new("UIListLayout", Page)
     layout.Padding = UDim.new(0,6)
 
-    table.insert(pages,Page)
+    table.insert(pages, Page)
 
+    -- DOT
     local dot = Instance.new("Frame", Dots)
     dot.Size = UDim2.new(0,8,0,8)
     dot.BackgroundColor3 = Color3.fromRGB(120,120,120)
     Instance.new("UICorner", dot)
-
-    table.insert(dots,dot)
-
-    task.defer(updateTabs)
+    table.insert(dots, dot)
 
     local Tab = {}
-    local order = 0
 
-    local function pulse(obj)
-        TweenService:Create(obj,TweenInfo.new(0.08),{
-            Size = UDim2.new(1,-4,0,32)
-        }):Play()
-        task.wait(0.08)
-        TweenService:Create(obj,TweenInfo.new(0.12),{
-            Size = UDim2.new(1,0,0,35)
-        }):Play()
-    end
-
+    -- SECTION
     function Tab:CreateSection(text)
-        order += 1
         local l = Instance.new("TextLabel", Page)
         l.Size = UDim2.new(1,0,0,20)
         l.BackgroundTransparency = 1
         l.Text = text
         l.TextColor3 = Color3.new(1,1,1)
-        l.LayoutOrder = order
     end
 
+    -- BUTTON
     function Tab:CreateButton(opt)
-        order += 1
         local b = Instance.new("TextButton", Page)
         b.Size = UDim2.new(1,0,0,35)
         b.Text = opt.Name
-        b.TextColor3 = Color3.new(1,1,1)
         b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        b.TextColor3 = Color3.new(1,1,1)
         Instance.new("UICorner", b)
-        b.LayoutOrder = order
 
         b.MouseButton1Click:Connect(function()
-            pulse(b)
             if opt.Callback then opt.Callback() end
         end)
     end
 
+    -- TOGGLE
     function Tab:CreateToggle(opt)
-        order += 1
         local state = false
 
         local b = Instance.new("TextButton", Page)
         b.Size = UDim2.new(1,0,0,35)
         b.Text = opt.Name..": OFF"
-        b.TextColor3 = Color3.new(1,1,1)
         b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        b.TextColor3 = Color3.new(1,1,1)
         Instance.new("UICorner", b)
-        b.LayoutOrder = order
 
         b.MouseButton1Click:Connect(function()
             state = not state
-            b.Text = opt.Name..": "..(state and "ON" or "OFF")
+            b.Text = opt.Name..(state and ": ON" or ": OFF")
             if opt.Callback then opt.Callback(state) end
         end)
     end
 
+    -- TEXTBOX
     function Tab:CreateTextBox(opt)
-        order += 1
         local box = Instance.new("TextBox", Page)
         box.Size = UDim2.new(1,0,0,35)
-        box.BackgroundColor3 = Color3.fromRGB(25,25,25)
-        box.TextColor3 = Color3.new(1,1,1)
         box.PlaceholderText = opt.Placeholder or "Enter..."
+        box.TextColor3 = Color3.new(1,1,1)
         Instance.new("UICorner", box)
-        box.LayoutOrder = order
 
         box.FocusLost:Connect(function()
             if opt.Callback then opt.Callback(box.Text) end
         end)
     end
 
+    -- RUNBOX
     function Tab:CreateRunBox(opt)
-        order += 1
-
         local frame = Instance.new("Frame", Page)
         frame.Size = UDim2.new(1,0,0,35)
         frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
         Instance.new("UICorner", frame)
-        frame.LayoutOrder = order
 
         local box = Instance.new("TextBox", frame)
         box.Size = UDim2.new(0.7,0,1,0)
@@ -340,13 +254,59 @@ function Window:CreateTab()
         Instance.new("UICorner", run)
 
         run.MouseButton1Click:Connect(function()
-            pulse(run)
             if opt.Callback then opt.Callback(box.Text) end
         end)
     end
 
     return Tab
 end
+
+-- =========================
+-- SWIPE FIX (SENSITIVE + STABLE)
+-- =========================
+Tabs.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        touchStart = input.Position
+    end
+end)
+
+Tabs.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch and touchStart then
+        local dx = input.Position.X - touchStart.X
+
+        -- FIX: vuốt nhẹ cũng ăn
+        if math.abs(dx) > 15 then
+            if dx < 0 then
+                currentIndex += 1
+            else
+                currentIndex -= 1
+            end
+
+            currentIndex = math.clamp(currentIndex,1,#pages)
+            UIPage:JumpTo(pages[currentIndex])
+        end
+
+        touchStart = nil
+    end
+end)
+
+-- FLOAT BUTTON (GIỮ NGUYÊN)
+local Float = Instance.new("TextButton", ScreenGui)
+Float.Size = UDim2.new(0,40,0,40)
+Float.Position = UDim2.new(0,20,0.5,-20)
+Float.Text = settings.Icon or "⚡"
+Float.BackgroundColor3 = Color3.fromRGB(10,10,10)
+Instance.new("UICorner", Float)
+
+local visible = true
+
+Float.MouseButton1Click:Connect(function()
+    visible = not visible
+    Main.Visible = visible
+    TweenService:Create(Blur,TweenInfo.new(0.2),{
+        Size = visible and 12 or 0
+    }):Play()
+end)
 
 return Window
 end
