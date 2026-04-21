@@ -129,7 +129,6 @@ function NoirUI:CreateWindow(settings)
             t.MouseButton1Click:Connect(function() s = not s; t.TextColor3 = s and ACCENT or Color3.fromRGB(180,180,180); bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40,40,40); opt.Callback(s) end)
         end
 
-        -- FIX SLIDER (Sử dụng isHeld để chống leak input)
         function Tab:CreateSlider(opt)
             local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,50); f.BackgroundColor3 = Color3.fromRGB(22,22,22); Instance.new("UICorner", f); f.LayoutOrder = GetO()
             local l = Instance.new("TextLabel", f); l.Size = UDim2.new(1,0,0,20); l.Position = UDim2.new(0,12,0,5); l.BackgroundTransparency = 1; l.Text = opt.Name..": "..opt.Default; l.TextColor3 = Color3.new(1,1,1); l.TextXAlignment = "Left"; l.TextSize = 11
@@ -142,25 +141,52 @@ function NoirUI:CreateWindow(settings)
                 local v = math.floor(opt.Min + (opt.Max - opt.Min) * p)
                 fill.Size = UDim2.new(p, 0, 1, 0); l.Text = opt.Name..": "..v; opt.Callback(v)
             end
+            sbg.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then isHeld = true; UpdateSlider(i) end end)
+            UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then isHeld = false end end)
+            UIS.InputChanged:Connect(function(i) if isHeld and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then UpdateSlider(i) end end)
+        end
 
-            sbg.InputBegan:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    isHeld = true
-                    UpdateSlider(i)
-                end
-            end)
+        function Tab:CreateColorPicker(opt)
+            local ColorSelected = opt.Default or Color3.fromRGB(170, 85, 255)
+            local h, s, v = ColorSelected:ToHSV()
+            local open = false
 
-            UIS.InputEnded:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    isHeld = false
-                end
-            end)
+            local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,35); f.BackgroundColor3 = Color3.fromRGB(22,22,22); Instance.new("UICorner", f); f.LayoutOrder = GetO(); f.ClipsDescendants = true
+            local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,0,0,35); t.Position = UDim2.new(0,12,0,0); t.BackgroundTransparency = 1; t.Text = opt.Name; t.TextColor3 = Color3.new(1,1,1); t.Font = "GothamMedium"; t.TextSize = 12; t.TextXAlignment = "Left"
+            
+            local pvw = Instance.new("TextButton", f); pvw.Size = UDim2.new(0,40,0,18); pvw.Position = UDim2.new(1,-50,0,8.5); pvw.BackgroundColor3 = ColorSelected; pvw.Text = ""; Instance.new("UICorner", pvw)
+            
+            local satBox = Instance.new("ImageButton", f); satBox.Size = UDim2.new(0,150,0,100); satBox.Position = UDim2.new(0,12,0,45); satBox.Image = "rbxassetid://4155801252"; satBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1); Instance.new("UICorner", satBox)
+            local cursor = Instance.new("Frame", satBox); cursor.Size = UDim2.new(0,6,0,6); cursor.AnchorPoint = Vector2.new(0.5,0.5); cursor.BackgroundColor3 = Color3.new(1,1,1); cursor.Position = UDim2.new(s,0,1-v,0); Instance.new("UICorner", cursor).CornerRadius = UDim.new(1,0)
 
+            local hueSlide = Instance.new("ImageButton", f); hueSlide.Size = UDim2.new(0,10,0,100); hueSlide.Position = UDim2.new(0,172,0,45); hueSlide.Image = "rbxassetid://3641079629"; Instance.new("UICorner", hueSlide)
+
+            local function UpdateColor()
+                local finalCol = Color3.fromHSV(h, s, v)
+                pvw.BackgroundColor3 = finalCol
+                satBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
+                opt.Callback(finalCol)
+            end
+
+            local hS, hH = false, false
+            satBox.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then hS = true end end)
+            hueSlide.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then hH = true end end)
+            UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then hS, hH = false, false end end)
+            
             UIS.InputChanged:Connect(function(i)
-                if isHeld and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-                    UpdateSlider(i)
+                if i.UserInputType == Enum.UserInputType.MouseMovement then
+                    if hS then
+                        s = math.clamp((i.Position.X - satBox.AbsolutePosition.X) / satBox.AbsoluteSize.X, 0, 1)
+                        v = 1 - math.clamp((i.Position.Y - satBox.AbsolutePosition.Y) / satBox.AbsoluteSize.Y, 0, 1)
+                        cursor.Position = UDim2.new(s, 0, 1-v, 0); UpdateColor()
+                    elseif hH then
+                        h = 1 - math.clamp((i.Position.Y - hueSlide.AbsolutePosition.Y) / hueSlide.AbsoluteSize.Y, 0, 1)
+                        UpdateColor()
+                    end
                 end
             end)
+
+            pvw.MouseButton1Click:Connect(function() open = not open; TweenService:Create(f, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95,0,0,155) or UDim2.new(0.95,0,0,35)}):Play() end)
         end
 
         function Tab:CreateDropdown(opt)
