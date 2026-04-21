@@ -1,0 +1,131 @@
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+
+local NoirUI = {}
+
+function NoirUI:CreateWindow(settings)
+    local old = game.CoreGui:FindFirstChild("NoirUI")
+    if old then old:Destroy() end
+
+    local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+    ScreenGui.Name = "NoirUI"; ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+    local ACCENT = settings.Accent or Color3.fromRGB(170,85,255)
+    local Blur = Instance.new("BlurEffect", game.Lighting)
+    Blur.Size = 0; TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 12}):Play()
+
+    local Main = Instance.new("Frame", ScreenGui)
+    Main.Size = UDim2.new(0,320,0,300); Main.Position = UDim2.new(0.5,-160,0.5,-150); Main.BackgroundColor3 = Color3.fromRGB(10,10,10)
+    Instance.new("UICorner", Main); local Stroke = Instance.new("UIStroke", Main); Stroke.Thickness = 2
+    local Glow = Instance.new("UIStroke", Main); Glow.Thickness = 6; Glow.Transparency = 0.7
+
+    task.spawn(function()
+        while Main and Main.Parent do
+            for i = 0,1,0.01 do
+                if not Main.Parent then break end
+                local c = Color3.fromHSV(i,1,1); Stroke.Color = c; Glow.Color = c; task.wait()
+            end
+        end
+    end)
+
+    local Header = Instance.new("Frame", Main); Header.Size = UDim2.new(1,0,0,40); Header.BackgroundTransparency = 1
+    local Title = Instance.new("TextLabel", Header); Title.Size = UDim2.new(1,-10,1,0); Title.Position = UDim2.new(0,5,0,0); Title.BackgroundTransparency = 1
+    Title.Text = settings.Name or "Noir UI"; Title.TextColor3 = Color3.new(1,1,1); Title.Font = Enum.Font.GothamBold; Title.TextSize = 16
+
+    if settings.HeaderIcon then
+        local HIcon = Instance.new("ImageLabel", Header)
+        HIcon.Size = UDim2.new(0,22,0,22); HIcon.Position = UDim2.new(0,10,0.5,-11); HIcon.BackgroundTransparency = 1
+        HIcon.Image = "rbxassetid://" .. tostring(settings.HeaderIcon):gsub("%D", "")
+        Title.TextXAlignment = Enum.TextXAlignment.Left; Instance.new("UIPadding", Title).PaddingLeft = UDim.new(0, 35)
+    end
+
+    local Container = Instance.new("ScrollingFrame", Main)
+    Container.Size = UDim2.new(1,-10,1,-50); Container.Position = UDim2.new(0,5,0,45); Container.BackgroundTransparency = 1
+    Container.AutomaticCanvasSize = Enum.AutomaticSize.Y; Container.ScrollBarThickness = 2; Container.BorderSizePixel = 0
+    local Layout = Instance.new("UIListLayout", Container); Layout.Padding = UDim.new(0,6); Layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local NotifyHolder = ScreenGui:FindFirstChild("NotifyHolder") or Instance.new("Frame", ScreenGui)
+    NotifyHolder.Name = "NotifyHolder"; NotifyHolder.Size = UDim2.new(0,260,1,-20); NotifyHolder.Position = UDim2.new(1,-270,0,10); NotifyHolder.BackgroundTransparency = 1
+    local NList = NotifyHolder:FindFirstChild("UIListLayout") or Instance.new("UIListLayout", NotifyHolder)
+    NList.VerticalAlignment = Enum.VerticalAlignment.Bottom; NList.Padding = UDim.new(0,8)
+
+    function NoirUI:Notify(title, text, delay)
+        local n = Instance.new("Frame", NotifyHolder); n.Size = UDim2.new(1,0,0,60); n.BackgroundColor3 = Color3.fromRGB(15,15,15); n.ClipsDescendants = true; Instance.new("UICorner", n)
+        local ns = Instance.new("UIStroke", n); ns.Color = ACCENT; ns.Thickness = 1.5; ns.Transparency = 1
+        local nt = Instance.new("TextLabel", n); nt.Size = UDim2.new(1,-10,0,25); nt.Position = UDim2.new(0,10,0,5); nt.Text = title; nt.TextColor3 = Color3.new(1,1,1); nt.Font = Enum.Font.GothamBold; nt.TextSize = 14; nt.BackgroundTransparency = 1; nt.TextXAlignment = Enum.TextXAlignment.Left
+        local nc = Instance.new("TextLabel", n); nc.Size = UDim2.new(1,-10,0,25); nc.Position = UDim2.new(0,10,0,28); nc.Text = text; nc.TextColor3 = Color3.fromRGB(200,200,200); nc.Font = Enum.Font.Gotham; nc.TextSize = 12; nc.BackgroundTransparency = 1; nc.TextXAlignment = Enum.TextXAlignment.Left; nc.TextWrapped = true
+        n.Position = UDim2.new(1, 10, 0, 0); TweenService:Create(n, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Position = UDim2.new(0,0,0,0)}):Play(); TweenService:Create(ns, TweenInfo.new(0.4), {Transparency = 0}):Play()
+        task.delay(delay or 4, function() TweenService:Create(n, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {Position = UDim2.new(1,10,0,0)}):Play(); task.wait(0.4); n:Destroy() end)
+    end
+
+    local Window = {}; local count = 0
+
+    function Window:CreateSection(t) count=count+1; local s=Instance.new("TextLabel",Container); s.Size=UDim2.new(1,0,0,25); s.Text="— "..t.." —"; s.TextColor3=ACCENT; s.Font=Enum.Font.GothamBold; s.TextSize=13; s.BackgroundTransparency=1; s.LayoutOrder=count end
+    function Window:CreateLabel(t) count=count+1; local l=Instance.new("TextLabel",Container); l.Size=UDim2.new(1,0,0,20); l.Text=t; l.TextColor3=Color3.fromRGB(200,200,200); l.Font=Enum.Font.Gotham; l.TextSize=13; l.BackgroundTransparency=1; l.TextXAlignment=Enum.TextXAlignment.Left; l.LayoutOrder=count; Instance.new("UIPadding",l).PaddingLeft=UDim.new(0,5) end
+    function Window:CreateParagraph(t) count=count+1; local p=Instance.new("TextLabel",Container); p.Size=UDim2.new(1,0,0,0); p.AutomaticSize=Enum.AutomaticSize.Y; p.Text=t; p.TextColor3=Color3.fromRGB(150,150,150); p.Font=Enum.Font.Gotham; p.TextSize=12; p.BackgroundTransparency=1; p.TextWrapped=true; p.TextXAlignment=Enum.TextXAlignment.Left; p.LayoutOrder=count; Instance.new("UIPadding",p).PaddingLeft=UDim.new(0,5) end
+
+    function Window:CreateButton(opt)
+        count = count + 1; local b = Instance.new("TextButton", Container)
+        b.Size = UDim2.new(1,0,0,35); b.Text = opt.Name; b.BackgroundColor3 = Color3.fromRGB(25,25,25); b.TextColor3 = Color3.new(1,1,1); b.Font = Enum.Font.Gotham; b.TextSize = 14; b.LayoutOrder = count; Instance.new("UICorner", b)
+        b.MouseButton1Click:Connect(function() TweenService:Create(b,TweenInfo.new(0.1),{BackgroundColor3 = ACCENT}):Play(); task.wait(0.1); TweenService:Create(b,TweenInfo.new(0.2),{BackgroundColor3 = Color3.fromRGB(25,25,25)}):Play(); if opt.Callback then opt.Callback() end end)
+    end
+
+    function Window:CreateToggle(opt)
+        count = count + 1; local b = Instance.new("TextButton", Container)
+        b.Size = UDim2.new(1,0,0,35); b.BackgroundColor3 = Color3.fromRGB(25,25,25); b.TextColor3 = Color3.new(1,1,1); b.Font = Enum.Font.Gotham; b.TextSize = 14; b.LayoutOrder = count; Instance.new("UICorner", b)
+        local s = false; b.Text = opt.Name .. ": OFF"
+        b.MouseButton1Click:Connect(function() s = not s; b.Text = opt.Name .. ": " .. (s and "ON" or "OFF"); TweenService:Create(b,TweenInfo.new(0.2),{BackgroundColor3 = s and ACCENT or Color3.fromRGB(25,25,25)}):Play(); if opt.Callback then opt.Callback(s) end end)
+    end
+
+    function Window:CreateSlider(opt)
+        count = count + 1; local sFrame = Instance.new("Frame", Container); sFrame.Size = UDim2.new(1,0,0,45); sFrame.BackgroundColor3 = Color3.fromRGB(25,25,25); sFrame.LayoutOrder = count; Instance.new("UICorner", sFrame)
+        local sTitle = Instance.new("TextLabel", sFrame); sTitle.Size = UDim2.new(1,0,0,20); sTitle.Position = UDim2.new(0,10,0,0); sTitle.Text = opt.Name .. ": " .. opt.Min; sTitle.TextColor3 = Color3.new(1,1,1); sTitle.Font = Enum.Font.Gotham; sTitle.TextSize = 12; sTitle.BackgroundTransparency = 1; sTitle.TextXAlignment = Enum.TextXAlignment.Left
+        local sBack = Instance.new("Frame", sFrame); sBack.Size = UDim2.new(1,-20,0,6); sBack.Position = UDim2.new(0,10,0,30); sBack.BackgroundColor3 = Color3.fromRGB(40,40,40); Instance.new("UICorner", sBack)
+        local sFill = Instance.new("Frame", sBack); sFill.Size = UDim2.new(0,0,1,0); sFill.BackgroundColor3 = ACCENT; Instance.new("UICorner", sFill)
+        local function Update(input) local per = math.clamp((input.Position.X - sBack.AbsolutePosition.X) / sBack.AbsoluteSize.X, 0, 1); local val = math.floor(opt.Min + (opt.Max - opt.Min) * per); sFill.Size = UDim2.new(per, 0, 1, 0); sTitle.Text = opt.Name .. ": " .. val; if opt.Callback then opt.Callback(val) end end
+        local drag = false; sFrame.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = true; Update(i) end end)
+        UIS.InputChanged:Connect(function(i) if drag and i.UserInputType == Enum.UserInputType.MouseMovement then Update(i) end end)
+        UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = false end end)
+    end
+
+    function Window:CreateTextBox(opt)
+        count = count + 1; local box = Instance.new("TextBox", Container); box.Size = UDim2.new(1,0,0,35); box.BackgroundColor3 = Color3.fromRGB(25,25,25); box.TextColor3 = Color3.new(1,1,1); box.PlaceholderText = opt.Placeholder or "Enter..."; box.Font = Enum.Font.Gotham; box.TextSize = 14; box.LayoutOrder = count; Instance.new("UICorner", box)
+        box.FocusLost:Connect(function() if opt.Callback then opt.Callback(box.Text) end end)
+    end
+
+    function Window:CreateColorPicker(opt)
+        count = count + 1; local cpFrame = Instance.new("Frame", Container); cpFrame.Size = UDim2.new(1,0,0,35); cpFrame.BackgroundColor3 = Color3.fromRGB(25,25,25); cpFrame.LayoutOrder = count; cpFrame.ClipsDescendants = true; Instance.new("UICorner", cpFrame)
+        local cpTitle = Instance.new("TextLabel", cpFrame); cpTitle.Size = UDim2.new(1,-50,0,35); cpTitle.Position = UDim2.new(0,10,0,0); cpTitle.Text = opt.Name; cpTitle.TextColor3 = Color3.new(1,1,1); cpTitle.Font = Enum.Font.Gotham; cpTitle.TextSize = 14; cpTitle.BackgroundTransparency = 1; cpTitle.TextXAlignment = Enum.TextXAlignment.Left
+        local cpBox = Instance.new("TextButton", cpFrame); cpBox.Size = UDim2.new(0,35,0,20); cpBox.Position = UDim2.new(1,-45,0,7.5); cpBox.BackgroundColor3 = opt.Default or Color3.new(1,1,1); cpBox.Text = ""; Instance.new("UICorner", cpBox)
+        local palette = Instance.new("Frame", cpFrame); palette.Size = UDim2.new(1,-20,0,100); palette.Position = UDim2.new(0,10,0,40); palette.BackgroundColor3 = Color3.new(1,1,1)
+        local pGrad = Instance.new("ImageLabel", palette); pGrad.Size = UDim2.new(1,0,1,0); pGrad.Image = "rbxassetid://4155801252"; pGrad.BackgroundTransparency = 1
+        local hueBar = Instance.new("ImageLabel", cpFrame); hueBar.Size = UDim2.new(1,-20,0,10); hueBar.Position = UDim2.new(0,10,0,145); hueBar.Image = "rbxassetid://3641079629"; Instance.new("UICorner", hueBar)
+        local currH, currS, currV = (opt.Default or Color3.new(1,1,1)):ToHSV()
+        local function update() local final = Color3.fromHSV(currH, currS, currV); cpBox.BackgroundColor3 = final; palette.BackgroundColor3 = Color3.fromHSV(currH, 1, 1); if opt.Callback then opt.Callback(final) end end
+        local open = false; cpBox.MouseButton1Click:Connect(function() open = not open; TweenService:Create(cpFrame, TweenInfo.new(0.3), {Size = open and UDim2.new(1,0,0,165) or UDim2.new(1,0,0,35)}):Play() end)
+        palette.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            local function move() currS = math.clamp((UIS:GetMouseLocation().X - palette.AbsolutePosition.X) / palette.AbsoluteSize.X, 0, 1); currV = 1 - math.clamp((UIS:GetMouseLocation().Y - 36 - palette.AbsolutePosition.Y) / palette.AbsoluteSize.Y, 0, 1); update() end
+            local con; con = UIS.InputChanged:Connect(function(v) if v.UserInputType == Enum.UserInputType.MouseMovement then move() end end)
+            UIS.InputEnded:Connect(function(v) if v.UserInputType == Enum.UserInputType.MouseButton1 then con:Disconnect() end end); move()
+        end end)
+        hueBar.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            local function move() currH = 1 - math.clamp((UIS:GetMouseLocation().X - hueBar.AbsolutePosition.X) / hueBar.AbsoluteSize.X, 0, 1); update() end
+            local con; con = UIS.InputChanged:Connect(function(v) if v.UserInputType == Enum.UserInputType.MouseMovement then move() end end)
+            UIS.InputEnded:Connect(function(v) if v.UserInputType == Enum.UserInputType.MouseButton1 then con:Disconnect() end end); move()
+        end end)
+    end
+
+    local Float = Instance.new("TextButton", ScreenGui); Float.Size = UDim2.new(0,45,0,45); Float.Position = UDim2.new(0,50,0.5,-22); Float.BackgroundColor3 = Color3.fromRGB(15,15,15); Float.Text = settings.FloatIcon and "" or ""; Float.TextColor3 = Color3.new(1,1,1); Float.TextSize = 20; Instance.new("UICorner", Float).CornerRadius = UDim.new(1,0)
+    local FS = Instance.new("UIStroke", Float); FS.Color = ACCENT; FS.Thickness = 2
+    if settings.FloatIcon then local fimg = Instance.new("ImageLabel", Float); fimg.Size = UDim2.new(0.6,0,0.6,0); fimg.Position = UDim2.new(0.2,0,0.2,0); fimg.BackgroundTransparency = 1; fimg.Image = "rbxassetid://" .. tostring(settings.FloatIcon):gsub("%D", "") end
+    local drag, dIn, dStart, sPos
+    Float.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = true; dStart = i.Position; sPos = Float.Position end end)
+    UIS.InputChanged:Connect(function(i) if drag and i.UserInputType == Enum.UserInputType.MouseMovement then local delta = i.Position - dStart; Float.Position = UDim2.new(sPos.X.Scale, sPos.X.Offset + delta.X, sPos.Y.Scale, sPos.Y.Offset + delta.Y) end end)
+    UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = false end end)
+    local v = true; Float.MouseButton1Click:Connect(function() if drag then return end; v = not v; Main.Visible = v; TweenService:Create(Blur,TweenInfo.new(0.2),{Size = v and 12 or 0}):Play() end)
+
+    NoirUI:Notify(settings.Name or "Noir UI", "Loaded Successfully!", 3)
+    return Window
+end
+
+return NoirUI
