@@ -1,7 +1,6 @@
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local Players = game:GetService("Players")
-
 local NoirUI = { Notifications = {} }
 
 local function MakeDraggable(frame)
@@ -26,7 +25,6 @@ function NoirUI:CreateWindow(settings)
     local ACCENT = settings.Accent or Color3.fromRGB(170, 85, 255)
     local Main = Instance.new("Frame", ScreenGui); Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150); Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Main.ClipsDescendants = true
     Instance.new("UICorner", Main); local Stroke = Instance.new("UIStroke", Main); Stroke.Thickness = 2; MakeDraggable(Main)
-
     task.spawn(function() while Main and Main.Parent do for i = 0, 1, 0.01 do if not Main or not Main.Parent then break end Stroke.Color = Color3.fromHSV(i, 0.8, 1); task.wait(0.04) end end end)
 
     if settings.KeySystem then
@@ -39,19 +37,20 @@ function NoirUI:CreateWindow(settings)
     end
 
     local Header = Instance.new("Frame", Main); Header.Size = UDim2.new(1, 0, 0, 40); Header.BackgroundTransparency = 1
-    local Title = Instance.new("TextLabel", Header); Title.Size = UDim2.new(1, -120, 1, 0); Title.Position = UDim2.new(0, 15, 0, 0); Title.BackgroundTransparency = 1; Title.Text = settings.Name or "NOIR HUB"; Title.TextColor3 = Color3.new(1,1,1); Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
-    
-    local Btns = Instance.new("Frame", Header); Btns.Size = UDim2.new(0, 70, 1, 0); Btns.Position = UDim2.new(1, -75, 0, 0); Btns.BackgroundTransparency = 1
-    Instance.new("UIListLayout", Btns).FillDirection = "Horizontal"; Btns.UIListLayout.HorizontalAlignment = "Right"; Btns.UIListLayout.VerticalAlignment = "Center"; Btns.UIListLayout.Padding = UDim.new(0, 5)
+    if settings.LogoID then
+        local L = Instance.new("ImageLabel", Header); L.Size = UDim2.new(0, 22, 0, 22); L.Position = UDim2.new(0, 12, 0.5, -11); L.BackgroundTransparency = 1; L.Image = "rbxassetid://"..tostring(settings.LogoID)
+    end
+    local Title = Instance.new("TextLabel", Header); Title.Size = UDim2.new(1, -120, 1, 0); Title.Position = UDim2.new(0, settings.LogoID and 40 or 15, 0, 0); Title.BackgroundTransparency = 1; Title.Text = settings.Name or "NOIR HUB"; Title.TextColor3 = Color3.new(1,1,1); Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
+    local Btns = Instance.new("Frame", Header); Btns.Size = UDim2.new(0, 70, 1, 0); Btns.Position = UDim2.new(1, -75, 0, 0); Btns.BackgroundTransparency = 1; Instance.new("UIListLayout", Btns).FillDirection = "Horizontal"; Btns.UIListLayout.HorizontalAlignment = "Right"; Btns.UIListLayout.VerticalAlignment = "Center"; Btns.UIListLayout.Padding = UDim.new(0, 5)
     local function TopB(txt, col, cb) local b = Instance.new("TextButton", Btns); b.Size = UDim2.new(0, 22, 0, 22); b.BackgroundColor3 = Color3.fromRGB(25, 25, 25); b.Text = txt; b.TextColor3 = col; b.Font = "GothamBold"; Instance.new("UICorner", b); b.MouseButton1Click:Connect(cb) end
-    TopB("X", Color3.fromRGB(255, 100, 100), function() ScreenGui:Destroy() end)
     local isM = false; TopB("-", Color3.fromRGB(255, 200, 50), function() isM = not isM; TweenService:Create(Main, TweenInfo.new(0.4), {Size = isM and UDim2.new(0, 420, 0, 40) or UDim2.new(0, 420, 0, 300)}):Play() end)
+    TopB("X", Color3.fromRGB(255, 100, 100), function() ScreenGui:Destroy() end)
 
-    local Side = Instance.new("Frame", Main); Side.Size = UDim2.new(0, 110, 1, -50); Side.Position = UDim2.new(0, 5, 0, 40); Side.BackgroundTransparency = 1
+    local Side = Instance.new("Frame", Main); Side.Size = UDim2.new(0, 110, 1, -50); Side.Position = UDim2.new(0, 5, 0, 40); Side.BackgroundTransparency = 1; Side.ClipsDescendants = true
     local TScroll = Instance.new("ScrollingFrame", Side); TScroll.Size = UDim2.new(1, 0, 1, -55); TScroll.BackgroundTransparency = 1; TScroll.ScrollBarThickness = 0; TScroll.AutomaticCanvasSize = "Y"; Instance.new("UIListLayout", TScroll).Padding = UDim.new(0, 5)
     local UA = Instance.new("Frame", Side); UA.Size = UDim2.new(1, 0, 0, 50); UA.Position = UDim2.new(0, 0, 1, -45); UA.BackgroundTransparency = 1
     local AI = Instance.new("ImageLabel", UA); AI.Size = UDim2.new(0, 38, 0, 38); AI.Position = UDim2.new(0.5, -19, 0, 0); pcall(function() AI.Image = Players:GetUserThumbnailAsync(Players.LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100) end); Instance.new("UICorner", AI).CornerRadius = UDim.new(1,0); Instance.new("UIStroke", AI).Color = ACCENT
-    local Cont = Instance.new("Frame", Main); Cont.Size = UDim2.new(1, -125, 1, -50); Cont.Position = UDim2.new(0, 120, 0, 40); Cont.BackgroundTransparency = 1
+    local Cont = Instance.new("Frame", Main); Cont.Size = UDim2.new(1, -125, 1, -50); Cont.Position = UDim2.new(0, 120, 0, 40); Cont.BackgroundTransparency = 1; Cont.ClipsDescendants = true
 
     local TBtn = Instance.new("TextButton", ScreenGui); TBtn.Size = UDim2.new(0, 45, 0, 45); TBtn.Position = UDim2.new(0, 15, 0.5, -22); TBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15); TBtn.Text = settings.Icon or "N"; TBtn.TextColor3 = ACCENT; TBtn.TextSize = 18; Instance.new("UICorner", TBtn).CornerRadius = UDim.new(1,0); local TS = Instance.new("UIStroke", TBtn); TS.Color = ACCENT; TS.Thickness = 2; MakeDraggable(TBtn); TBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
 
@@ -70,6 +69,8 @@ function NoirUI:CreateWindow(settings)
         local Tab = { Count = 0 }
         local function GetO() Tab.Count = Tab.Count + 1 return Tab.Count end
         function Tab:CreateSection(t) local s = Instance.new("Frame", P); s.Size = UDim2.new(0.95, 0, 0, 25); s.BackgroundTransparency = 1; s.LayoutOrder = GetO(); local lbl = Instance.new("TextLabel", s); lbl.Size = UDim2.new(1,0,1,0); lbl.Text = t:upper(); lbl.TextColor3 = ACCENT; lbl.Font = "GothamBold"; lbl.TextSize = 10; lbl.TextXAlignment = "Left"; lbl.BackgroundTransparency = 1; local l = Instance.new("Frame", s); l.Size = UDim2.new(1,0,0,1); l.Position = UDim2.new(0,0,1,0); l.BackgroundColor3 = ACCENT; l.BackgroundTransparency = 0.5 end
+        function Tab:CreateLabel(t) local l = Instance.new("TextLabel", P); l.Size = UDim2.new(0.95,0,0,20); l.BackgroundTransparency = 1; l.Text = t; l.TextColor3 = Color3.fromRGB(200,200,200); l.Font = "GothamMedium"; l.TextSize = 12; l.TextXAlignment = "Left"; l.LayoutOrder = GetO() end
+        function Tab:CreateParagraph(opt) local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,60); f.BackgroundColor3 = Color3.fromRGB(15,15,15); Instance.new("UICorner", f); f.LayoutOrder = GetO(); local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,-20,0,25); t.Position = UDim2.new(0,10,0,5); t.Text = opt.Title; t.TextColor3 = ACCENT; t.Font = "GothamBold"; t.TextSize = 13; t.BackgroundTransparency = 1; t.TextXAlignment = "Left"; local c = Instance.new("TextLabel", f); c.Size = UDim2.new(1,-20,0,30); c.Position = UDim2.new(0,10,0,25); c.Text = opt.Content; c.TextColor3 = Color3.new(1,1,1); c.Font = "GothamMedium"; c.TextSize = 11; c.BackgroundTransparency = 1; c.TextWrapped = true; c.TextXAlignment = "Left"; c.TextYAlignment = "Top" end
         function Tab:CreateButton(opt) local b = Instance.new("TextButton", P); b.Size = UDim2.new(0.95,0,0,35); b.BackgroundColor3 = Color3.fromRGB(25,25,25); b.Text = opt.Name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamMedium"; b.TextSize = 12; Instance.new("UICorner", b); b.LayoutOrder = GetO(); b.MouseButton1Click:Connect(opt.Callback) end
         function Tab:CreateToggle(opt) local s = opt.Default or false; local t = Instance.new("TextButton", P); t.Size = UDim2.new(0.95,0,0,35); t.BackgroundColor3 = Color3.fromRGB(25,25,25); t.Text = "  "..opt.Name; t.TextColor3 = s and ACCENT or Color3.fromRGB(180,180,180); t.TextXAlignment = "Left"; t.TextSize = 12; Instance.new("UICorner", t); t.LayoutOrder = GetO(); local bx = Instance.new("Frame", t); bx.Size = UDim2.new(0,30,0,16); bx.Position = UDim2.new(1,-40,0.5,-8); bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40,40,40); Instance.new("UICorner", bx).CornerRadius = UDim.new(1,0); t.MouseButton1Click:Connect(function() s = not s; t.TextColor3 = s and ACCENT or Color3.fromRGB(180,180,180); bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40,40,40); opt.Callback(s) end) end
         function Tab:CreateSlider(opt)
@@ -87,6 +88,10 @@ function NoirUI:CreateWindow(settings)
             local il = Instance.new("Frame", d); il.Size = UDim2.new(1,0,0,#opt.Options*30); il.Position = UDim2.new(0,0,0,35); il.BackgroundTransparency = 1; Instance.new("UIListLayout", il)
             local open = false; t.MouseButton1Click:Connect(function() open = not open; TweenService:Create(d, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95,0,0,35+(#opt.Options*30)) or UDim2.new(0.95,0,0,35)}):Play(); ar.Text = open and "▲" or "▼" end)
             for _, v in pairs(opt.Options) do local it = Instance.new("TextButton", il); it.Size = UDim2.new(1,0,0,30); it.BackgroundColor3 = Color3.fromRGB(28,28,28); it.BackgroundTransparency = 0.5; it.Text = v; it.TextColor3 = Color3.fromRGB(200,200,200); it.Font = "GothamMedium"; it.TextSize = 11; it.MouseButton1Click:Connect(function() open = false; t.Text = "  "..opt.Name.." : "..v; TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95,0,0,35)}):Play(); ar.Text = "▼"; opt.Callback(v) end) end
+        end
+        function Tab:CreateTextBox(opt)
+            local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,35); f.BackgroundColor3 = Color3.fromRGB(22,22,22); Instance.new("UICorner", f); f.LayoutOrder = GetO()
+            local i = Instance.new("TextBox", f); i.Size = UDim2.new(1,-20,1,0); i.Position = UDim2.new(0,10,0,0); i.BackgroundTransparency = 1; i.PlaceholderText = opt.Name; i.Text = ""; i.TextColor3 = Color3.new(1,1,1); i.Font = "GothamMedium"; i.TextSize = 12; i.TextXAlignment = "Left"; i.FocusLost:Connect(function() opt.Callback(i.Text) end)
         end
         function Tab:CreateRunBox(opt)
             local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,38); f.BackgroundColor3 = Color3.fromRGB(18,18,18); Instance.new("UICorner", f); f.LayoutOrder = GetO(); local st = Instance.new("UIStroke", f); st.Color = Color3.fromRGB(40,40,40)
