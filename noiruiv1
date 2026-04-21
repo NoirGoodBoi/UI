@@ -21,30 +21,48 @@ local function MakeDraggable(frame)
 end
 
 function NoirUI:CreateWindow(settings)
-    local ScreenGui = Instance.new("ScreenGui", game.CoreGui); ScreenGui.Name = "NoirUI_Final"; ScreenGui.ResetOnSpawn = false
+    local ScreenGui = Instance.new("ScreenGui", game.CoreGui); ScreenGui.Name = "NoirUI_V3_Final"; ScreenGui.ResetOnSpawn = false
     local ACCENT = settings.Accent or Color3.fromRGB(170, 85, 255)
-    local Main = Instance.new("Frame", ScreenGui); Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150); Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Main.ClipsDescendants = true
-    Instance.new("UICorner", Main); local Stroke = Instance.new("UIStroke", Main); Stroke.Thickness = 2; MakeDraggable(Main)
-    task.spawn(function() while Main and Main.Parent do for i = 0, 1, 0.01 do if not Main or not Main.Parent then break end Stroke.Color = Color3.fromHSV(i, 0.8, 1); task.wait(0.04) end end end)
+    local Main = Instance.new("Frame", ScreenGui); Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150); Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Main.ClipsDescendants = true; Main.Visible = not settings.KeySystem
+    Instance.new("UICorner", Main); local MainStroke = Instance.new("UIStroke", Main); MainStroke.Thickness = 2; MakeDraggable(Main)
+    
+    task.spawn(function() while Main and Main.Parent do for i = 0, 1, 0.01 do if not Main or not Main.Parent then break end MainStroke.Color = Color3.fromHSV(i, 0.8, 1); task.wait(0.04) end end end)
 
+    local KUI, KeySolved = nil, false
     if settings.KeySystem then
-        Main.Visible = false
-        local KUI = Instance.new("Frame", ScreenGui); KUI.Size = UDim2.new(0, 300, 0, 160); KUI.Position = UDim2.new(0.5, -150, 0.5, -80); KUI.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Instance.new("UICorner", KUI); local KS = Instance.new("UIStroke", KUI); KS.Thickness = 2; MakeDraggable(KUI)
-        task.spawn(function() while KUI and KUI.Parent do for i = 0, 1, 0.01 do if not KUI or not KUI.Parent then break end KS.Color = Color3.fromHSV(i, 0.8, 1); task.wait(0.04) end end end)
-        local KI = Instance.new("TextBox", KUI); KI.Size = UDim2.new(0.8, 0, 0, 35); KI.Position = UDim2.new(0.1, 0, 0.35, 0); KI.BackgroundColor3 = Color3.fromRGB(20, 20, 20); KI.TextColor3 = Color3.new(1,1,1); KI.PlaceholderText = "Nhập Key..."; KI.Text = ""; Instance.new("UICorner", KI)
-        local KB = Instance.new("TextButton", KUI); KB.Size = UDim2.new(0.8, 0, 0, 35); KB.Position = UDim2.new(0.1, 0, 0.7, 0); KB.BackgroundColor3 = ACCENT; KB.Text = "XÁC NHẬN"; KB.Font = "GothamBold"; Instance.new("UICorner", KB)
-        KB.MouseButton1Click:Connect(function() if KI.Text == settings.Key then KUI:Destroy(); Main.Visible = true end end)
-    end
+        KUI = Instance.new("Frame", ScreenGui); KUI.Size = UDim2.new(0, 300, 0, 160); KUI.Position = UDim2.new(0.5, -150, 0.5, -80); KUI.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Instance.new("UICorner", KUI); local KS = Instance.new("UIStroke", KUI); KS.Thickness = 2; MakeDraggable(KUI)
+        local KI = Instance.new("TextBox", KUI); KI.Size = UDim2.new(0.8, 0, 0, 35); KI.Position = UDim2.new(0.1, 0, 0.3, 0); KI.BackgroundColor3 = Color3.fromRGB(20, 20, 20); KI.TextColor3 = Color3.new(1,1,1); KI.PlaceholderText = "Nhập Key..."; KI.Text = ""; Instance.new("UICorner", KI)
+        local KB = Instance.new("TextButton", KUI); KB.Size = UDim2.new(0.8, 0, 0, 35); KB.Position = UDim2.new(0.1, 0, 0.65, 0); KB.BackgroundColor3 = ACCENT; KB.Text = "XÁC NHẬN"; KB.Font = "GothamBold"; Instance.new("UICorner", KB)
+        KB.MouseButton1Click:Connect(function() if KI.Text == settings.Key then KUI:Destroy(); Main.Visible = true; KeySolved = true end end)
+    else KeySolved = true end
 
     local Header = Instance.new("Frame", Main); Header.Size = UDim2.new(1, 0, 0, 40); Header.BackgroundTransparency = 1
     if settings.LogoID then
-        local L = Instance.new("ImageLabel", Header); L.Size = UDim2.new(0, 22, 0, 22); L.Position = UDim2.new(0, 12, 0.5, -11); L.BackgroundTransparency = 1; L.Image = "rbxassetid://"..tostring(settings.LogoID)
+        local L = Instance.new("ImageLabel", Header); L.Size = UDim2.new(0, 24, 0, 24); L.Position = UDim2.new(0, 10, 0.5, -12); L.BackgroundTransparency = 1; L.Image = "rbxassetid://"..tostring(settings.LogoID)
     end
     local Title = Instance.new("TextLabel", Header); Title.Size = UDim2.new(1, -120, 1, 0); Title.Position = UDim2.new(0, settings.LogoID and 40 or 15, 0, 0); Title.BackgroundTransparency = 1; Title.Text = settings.Name or "NOIR HUB"; Title.TextColor3 = Color3.new(1,1,1); Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
-    local Btns = Instance.new("Frame", Header); Btns.Size = UDim2.new(0, 70, 1, 0); Btns.Position = UDim2.new(1, -75, 0, 0); Btns.BackgroundTransparency = 1; Instance.new("UIListLayout", Btns).FillDirection = "Horizontal"; Btns.UIListLayout.HorizontalAlignment = "Right"; Btns.UIListLayout.VerticalAlignment = "Center"; Btns.UIListLayout.Padding = UDim.new(0, 5)
-    local function TopB(txt, col, cb) local b = Instance.new("TextButton", Btns); b.Size = UDim2.new(0, 22, 0, 22); b.BackgroundColor3 = Color3.fromRGB(25, 25, 25); b.Text = txt; b.TextColor3 = col; b.Font = "GothamBold"; Instance.new("UICorner", b); b.MouseButton1Click:Connect(cb) end
-    local isM = false; TopB("-", Color3.fromRGB(255, 200, 50), function() isM = not isM; TweenService:Create(Main, TweenInfo.new(0.4), {Size = isM and UDim2.new(0, 420, 0, 40) or UDim2.new(0, 420, 0, 300)}):Play() end)
-    TopB("X", Color3.fromRGB(255, 100, 100), function() ScreenGui:Destroy() end)
+
+    local Btns = Instance.new("Frame", Header); Btns.Size = UDim2.new(0, 70, 1, 0); Btns.Position = UDim2.new(1, -75, 0, 0); Btns.BackgroundTransparency = 1; local BL = Instance.new("UIListLayout", Btns); BL.FillDirection = "Horizontal"; BL.HorizontalAlignment = "Right"; BL.VerticalAlignment = "Center"; BL.Padding = UDim.new(0, 8)
+    
+    local function TopB(txt, col, cb) 
+        local b = Instance.new("TextButton", Btns); b.Size = UDim2.new(0, 22, 0, 22); b.BackgroundColor3 = Color3.fromRGB(25, 25, 25); b.Text = txt; b.TextColor3 = col; b.Font = "GothamBold"; Instance.new("UICorner", b); b.MouseButton1Click:Connect(cb) 
+        return b
+    end
+
+    local isM = false
+    TopB("-", Color3.fromRGB(255, 200, 50), function() 
+        isM = not isM
+        TweenService:Create(Main, TweenInfo.new(0.4), {Size = isM and UDim2.new(0, 420, 0, 40) or UDim2.new(0, 420, 0, 300)}):Play()
+    end)
+    
+    TopB("X", Color3.fromRGB(255, 100, 100), function() 
+        local Conf = Instance.new("Frame", ScreenGui); Conf.Size = UDim2.new(0, 240, 0, 120); Conf.Position = UDim2.new(0.5, -120, 0.5, -60); Conf.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Conf.ZIndex = 10; Instance.new("UICorner", Conf); Instance.new("UIStroke", Conf).Color = Color3.fromRGB(255, 50, 50)
+        local t = Instance.new("TextLabel", Conf); t.Size = UDim2.new(1, 0, 0.5, 0); t.BackgroundTransparency = 1; t.Text = "Bạn có muốn đóng UI không?"; t.TextColor3 = Color3.new(1,1,1); t.Font = "GothamMedium"; t.TextSize = 12
+        local cbtn = Instance.new("TextButton", Conf); cbtn.Size = UDim2.new(0.4, 0, 0, 30); cbtn.Position = UDim2.new(0.08, 0, 0.6, 0); cbtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40); cbtn.Text = "Cancel"; cbtn.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", cbtn)
+        local fbtn = Instance.new("TextButton", Conf); fbtn.Size = UDim2.new(0.4, 0, 0, 30); fbtn.Position = UDim2.new(0.52, 0, 0.6, 0); fbtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50); fbtn.Text = "Confirm"; fbtn.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", fbtn)
+        cbtn.MouseButton1Click:Connect(function() Conf:Destroy() end)
+        fbtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+    end)
 
     local Side = Instance.new("Frame", Main); Side.Size = UDim2.new(0, 110, 1, -50); Side.Position = UDim2.new(0, 5, 0, 40); Side.BackgroundTransparency = 1; Side.ClipsDescendants = true
     local TScroll = Instance.new("ScrollingFrame", Side); TScroll.Size = UDim2.new(1, 0, 1, -55); TScroll.BackgroundTransparency = 1; TScroll.ScrollBarThickness = 0; TScroll.AutomaticCanvasSize = "Y"; Instance.new("UIListLayout", TScroll).Padding = UDim.new(0, 5)
@@ -52,12 +70,22 @@ function NoirUI:CreateWindow(settings)
     local AI = Instance.new("ImageLabel", UA); AI.Size = UDim2.new(0, 38, 0, 38); AI.Position = UDim2.new(0.5, -19, 0, 0); pcall(function() AI.Image = Players:GetUserThumbnailAsync(Players.LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100) end); Instance.new("UICorner", AI).CornerRadius = UDim.new(1,0); Instance.new("UIStroke", AI).Color = ACCENT
     local Cont = Instance.new("Frame", Main); Cont.Size = UDim2.new(1, -125, 1, -50); Cont.Position = UDim2.new(0, 120, 0, 40); Cont.BackgroundTransparency = 1; Cont.ClipsDescendants = true
 
-    local TBtn = Instance.new("TextButton", ScreenGui); TBtn.Size = UDim2.new(0, 45, 0, 45); TBtn.Position = UDim2.new(0, 15, 0.5, -22); TBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15); TBtn.Text = settings.Icon or "N"; TBtn.TextColor3 = ACCENT; TBtn.TextSize = 18; Instance.new("UICorner", TBtn).CornerRadius = UDim.new(1,0); local TS = Instance.new("UIStroke", TBtn); TS.Color = ACCENT; TS.Thickness = 2; MakeDraggable(TBtn); TBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
+    local TBtn = Instance.new("TextButton", ScreenGui); TBtn.Size = UDim2.new(0, 45, 0, 45); TBtn.Position = UDim2.new(0, 15, 0.5, -22); TBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15); TBtn.Text = type(settings.Icon) == "string" and settings.Icon or ""; TBtn.TextColor3 = ACCENT; TBtn.TextSize = 18; Instance.new("UICorner", TBtn).CornerRadius = UDim.new(1,0); local TS = Instance.new("UIStroke", TBtn); TS.Color = ACCENT; TS.Thickness = 2; MakeDraggable(TBtn)
+    if type(settings.Icon) == "number" then
+        local FI = Instance.new("ImageLabel", TBtn); FI.Size = UDim2.new(0.6,0,0.6,0); FI.Position = UDim2.new(0.2,0,0.2,0); FI.BackgroundTransparency = 1; FI.Image = "rbxassetid://"..tostring(settings.Icon); FI.ImageColor3 = ACCENT
+    end
+    
+    TBtn.MouseButton1Click:Connect(function()
+        if not KeySolved and KUI then KUI.Visible = not KUI.Visible
+        else Main.Visible = not Main.Visible end
+    end)
 
     local Window = {}
     function Window:CreateTab(name, icon)
-        local B = Instance.new("TextButton", TScroll); B.Size = UDim2.new(1, -5, 0, 32); B.BackgroundColor3 = Color3.fromRGB(20, 20, 20); B.Text = (icon and "      " or "") .. name; B.TextColor3 = Color3.fromRGB(150, 150, 150); B.Font = "GothamMedium"; B.TextSize = 11; B.TextXAlignment = "Left"; Instance.new("UICorner", B)
-        if icon then local IC = Instance.new("ImageLabel", B); IC.Size = UDim2.new(0, 18, 0, 18); IC.Position = UDim2.new(0, 8, 0.5, -9); IC.BackgroundTransparency = 1; IC.Image = "rbxassetid://"..tostring(icon); IC.ImageColor3 = Color3.fromRGB(150, 150, 150) end
+        local B = Instance.new("TextButton", TScroll); B.Size = UDim2.new(1, -5, 0, 32); B.BackgroundColor3 = Color3.fromRGB(20, 20, 20); B.Text = (icon and "       " or "  ") .. name; B.TextColor3 = Color3.fromRGB(150, 150, 150); B.Font = "GothamMedium"; B.TextSize = 11; B.TextXAlignment = "Left"; Instance.new("UICorner", B)
+        if icon then 
+            local IC = Instance.new("ImageLabel", B); IC.Size = UDim2.new(0, 18, 0, 18); IC.Position = UDim2.new(0, 8, 0.5, -9); IC.BackgroundTransparency = 1; IC.Image = "rbxassetid://"..tostring(icon); IC.ImageColor3 = Color3.fromRGB(150, 150, 150) 
+        end
         local P = Instance.new("ScrollingFrame", Cont); P.Size = UDim2.new(1, 0, 1, 0); P.BackgroundTransparency = 1; P.Visible = false; P.ScrollBarThickness = 1; P.AutomaticCanvasSize = "Y"; Instance.new("UIListLayout", P).Padding = UDim.new(0, 8); P.UIListLayout.HorizontalAlignment = "Center"
         B.MouseButton1Click:Connect(function()
             for _, v in pairs(Cont:GetChildren()) do if v:IsA("ScrollingFrame") then v.Visible = false end end
