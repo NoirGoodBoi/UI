@@ -21,8 +21,9 @@ local function MakeDraggable(frame)
 end
 
 function NoirUI:CreateWindow(settings)
-    local ScreenGui = Instance.new("ScreenGui", game.CoreGui); ScreenGui.Name = "NoirUI_V3_Final"; ScreenGui.ResetOnSpawn = false
+    local ScreenGui = Instance.new("ScreenGui", game.CoreGui); ScreenGui.Name = "NoirUI_V3_Ultimate"; ScreenGui.ResetOnSpawn = false
     local ACCENT = settings.Accent or Color3.fromRGB(170, 85, 255)
+    
     local Main = Instance.new("Frame", ScreenGui); Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150); Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Main.ClipsDescendants = true; Main.Visible = not settings.KeySystem
     Instance.new("UICorner", Main); local MainStroke = Instance.new("UIStroke", Main); MainStroke.Thickness = 2; MakeDraggable(Main)
     
@@ -30,8 +31,9 @@ function NoirUI:CreateWindow(settings)
 
     local KUI, KeySolved = nil, false
     if settings.KeySystem then
-        KUI = Instance.new("Frame", ScreenGui); KUI.Size = UDim2.new(0, 300, 0, 160); KUI.Position = UDim2.new(0.5, -150, 0.5, -80); KUI.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Instance.new("UICorner", KUI); local KS = Instance.new("UIStroke", KUI); KS.Thickness = 2; MakeDraggable(KUI)
-        local KI = Instance.new("TextBox", KUI); KI.Size = UDim2.new(0.8, 0, 0, 35); KI.Position = UDim2.new(0.1, 0, 0.3, 0); KI.BackgroundColor3 = Color3.fromRGB(20, 20, 20); KI.TextColor3 = Color3.new(1,1,1); KI.PlaceholderText = "Nhập Key..."; KI.Text = ""; Instance.new("UICorner", KI)
+        KUI = Instance.new("Frame", ScreenGui); KUI.Size = UDim2.new(0, 300, 0, 180); KUI.Position = UDim2.new(0.5, -150, 0.5, -90); KUI.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Instance.new("UICorner", KUI); local KS = Instance.new("UIStroke", KUI); KS.Thickness = 2; MakeDraggable(KUI)
+        local KT = Instance.new("TextLabel", KUI); KT.Size = UDim2.new(1,0,0,40); KT.Text = (settings.Name or "NOIR").." KEY"; KT.TextColor3 = ACCENT; KT.Font = "GothamBold"; KT.BackgroundTransparency = 1
+        local KI = Instance.new("TextBox", KUI); KI.Size = UDim2.new(0.8, 0, 0, 35); KI.Position = UDim2.new(0.1, 0, 0.35, 0); KI.BackgroundColor3 = Color3.fromRGB(20, 20, 20); KI.TextColor3 = Color3.new(1,1,1); KI.PlaceholderText = "Nhập Key..."; KI.Text = ""; Instance.new("UICorner", KI)
         local KB = Instance.new("TextButton", KUI); KB.Size = UDim2.new(0.8, 0, 0, 35); KB.Position = UDim2.new(0.1, 0, 0.65, 0); KB.BackgroundColor3 = ACCENT; KB.Text = "XÁC NHẬN"; KB.Font = "GothamBold"; Instance.new("UICorner", KB)
         KB.MouseButton1Click:Connect(function() if KI.Text == settings.Key then KUI:Destroy(); Main.Visible = true; KeySolved = true end end)
     else KeySolved = true end
@@ -43,10 +45,8 @@ function NoirUI:CreateWindow(settings)
     local Title = Instance.new("TextLabel", Header); Title.Size = UDim2.new(1, -120, 1, 0); Title.Position = UDim2.new(0, settings.LogoID and 40 or 15, 0, 0); Title.BackgroundTransparency = 1; Title.Text = settings.Name or "NOIR HUB"; Title.TextColor3 = Color3.new(1,1,1); Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
 
     local Btns = Instance.new("Frame", Header); Btns.Size = UDim2.new(0, 70, 1, 0); Btns.Position = UDim2.new(1, -75, 0, 0); Btns.BackgroundTransparency = 1; local BL = Instance.new("UIListLayout", Btns); BL.FillDirection = "Horizontal"; BL.HorizontalAlignment = "Right"; BL.VerticalAlignment = "Center"; BL.Padding = UDim.new(0, 8)
-    
     local function TopB(txt, col, cb) 
         local b = Instance.new("TextButton", Btns); b.Size = UDim2.new(0, 22, 0, 22); b.BackgroundColor3 = Color3.fromRGB(25, 25, 25); b.Text = txt; b.TextColor3 = col; b.Font = "GothamBold"; Instance.new("UICorner", b); b.MouseButton1Click:Connect(cb) 
-        return b
     end
 
     local isM = false
@@ -56,10 +56,10 @@ function NoirUI:CreateWindow(settings)
     end)
     
     TopB("X", Color3.fromRGB(255, 100, 100), function() 
-        local Conf = Instance.new("Frame", ScreenGui); Conf.Size = UDim2.new(0, 240, 0, 120); Conf.Position = UDim2.new(0.5, -120, 0.5, -60); Conf.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Conf.ZIndex = 10; Instance.new("UICorner", Conf); Instance.new("UIStroke", Conf).Color = Color3.fromRGB(255, 50, 50)
-        local t = Instance.new("TextLabel", Conf); t.Size = UDim2.new(1, 0, 0.5, 0); t.BackgroundTransparency = 1; t.Text = "Bạn có muốn đóng UI không?"; t.TextColor3 = Color3.new(1,1,1); t.Font = "GothamMedium"; t.TextSize = 12
-        local cbtn = Instance.new("TextButton", Conf); cbtn.Size = UDim2.new(0.4, 0, 0, 30); cbtn.Position = UDim2.new(0.08, 0, 0.6, 0); cbtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40); cbtn.Text = "Cancel"; cbtn.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", cbtn)
-        local fbtn = Instance.new("TextButton", Conf); fbtn.Size = UDim2.new(0.4, 0, 0, 30); fbtn.Position = UDim2.new(0.52, 0, 0.6, 0); fbtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50); fbtn.Text = "Confirm"; fbtn.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", fbtn)
+        local Conf = Instance.new("Frame", ScreenGui); Conf.Size = UDim2.new(0, 260, 0, 120); Conf.Position = UDim2.new(0.5, -130, 0.5, -60); Conf.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Conf.ZIndex = 100; Instance.new("UICorner", Conf); local s = Instance.new("UIStroke", Conf); s.Color = ACCENT; s.Thickness = 2
+        local t = Instance.new("TextLabel", Conf); t.Size = UDim2.new(1, 0, 0.5, 0); t.BackgroundTransparency = 1; t.Text = "Bạn có muốn đóng UI không?"; t.TextColor3 = Color3.new(1,1,1); t.Font = "GothamMedium"; t.TextSize = 13; t.ZIndex = 101
+        local cbtn = Instance.new("TextButton", Conf); cbtn.Size = UDim2.new(0.4, 0, 0, 32); cbtn.Position = UDim2.new(0.07, 0, 0.6, 0); cbtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35); cbtn.Text = "Cancel"; cbtn.TextColor3 = Color3.new(1,1,1); cbtn.ZIndex = 101; Instance.new("UICorner", cbtn)
+        local fbtn = Instance.new("TextButton", Conf); fbtn.Size = UDim2.new(0.4, 0, 0, 32); fbtn.Position = UDim2.new(0.53, 0, 0.6, 0); fbtn.BackgroundColor3 = ACCENT; fbtn.Text = "Confirm"; fbtn.TextColor3 = Color3.new(1,1,1); fbtn.ZIndex = 101; Instance.new("UICorner", fbtn)
         cbtn.MouseButton1Click:Connect(function() Conf:Destroy() end)
         fbtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
     end)
@@ -74,68 +74,119 @@ function NoirUI:CreateWindow(settings)
     if type(settings.Icon) == "number" then
         local FI = Instance.new("ImageLabel", TBtn); FI.Size = UDim2.new(0.6,0,0.6,0); FI.Position = UDim2.new(0.2,0,0.2,0); FI.BackgroundTransparency = 1; FI.Image = "rbxassetid://"..tostring(settings.Icon); FI.ImageColor3 = ACCENT
     end
-    
-    TBtn.MouseButton1Click:Connect(function()
-        if not KeySolved and KUI then KUI.Visible = not KUI.Visible
-        else Main.Visible = not Main.Visible end
-    end)
+    TBtn.MouseButton1Click:Connect(function() if not KeySolved and KUI then KUI.Visible = not KUI.Visible else Main.Visible = not Main.Visible end end)
+
+    -- CHỨC NĂNG THÔNG BÁO (NOTIFY)
+    function NoirUI:Notify(t, m)
+        local n = Instance.new("Frame", ScreenGui); n.Size = UDim2.new(0,220,0,65); n.Position = UDim2.new(1,20,0.8,0); n.BackgroundColor3 = Color3.fromRGB(15,15,15); Instance.new("UICorner", n); local ns = Instance.new("UIStroke", n); ns.Color = ACCENT
+        local tl = Instance.new("TextLabel", n); tl.Size = UDim2.new(1,-10,0,20); tl.Position = UDim2.new(0,10,0,5); tl.Text = t; tl.TextColor3 = ACCENT; tl.BackgroundTransparency = 1; tl.Font = "GothamBold"; tl.TextSize = 13; tl.TextXAlignment = "Left"
+        local ml = Instance.new("TextLabel", n); ml.Size = UDim2.new(1,-20,0,35); ml.Position = UDim2.new(0,10,0,25); ml.Text = m; ml.TextColor3 = Color3.new(1,1,1); ml.BackgroundTransparency = 1; ml.TextWrapped = true; ml.TextXAlignment = "Left"; ml.TextYAlignment = "Top"; ml.Font = "GothamMedium"; ml.TextSize = 11
+        for i, v in ipairs(NoirUI.Notifications) do TweenService:Create(v, TweenInfo.new(0.3), {Position = UDim2.new(1,-240,0.8,-(i*75))}):Play() end
+        table.insert(NoirUI.Notifications, 1, n); TweenService:Create(n, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Position = UDim2.new(1,-240,0.8,0)}):Play()
+        task.delay(4, function() TweenService:Create(n, TweenInfo.new(0.5), {Position = UDim2.new(1,20,n.Position.Y.Scale,n.Position.Y.Offset), BackgroundTransparency = 1}):Play(); task.wait(0.5); for i, v in ipairs(NoirUI.Notifications) do if v == n then table.remove(NoirUI.Notifications, i) break end end; n:Destroy() end)
+    end
 
     local Window = {}
     function Window:CreateTab(name, icon)
-        local B = Instance.new("TextButton", TScroll); B.Size = UDim2.new(1, -5, 0, 32); B.BackgroundColor3 = Color3.fromRGB(20, 20, 20); B.Text = (icon and "       " or "  ") .. name; B.TextColor3 = Color3.fromRGB(150, 150, 150); B.Font = "GothamMedium"; B.TextSize = 11; B.TextXAlignment = "Left"; Instance.new("UICorner", B)
+        local B = Instance.new("TextButton", TScroll); B.Size = UDim2.new(1, -5, 0, 32); B.BackgroundColor3 = Color3.fromRGB(20, 20, 20); B.Text = ""; B.TextColor3 = Color3.fromRGB(150, 150, 150); B.Font = "GothamMedium"; B.TextSize = 11; Instance.new("UICorner", B)
+        local BT = Instance.new("TextLabel", B); BT.Size = UDim2.new(1,-10,1,0); BT.Position = UDim2.new(0, icon and 35 or 8, 0, 0); BT.BackgroundTransparency = 1; BT.Text = name; BT.TextColor3 = Color3.fromRGB(150, 150, 150); BT.Font = "GothamMedium"; BT.TextSize = 11; BT.TextXAlignment = "Left"
         if icon then 
             local IC = Instance.new("ImageLabel", B); IC.Size = UDim2.new(0, 18, 0, 18); IC.Position = UDim2.new(0, 8, 0.5, -9); IC.BackgroundTransparency = 1; IC.Image = "rbxassetid://"..tostring(icon); IC.ImageColor3 = Color3.fromRGB(150, 150, 150) 
         end
         local P = Instance.new("ScrollingFrame", Cont); P.Size = UDim2.new(1, 0, 1, 0); P.BackgroundTransparency = 1; P.Visible = false; P.ScrollBarThickness = 1; P.AutomaticCanvasSize = "Y"; Instance.new("UIListLayout", P).Padding = UDim.new(0, 8); P.UIListLayout.HorizontalAlignment = "Center"
+        
         B.MouseButton1Click:Connect(function()
             for _, v in pairs(Cont:GetChildren()) do if v:IsA("ScrollingFrame") then v.Visible = false end end
-            for _, v in pairs(TScroll:GetChildren()) do if v:IsA("TextButton") then v.TextColor3 = Color3.fromRGB(150, 150, 150) if v:FindFirstChild("ImageLabel") then v.ImageLabel.ImageColor3 = Color3.fromRGB(150, 150, 150) end end end
-            P.Visible = true; B.TextColor3 = ACCENT; if B:FindFirstChild("ImageLabel") then B.ImageLabel.ImageColor3 = ACCENT end
+            for _, v in pairs(TScroll:GetChildren()) do if v:IsA("TextButton") then local t = v:FindFirstChild("TextLabel") if t then t.TextColor3 = Color3.fromRGB(150, 150, 150) end if v:FindFirstChild("ImageLabel") then v.ImageLabel.ImageColor3 = Color3.fromRGB(150, 150, 150) end end end
+            P.Visible = true; BT.TextColor3 = ACCENT; if B:FindFirstChild("ImageLabel") then B.ImageLabel.ImageColor3 = ACCENT end
         end)
-        if #TScroll:GetChildren() == 2 then P.Visible = true; B.TextColor3 = ACCENT; if B:FindFirstChild("ImageLabel") then B.ImageLabel.ImageColor3 = ACCENT end end
+        if #TScroll:GetChildren() == 2 then P.Visible = true; BT.TextColor3 = ACCENT; if B:FindFirstChild("ImageLabel") then B.ImageLabel.ImageColor3 = ACCENT end end
         
         local Tab = { Count = 0 }
         local function GetO() Tab.Count = Tab.Count + 1 return Tab.Count end
-        function Tab:CreateSection(t) local s = Instance.new("Frame", P); s.Size = UDim2.new(0.95, 0, 0, 25); s.BackgroundTransparency = 1; s.LayoutOrder = GetO(); local lbl = Instance.new("TextLabel", s); lbl.Size = UDim2.new(1,0,1,0); lbl.Text = t:upper(); lbl.TextColor3 = ACCENT; lbl.Font = "GothamBold"; lbl.TextSize = 10; lbl.TextXAlignment = "Left"; lbl.BackgroundTransparency = 1; local l = Instance.new("Frame", s); l.Size = UDim2.new(1,0,0,1); l.Position = UDim2.new(0,0,1,0); l.BackgroundColor3 = ACCENT; l.BackgroundTransparency = 0.5 end
-        function Tab:CreateLabel(t) local l = Instance.new("TextLabel", P); l.Size = UDim2.new(0.95,0,0,20); l.BackgroundTransparency = 1; l.Text = t; l.TextColor3 = Color3.fromRGB(200,200,200); l.Font = "GothamMedium"; l.TextSize = 12; l.TextXAlignment = "Left"; l.LayoutOrder = GetO() end
-        function Tab:CreateParagraph(opt) local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,60); f.BackgroundColor3 = Color3.fromRGB(15,15,15); Instance.new("UICorner", f); f.LayoutOrder = GetO(); local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,-20,0,25); t.Position = UDim2.new(0,10,0,5); t.Text = opt.Title; t.TextColor3 = ACCENT; t.Font = "GothamBold"; t.TextSize = 13; t.BackgroundTransparency = 1; t.TextXAlignment = "Left"; local c = Instance.new("TextLabel", f); c.Size = UDim2.new(1,-20,0,30); c.Position = UDim2.new(0,10,0,25); c.Text = opt.Content; c.TextColor3 = Color3.new(1,1,1); c.Font = "GothamMedium"; c.TextSize = 11; c.BackgroundTransparency = 1; c.TextWrapped = true; c.TextXAlignment = "Left"; c.TextYAlignment = "Top" end
-        function Tab:CreateButton(opt) local b = Instance.new("TextButton", P); b.Size = UDim2.new(0.95,0,0,35); b.BackgroundColor3 = Color3.fromRGB(25,25,25); b.Text = opt.Name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamMedium"; b.TextSize = 12; Instance.new("UICorner", b); b.LayoutOrder = GetO(); b.MouseButton1Click:Connect(opt.Callback) end
-        function Tab:CreateToggle(opt) local s = opt.Default or false; local t = Instance.new("TextButton", P); t.Size = UDim2.new(0.95,0,0,35); t.BackgroundColor3 = Color3.fromRGB(25,25,25); t.Text = "  "..opt.Name; t.TextColor3 = s and ACCENT or Color3.fromRGB(180,180,180); t.TextXAlignment = "Left"; t.TextSize = 12; Instance.new("UICorner", t); t.LayoutOrder = GetO(); local bx = Instance.new("Frame", t); bx.Size = UDim2.new(0,30,0,16); bx.Position = UDim2.new(1,-40,0.5,-8); bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40,40,40); Instance.new("UICorner", bx).CornerRadius = UDim.new(1,0); t.MouseButton1Click:Connect(function() s = not s; t.TextColor3 = s and ACCENT or Color3.fromRGB(180,180,180); bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40,40,40); opt.Callback(s) end) end
-        function Tab:CreateSlider(opt)
-            local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,50); f.BackgroundColor3 = Color3.fromRGB(22,22,22); Instance.new("UICorner", f); f.LayoutOrder = GetO()
-            local l = Instance.new("TextLabel", f); l.Size = UDim2.new(1,0,0,20); l.Position = UDim2.new(0,12,0,5); l.BackgroundTransparency = 1; l.Text = opt.Name..": "..opt.Default; l.TextColor3 = Color3.new(1,1,1); l.TextXAlignment = "Left"; l.TextSize = 11
-            local sbg = Instance.new("Frame", f); sbg.Size = UDim2.new(0.9,0,0,8); sbg.Position = UDim2.new(0.05,0,0.7,0); sbg.BackgroundColor3 = Color3.fromRGB(40,40,40); Instance.new("UICorner", sbg)
-            local fill = Instance.new("Frame", sbg); fill.Size = UDim2.new((opt.Default-opt.Min)/(opt.Max-opt.Min),0,1,0); fill.BackgroundColor3 = ACCENT; Instance.new("UICorner", fill)
-            local function up() local p = math.clamp((UIS:GetMouseLocation().X-sbg.AbsolutePosition.X)/sbg.AbsoluteSize.X,0,1); local v = math.floor(opt.Min+(opt.Max-opt.Min)*p); fill.Size = UDim2.new(p,0,1,0); l.Text = opt.Name..": "..v; opt.Callback(v) end
-            sbg.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then local c; c = UIS.InputChanged:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseMovement then up() end end); UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then c:Disconnect() end end); up() end end)
+
+        -- 1. LABEL
+        function Tab:CreateLabel(t) 
+            local l = Instance.new("TextLabel", P); l.Size = UDim2.new(0.95,0,0,20); l.BackgroundTransparency = 1; l.Text = t; l.TextColor3 = Color3.fromRGB(200,200,200); l.Font = "GothamMedium"; l.TextSize = 12; l.TextXAlignment = "Left"; l.LayoutOrder = GetO() 
         end
-        function Tab:CreateDropdown(opt)
-            local d = Instance.new("Frame", P); d.Size = UDim2.new(0.95,0,0,35); d.BackgroundColor3 = Color3.fromRGB(22,22,22); Instance.new("UICorner", d); d.LayoutOrder = GetO(); d.ClipsDescendants = true
-            local t = Instance.new("TextButton", d); t.Size = UDim2.new(1,0,0,35); t.BackgroundTransparency = 1; t.Text = "  "..opt.Name.." : "..(opt.Default or opt.Options[1]); t.TextColor3 = Color3.new(1,1,1); t.Font = "GothamMedium"; t.TextSize = 12; t.TextXAlignment = "Left"
-            local ar = Instance.new("TextLabel", t); ar.Size = UDim2.new(0,35,1,0); ar.Position = UDim2.new(1,-35,0,0); ar.BackgroundTransparency = 1; ar.Text = "▼"; ar.TextColor3 = ACCENT; ar.TextSize = 10
-            local il = Instance.new("Frame", d); il.Size = UDim2.new(1,0,0,#opt.Options*30); il.Position = UDim2.new(0,0,0,35); il.BackgroundTransparency = 1; Instance.new("UIListLayout", il)
-            local open = false; t.MouseButton1Click:Connect(function() open = not open; TweenService:Create(d, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95,0,0,35+(#opt.Options*30)) or UDim2.new(0.95,0,0,35)}):Play(); ar.Text = open and "▲" or "▼" end)
-            for _, v in pairs(opt.Options) do local it = Instance.new("TextButton", il); it.Size = UDim2.new(1,0,0,30); it.BackgroundColor3 = Color3.fromRGB(28,28,28); it.BackgroundTransparency = 0.5; it.Text = v; it.TextColor3 = Color3.fromRGB(200,200,200); it.Font = "GothamMedium"; it.TextSize = 11; it.MouseButton1Click:Connect(function() open = false; t.Text = "  "..opt.Name.." : "..v; TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95,0,0,35)}):Play(); ar.Text = "▼"; opt.Callback(v) end) end
+
+        -- 2. PARAGRAPH
+        function Tab:CreateParagraph(opt)
+            local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,65); f.BackgroundColor3 = Color3.fromRGB(15,15,15); Instance.new("UICorner", f); f.LayoutOrder = GetO()
+            local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,-20,0,25); t.Position = UDim2.new(0,10,0,5); t.Text = opt.Title; t.TextColor3 = ACCENT; t.Font = "GothamBold"; t.TextSize = 13; t.BackgroundTransparency = 1; t.TextXAlignment = "Left"
+            local c = Instance.new("TextLabel", f); c.Size = UDim2.new(1,-20,0,30); c.Position = UDim2.new(0,10,0,25); c.Text = opt.Content; c.TextColor3 = Color3.new(1,1,1); c.Font = "GothamMedium"; c.TextSize = 11; c.BackgroundTransparency = 1; c.TextWrapped = true; c.TextXAlignment = "Left"; c.TextYAlignment = "Top"
         end
+
+        -- 3. TEXTBOX
         function Tab:CreateTextBox(opt)
             local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,35); f.BackgroundColor3 = Color3.fromRGB(22,22,22); Instance.new("UICorner", f); f.LayoutOrder = GetO()
             local i = Instance.new("TextBox", f); i.Size = UDim2.new(1,-20,1,0); i.Position = UDim2.new(0,10,0,0); i.BackgroundTransparency = 1; i.PlaceholderText = opt.Name; i.Text = ""; i.TextColor3 = Color3.new(1,1,1); i.Font = "GothamMedium"; i.TextSize = 12; i.TextXAlignment = "Left"; i.FocusLost:Connect(function() opt.Callback(i.Text) end)
         end
-        function Tab:CreateRunBox(opt)
-            local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,38); f.BackgroundColor3 = Color3.fromRGB(18,18,18); Instance.new("UICorner", f); f.LayoutOrder = GetO(); local st = Instance.new("UIStroke", f); st.Color = Color3.fromRGB(40,40,40)
-            local i = Instance.new("TextBox", f); i.Size = UDim2.new(1,-65,1,0); i.Position = UDim2.new(0,10,0,0); i.BackgroundTransparency = 1; i.PlaceholderText = opt.Placeholder or "Enter code..."; i.Text = ""; i.TextColor3 = Color3.new(1,1,1); i.Font = "GothamMedium"; i.TextSize = 12; i.TextXAlignment = "Left"; i.ClearTextOnFocus = false
-            local r = Instance.new("TextButton", f); r.Size = UDim2.new(0,50,0,26); r.Position = UDim2.new(1,-55,0.5,-13); r.BackgroundColor3 = ACCENT; r.Text = "RUN"; r.TextColor3 = Color3.new(1,1,1); r.Font = "GothamBold"; r.TextSize = 10; Instance.new("UICorner", r); r.MouseButton1Click:Connect(function() if i.Text ~= "" then opt.Callback(i.Text) end end)
-        end
-        return Tab
-    end
 
-    function NoirUI:Notify(t, m)
-        local n = Instance.new("Frame", ScreenGui); n.Size = UDim2.new(0,220,0,65); n.Position = UDim2.new(1,20,0.8,0); n.BackgroundColor3 = Color3.fromRGB(15,15,15); Instance.new("UICorner", n); Instance.new("UIStroke", n).Color = ACCENT
-        local tl = Instance.new("TextLabel", n); tl.Size = UDim2.new(1,-10,0,20); tl.Position = UDim2.new(0,10,0,5); tl.Text = t; tl.TextColor3 = ACCENT; tl.BackgroundTransparency = 1; tl.Font = "GothamBold"
-        local ml = Instance.new("TextLabel", n); ml.Size = UDim2.new(1,-15,0,40); ml.Position = UDim2.new(0,10,0,22); ml.Text = m; ml.TextColor3 = Color3.new(1,1,1); ml.BackgroundTransparency = 1; ml.TextWrapped = true; ml.TextXAlignment = "Left"; ml.TextYAlignment = "Top"
-        for i, v in ipairs(NoirUI.Notifications) do TweenService:Create(v, TweenInfo.new(0.3), {Position = UDim2.new(1,-240,0.8,-(i*75))}):Play() end
-        table.insert(NoirUI.Notifications, 1, n); TweenService:Create(n, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Position = UDim2.new(1,-240,0.8,0)}):Play()
-        task.delay(4, function() TweenService:Create(n, TweenInfo.new(0.5), {Position = UDim2.new(1,20,n.Position.Y.Scale,n.Position.Y.Offset), BackgroundTransparency = 1}):Play(); task.wait(0.5); for i, v in ipairs(NoirUI.Notifications) do if v == n then table.remove(NoirUI.Notifications, i) break end end; n:Destroy() end)
+        -- 4. BUTTON
+        function Tab:CreateButton(opt)
+            local b = Instance.new("TextButton", P); b.Size = UDim2.new(0.95,0,0,35); b.BackgroundColor3 = Color3.fromRGB(25,25,25); b.Text = opt.Name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamMedium"; b.TextSize = 12; Instance.new("UICorner", b); b.LayoutOrder = GetO(); b.MouseButton1Click:Connect(opt.Callback)
+        end
+
+        -- 5. TOGGLE
+        function Tab:CreateToggle(opt)
+            local s = opt.Default or false; local t = Instance.new("TextButton", P); t.Size = UDim2.new(0.95,0,0,35); t.BackgroundColor3 = Color3.fromRGB(25,25,25); t.Text = "  "..opt.Name; t.TextColor3 = s and ACCENT or Color3.fromRGB(180,180,180); t.TextXAlignment = "Left"; t.TextSize = 12; Instance.new("UICorner", t); t.LayoutOrder = GetO()
+            local bx = Instance.new("Frame", t); bx.Size = UDim2.new(0,30,0,16); bx.Position = UDim2.new(1,-40,0.5,-8); bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40,40,40); Instance.new("UICorner", bx).CornerRadius = UDim.new(1,0)
+            t.MouseButton1Click:Connect(function() s = not s; t.TextColor3 = s and ACCENT or Color3.fromRGB(180,180,180); bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40,40,40); opt.Callback(s) end)
+        end
+
+        -- 6. SLIDER
+        function Tab:CreateSlider(opt)
+            local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,50); f.BackgroundColor3 = Color3.fromRGB(22,22,22); Instance.new("UICorner", f); f.LayoutOrder = GetO()
+            local l = Instance.new("TextLabel", f); l.Size = UDim2.new(1,0,0,20); l.Position = UDim2.new(0,12,0,5); l.BackgroundTransparency = 1; l.Text = opt.Name..": "..opt.Default; l.TextColor3 = Color3.new(1,1,1); l.TextXAlignment = "Left"; l.TextSize = 11
+            local sbg = Instance.new("Frame", f); sbg.Size = UDim2.new(0.9,0,0,8); sbg.Position = UDim2.new(0.05,0,0.7,0); sbg.BackgroundColor3 = Color3.fromRGB(40,40,40); Instance.new("UICorner", sbg)
+            local fill = Instance.new("Frame", sbg); fill.Size = UDim2.new(math.clamp((opt.Default-opt.Min)/(opt.Max-opt.Min),0,1),0,1,0); fill.BackgroundColor3 = ACCENT; Instance.new("UICorner", fill)
+            local move; sbg.InputBegan:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    move = UIS.InputChanged:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                            local p = math.clamp((input.Position.X - sbg.AbsolutePosition.X) / sbg.AbsoluteSize.X, 0, 1)
+                            local v = math.floor(opt.Min + (opt.Max - opt.Min) * p)
+                            fill.Size = UDim2.new(p, 0, 1, 0); l.Text = opt.Name..": "..v; opt.Callback(v)
+                        end
+                    end)
+                end
+            end)
+            UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then if move then move:Disconnect() end end end)
+        end
+
+        -- 7. DROPDOWN (Scroll 4)
+        function Tab:CreateDropdown(opt)
+            local d = Instance.new("Frame", P); d.Size = UDim2.new(0.95,0,0,35); d.BackgroundColor3 = Color3.fromRGB(22,22,22); Instance.new("UICorner", d); d.LayoutOrder = GetO(); d.ClipsDescendants = true
+            local t = Instance.new("TextButton", d); t.Size = UDim2.new(1,0,0,35); t.BackgroundTransparency = 1; t.Text = "  "..opt.Name.." : "..(opt.Default or opt.Options[1]); t.TextColor3 = Color3.new(1,1,1); t.Font = "GothamMedium"; t.TextSize = 12; t.TextXAlignment = "Left"
+            local il = Instance.new("ScrollingFrame", d); il.Size = UDim2.new(1,0,0, math.min(#opt.Options, 4) * 30); il.Position = UDim2.new(0,0,0,35); il.BackgroundTransparency = 1; il.ScrollBarThickness = 2; il.AutomaticCanvasSize = "Y"; Instance.new("UIListLayout", il)
+            local open = false; t.MouseButton1Click:Connect(function() open = not open; TweenService:Create(d, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95,0,0,35+il.Size.Y.Offset) or UDim2.new(0.95,0,0,35)}):Play() end)
+            for _, v in pairs(opt.Options) do 
+                local it = Instance.new("TextButton", il); it.Size = UDim2.new(1,0,0,30); it.BackgroundColor3 = Color3.fromRGB(28,28,28); it.Text = v; it.TextColor3 = Color3.fromRGB(200,200,200); it.Font = "GothamMedium"; it.TextSize = 11; it.MouseButton1Click:Connect(function() open = false; t.Text = "  "..opt.Name.." : "..v; TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95,0,0,35)}):Play(); opt.Callback(v) end)
+            end
+        end
+
+        -- 8. RUNBOX (Admin + Lua)
+        function Tab:CreateRunBox(opt)
+            local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,38); f.BackgroundColor3 = Color3.fromRGB(18,18,18); Instance.new("UICorner", f); f.LayoutOrder = GetO()
+            local i = Instance.new("TextBox", f); i.Size = UDim2.new(1,-65,1,0); i.Position = UDim2.new(0,10,0,0); i.BackgroundTransparency = 1; i.PlaceholderText = opt.Placeholder or "Run Lua or ;admin_cmd..."; i.Text = ""; i.TextColor3 = Color3.new(1,1,1); i.Font = "GothamMedium"; i.TextSize = 11; i.TextXAlignment = "Left"; i.ClearTextOnFocus = false
+            local r = Instance.new("TextButton", f); r.Size = UDim2.new(0,50,0,26); r.Position = UDim2.new(1,-55,0.5,-13); r.BackgroundColor3 = ACCENT; r.Text = "RUN"; r.TextColor3 = Color3.new(1,1,1); r.Font = "GothamBold"; r.TextSize = 10; Instance.new("UICorner", r)
+            r.MouseButton1Click:Connect(function() 
+                local input = i.Text
+                if input:sub(1,1) == ";" then
+                    local args = input:sub(2):split(" ")
+                    local cmd = args[1]:lower()
+                    if cmd == "speed" then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = tonumber(args[2]) or 16 end
+                    print("Admin Cmd Executed:", cmd)
+                else
+                    local f, e = loadstring(input) if f then f() else warn(e) end
+                end
+            end)
+        end
+
+        function Tab:CreateSection(t) local s = Instance.new("Frame", P); s.Size = UDim2.new(0.95, 0, 0, 25); s.BackgroundTransparency = 1; s.LayoutOrder = GetO(); local lbl = Instance.new("TextLabel", s); lbl.Size = UDim2.new(1,0,1,0); lbl.Text = t:upper(); lbl.TextColor3 = ACCENT; lbl.Font = "GothamBold"; lbl.TextSize = 10; lbl.TextXAlignment = "Left"; lbl.BackgroundTransparency = 1 end
+        
+        return Tab
     end
     return Window
 end
