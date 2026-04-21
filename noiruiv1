@@ -76,7 +76,6 @@ function NoirUI:CreateWindow(settings)
     end
     TBtn.MouseButton1Click:Connect(function() if not KeySolved and KUI then KUI.Visible = not KUI.Visible else Main.Visible = not Main.Visible end end)
 
-    -- CHỨC NĂNG THÔNG BÁO (NOTIFY)
     function NoirUI:Notify(t, m)
         local n = Instance.new("Frame", ScreenGui); n.Size = UDim2.new(0,220,0,65); n.Position = UDim2.new(1,20,0.8,0); n.BackgroundColor3 = Color3.fromRGB(15,15,15); Instance.new("UICorner", n); local ns = Instance.new("UIStroke", n); ns.Color = ACCENT
         local tl = Instance.new("TextLabel", n); tl.Size = UDim2.new(1,-10,0,20); tl.Position = UDim2.new(0,10,0,5); tl.Text = t; tl.TextColor3 = ACCENT; tl.BackgroundTransparency = 1; tl.Font = "GothamBold"; tl.TextSize = 13; tl.TextXAlignment = "Left"
@@ -105,57 +104,65 @@ function NoirUI:CreateWindow(settings)
         local Tab = { Count = 0 }
         local function GetO() Tab.Count = Tab.Count + 1 return Tab.Count end
 
-        -- 1. LABEL
         function Tab:CreateLabel(t) 
             local l = Instance.new("TextLabel", P); l.Size = UDim2.new(0.95,0,0,20); l.BackgroundTransparency = 1; l.Text = t; l.TextColor3 = Color3.fromRGB(200,200,200); l.Font = "GothamMedium"; l.TextSize = 12; l.TextXAlignment = "Left"; l.LayoutOrder = GetO() 
         end
 
-        -- 2. PARAGRAPH
         function Tab:CreateParagraph(opt)
             local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,65); f.BackgroundColor3 = Color3.fromRGB(15,15,15); Instance.new("UICorner", f); f.LayoutOrder = GetO()
             local t = Instance.new("TextLabel", f); t.Size = UDim2.new(1,-20,0,25); t.Position = UDim2.new(0,10,0,5); t.Text = opt.Title; t.TextColor3 = ACCENT; t.Font = "GothamBold"; t.TextSize = 13; t.BackgroundTransparency = 1; t.TextXAlignment = "Left"
             local c = Instance.new("TextLabel", f); c.Size = UDim2.new(1,-20,0,30); c.Position = UDim2.new(0,10,0,25); c.Text = opt.Content; c.TextColor3 = Color3.new(1,1,1); c.Font = "GothamMedium"; c.TextSize = 11; c.BackgroundTransparency = 1; c.TextWrapped = true; c.TextXAlignment = "Left"; c.TextYAlignment = "Top"
         end
 
-        -- 3. TEXTBOX
         function Tab:CreateTextBox(opt)
             local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,35); f.BackgroundColor3 = Color3.fromRGB(22,22,22); Instance.new("UICorner", f); f.LayoutOrder = GetO()
             local i = Instance.new("TextBox", f); i.Size = UDim2.new(1,-20,1,0); i.Position = UDim2.new(0,10,0,0); i.BackgroundTransparency = 1; i.PlaceholderText = opt.Name; i.Text = ""; i.TextColor3 = Color3.new(1,1,1); i.Font = "GothamMedium"; i.TextSize = 12; i.TextXAlignment = "Left"; i.FocusLost:Connect(function() opt.Callback(i.Text) end)
         end
 
-        -- 4. BUTTON
         function Tab:CreateButton(opt)
             local b = Instance.new("TextButton", P); b.Size = UDim2.new(0.95,0,0,35); b.BackgroundColor3 = Color3.fromRGB(25,25,25); b.Text = opt.Name; b.TextColor3 = Color3.new(1,1,1); b.Font = "GothamMedium"; b.TextSize = 12; Instance.new("UICorner", b); b.LayoutOrder = GetO(); b.MouseButton1Click:Connect(opt.Callback)
         end
 
-        -- 5. TOGGLE
         function Tab:CreateToggle(opt)
             local s = opt.Default or false; local t = Instance.new("TextButton", P); t.Size = UDim2.new(0.95,0,0,35); t.BackgroundColor3 = Color3.fromRGB(25,25,25); t.Text = "  "..opt.Name; t.TextColor3 = s and ACCENT or Color3.fromRGB(180,180,180); t.TextXAlignment = "Left"; t.TextSize = 12; Instance.new("UICorner", t); t.LayoutOrder = GetO()
             local bx = Instance.new("Frame", t); bx.Size = UDim2.new(0,30,0,16); bx.Position = UDim2.new(1,-40,0.5,-8); bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40,40,40); Instance.new("UICorner", bx).CornerRadius = UDim.new(1,0)
             t.MouseButton1Click:Connect(function() s = not s; t.TextColor3 = s and ACCENT or Color3.fromRGB(180,180,180); bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40,40,40); opt.Callback(s) end)
         end
 
-        -- 6. SLIDER
+        -- FIX SLIDER (Sử dụng isHeld để chống leak input)
         function Tab:CreateSlider(opt)
             local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,50); f.BackgroundColor3 = Color3.fromRGB(22,22,22); Instance.new("UICorner", f); f.LayoutOrder = GetO()
             local l = Instance.new("TextLabel", f); l.Size = UDim2.new(1,0,0,20); l.Position = UDim2.new(0,12,0,5); l.BackgroundTransparency = 1; l.Text = opt.Name..": "..opt.Default; l.TextColor3 = Color3.new(1,1,1); l.TextXAlignment = "Left"; l.TextSize = 11
             local sbg = Instance.new("Frame", f); sbg.Size = UDim2.new(0.9,0,0,8); sbg.Position = UDim2.new(0.05,0,0.7,0); sbg.BackgroundColor3 = Color3.fromRGB(40,40,40); Instance.new("UICorner", sbg)
             local fill = Instance.new("Frame", sbg); fill.Size = UDim2.new(math.clamp((opt.Default-opt.Min)/(opt.Max-opt.Min),0,1),0,1,0); fill.BackgroundColor3 = ACCENT; Instance.new("UICorner", fill)
-            local move; sbg.InputBegan:Connect(function(i)
+            
+            local isHeld = false
+            local function UpdateSlider(input)
+                local p = math.clamp((input.Position.X - sbg.AbsolutePosition.X) / sbg.AbsoluteSize.X, 0, 1)
+                local v = math.floor(opt.Min + (opt.Max - opt.Min) * p)
+                fill.Size = UDim2.new(p, 0, 1, 0); l.Text = opt.Name..": "..v; opt.Callback(v)
+            end
+
+            sbg.InputBegan:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-                    move = UIS.InputChanged:Connect(function(input)
-                        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-                            local p = math.clamp((input.Position.X - sbg.AbsolutePosition.X) / sbg.AbsoluteSize.X, 0, 1)
-                            local v = math.floor(opt.Min + (opt.Max - opt.Min) * p)
-                            fill.Size = UDim2.new(p, 0, 1, 0); l.Text = opt.Name..": "..v; opt.Callback(v)
-                        end
-                    end)
+                    isHeld = true
+                    UpdateSlider(i)
                 end
             end)
-            UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then if move then move:Disconnect() end end end)
+
+            UIS.InputEnded:Connect(function(i)
+                if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+                    isHeld = false
+                end
+            end)
+
+            UIS.InputChanged:Connect(function(i)
+                if isHeld and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+                    UpdateSlider(i)
+                end
+            end)
         end
 
-        -- 7. DROPDOWN (Scroll 4)
         function Tab:CreateDropdown(opt)
             local d = Instance.new("Frame", P); d.Size = UDim2.new(0.95,0,0,35); d.BackgroundColor3 = Color3.fromRGB(22,22,22); Instance.new("UICorner", d); d.LayoutOrder = GetO(); d.ClipsDescendants = true
             local t = Instance.new("TextButton", d); t.Size = UDim2.new(1,0,0,35); t.BackgroundTransparency = 1; t.Text = "  "..opt.Name.." : "..(opt.Default or opt.Options[1]); t.TextColor3 = Color3.new(1,1,1); t.Font = "GothamMedium"; t.TextSize = 12; t.TextXAlignment = "Left"
@@ -166,7 +173,6 @@ function NoirUI:CreateWindow(settings)
             end
         end
 
-        -- 8. RUNBOX (Admin + Lua)
         function Tab:CreateRunBox(opt)
             local f = Instance.new("Frame", P); f.Size = UDim2.new(0.95,0,0,38); f.BackgroundColor3 = Color3.fromRGB(18,18,18); Instance.new("UICorner", f); f.LayoutOrder = GetO()
             local i = Instance.new("TextBox", f); i.Size = UDim2.new(1,-65,1,0); i.Position = UDim2.new(0,10,0,0); i.BackgroundTransparency = 1; i.PlaceholderText = opt.Placeholder or "Run Lua or ;admin_cmd..."; i.Text = ""; i.TextColor3 = Color3.new(1,1,1); i.Font = "GothamMedium"; i.TextSize = 11; i.TextXAlignment = "Left"; i.ClearTextOnFocus = false
@@ -177,7 +183,6 @@ function NoirUI:CreateWindow(settings)
                     local args = input:sub(2):split(" ")
                     local cmd = args[1]:lower()
                     if cmd == "speed" then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = tonumber(args[2]) or 16 end
-                    print("Admin Cmd Executed:", cmd)
                 else
                     local f, e = loadstring(input) if f then f() else warn(e) end
                 end
