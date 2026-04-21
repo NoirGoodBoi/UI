@@ -3,6 +3,7 @@ local UIS = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local NoirUI = { Notifications = {} }
 
+-- // Hàm kéo thả (Draggable) mượt mà cho PC và Mobile
 local function MakeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
     frame.InputBegan:Connect(function(input)
@@ -24,26 +25,66 @@ function NoirUI:CreateWindow(settings)
     local ScreenGui = Instance.new("ScreenGui", game.CoreGui); ScreenGui.Name = "NoirUI_V3_Ultimate"; ScreenGui.ResetOnSpawn = false
     local ACCENT = settings.Accent or Color3.fromRGB(170, 85, 255)
     
-    local Main = Instance.new("Frame", ScreenGui); Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150); Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Main.ClipsDescendants = true; Main.Visible = not settings.KeySystem
+    -- // Giao diện chính (Mặc định ẩn nếu có KeySystem)
+    local Main = Instance.new("Frame", ScreenGui); Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150); Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Main.ClipsDescendants = true; Main.Visible = false
     Instance.new("UICorner", Main); local MainStroke = Instance.new("UIStroke", Main); MainStroke.Thickness = 2; MakeDraggable(Main)
     
+    -- // Hiệu ứng viền RGB
     task.spawn(function() while Main and Main.Parent do for i = 0, 1, 0.01 do if not Main or not Main.Parent then break end MainStroke.Color = Color3.fromHSV(i, 0.8, 1); task.wait(0.04) end end end)
 
-    local KUI, KeySolved = nil, false
-    if settings.KeySystem then
-        KUI = Instance.new("Frame", ScreenGui); KUI.Size = UDim2.new(0, 300, 0, 180); KUI.Position = UDim2.new(0.5, -150, 0.5, -90); KUI.BackgroundColor3 = Color3.fromRGB(10, 10, 10); Instance.new("UICorner", KUI); local KS = Instance.new("UIStroke", KUI); KS.Thickness = 2; MakeDraggable(KUI)
-        local KT = Instance.new("TextLabel", KUI); KT.Size = UDim2.new(1,0,0,40); KT.Text = (settings.Name or "NOIR").." KEY"; KT.TextColor3 = ACCENT; KT.Font = "GothamBold"; KT.BackgroundTransparency = 1
-        local KI = Instance.new("TextBox", KUI); KI.Size = UDim2.new(0.8, 0, 0, 35); KI.Position = UDim2.new(0.1, 0, 0.35, 0); KI.BackgroundColor3 = Color3.fromRGB(20, 20, 20); KI.TextColor3 = Color3.new(1,1,1); KI.PlaceholderText = "Nhập Key..."; KI.Text = ""; Instance.new("UICorner", KI)
-        local KB = Instance.new("TextButton", KUI); KB.Size = UDim2.new(0.8, 0, 0, 35); KB.Position = UDim2.new(0.1, 0, 0.65, 0); KB.BackgroundColor3 = ACCENT; KB.Text = "XÁC NHẬN"; KB.Font = "GothamBold"; Instance.new("UICorner", KB)
-        KB.MouseButton1Click:Connect(function() if KI.Text == settings.Key then KUI:Destroy(); Main.Visible = true; KeySolved = true end end)
-    else KeySolved = true end
+    -- // Hệ thống Key Nâng Cao
+    local KeySolved = false
+    local KUI = nil
 
+    if settings.KeySystem then
+        local KS = settings.KeySettings or {}
+        local KeyPath = (KS.FileName or "NoirKey") .. ".json"
+        
+        local function CheckKeys(val)
+            local keys = type(KS.Key) == "table" and KS.Key or {KS.Key}
+            for _, k in pairs(keys) do if val == k then return true end end
+            return false
+        end
+
+        -- Tự động nạp key đã lưu
+        if KS.SaveKey and isfile and isfile(KeyPath) then
+            local saved = readfile(KeyPath)
+            if CheckKeys(saved) then KeySolved = true; Main.Visible = true end
+        end
+
+        if not KeySolved then
+            KUI = Instance.new("Frame", ScreenGui); KUI.Size = UDim2.new(0, 320, 0, 200); KUI.Position = UDim2.new(0.5, -160, 0.5, -100); KUI.BackgroundColor3 = Color3.fromRGB(12, 12, 12); Instance.new("UICorner", KUI); local kstr = Instance.new("UIStroke", KUI); kstr.Thickness = 2; kstr.Color = ACCENT; MakeDraggable(KUI)
+            
+            local KT = Instance.new("TextLabel", KUI); KT.Size = UDim2.new(1,0,0,35); KT.Position = UDim2.new(0,0,0,10); KT.Text = KS.Title or "KEY SYSTEM"; KT.TextColor3 = ACCENT; KT.Font = "GothamBold"; KT.TextSize = 16; KT.BackgroundTransparency = 1
+            local KSub = Instance.new("TextLabel", KUI); KSub.Size = UDim2.new(1,0,0,20); KSub.Position = UDim2.new(0,0,0,30); KSub.Text = KS.Subtitle or "Vui lòng nhập key để tiếp tục"; KSub.TextColor3 = Color3.fromRGB(150,150,150); KSub.Font = "GothamMedium"; KSub.TextSize = 12; KSub.BackgroundTransparency = 1
+            
+            local KI = Instance.new("TextBox", KUI); KI.Size = UDim2.new(0.8, 0, 0, 35); KI.Position = UDim2.new(0.1, 0, 0.35, 10); KI.BackgroundColor3 = Color3.fromRGB(20, 20, 20); KI.TextColor3 = Color3.new(1,1,1); KI.PlaceholderText = "Nhập Key..."; KI.Text = ""; Instance.new("UICorner", KI); Instance.new("UIStroke", KI).Color = Color3.fromRGB(40,40,40)
+            
+            local Note = Instance.new("TextLabel", KUI); Note.Size = UDim2.new(0.8,0,0,30); Note.Position = UDim2.new(0.1,0,0.55,10); Note.Text = KS.Note or ""; Note.TextColor3 = Color3.fromRGB(120,120,120); Note.Font = "Gotham"; Note.TextSize = 10; Note.BackgroundTransparency = 1; Note.TextWrapped = true
+            
+            local KB = Instance.new("TextButton", KUI); KB.Size = UDim2.new(0.8, 0, 0, 35); KB.Position = UDim2.new(0.1, 0, 0.75, 10); KB.BackgroundColor3 = ACCENT; KB.Text = "XÁC NHẬN"; KB.Font = "GothamBold"; KB.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", KB)
+
+            KB.MouseButton1Click:Connect(function()
+                if CheckKeys(KI.Text) then
+                    if KS.SaveKey and writefile then writefile(KeyPath, KI.Text) end
+                    KUI:Destroy(); Main.Visible = true; KeySolved = true
+                else
+                    KI.Text = ""; KI.PlaceholderText = "Key không chính xác!"; task.wait(1); KI.PlaceholderText = "Nhập Key..."
+                end
+            end)
+        end
+    else
+        Main.Visible = true; KeySolved = true
+    end
+
+    -- // Header
     local Header = Instance.new("Frame", Main); Header.Size = UDim2.new(1, 0, 0, 40); Header.BackgroundTransparency = 1
     if settings.LogoID then
         local L = Instance.new("ImageLabel", Header); L.Size = UDim2.new(0, 24, 0, 24); L.Position = UDim2.new(0, 10, 0.5, -12); L.BackgroundTransparency = 1; L.Image = "rbxassetid://"..tostring(settings.LogoID)
     end
     local Title = Instance.new("TextLabel", Header); Title.Size = UDim2.new(1, -120, 1, 0); Title.Position = UDim2.new(0, settings.LogoID and 40 or 15, 0, 0); Title.BackgroundTransparency = 1; Title.Text = settings.Name or "NOIR HUB"; Title.TextColor3 = Color3.new(1,1,1); Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
 
+    -- // Nút điều khiển (Minimize/Close)
     local Btns = Instance.new("Frame", Header); Btns.Size = UDim2.new(0, 70, 1, 0); Btns.Position = UDim2.new(1, -75, 0, 0); Btns.BackgroundTransparency = 1; local BL = Instance.new("UIListLayout", Btns); BL.FillDirection = "Horizontal"; BL.HorizontalAlignment = "Right"; BL.VerticalAlignment = "Center"; BL.Padding = UDim.new(0, 8)
     local function TopB(txt, col, cb) 
         local b = Instance.new("TextButton", Btns); b.Size = UDim2.new(0, 22, 0, 22); b.BackgroundColor3 = Color3.fromRGB(25, 25, 25); b.Text = txt; b.TextColor3 = col; b.Font = "GothamBold"; Instance.new("UICorner", b); b.MouseButton1Click:Connect(cb) 
@@ -64,18 +105,21 @@ function NoirUI:CreateWindow(settings)
         fbtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
     end)
 
+    -- // Sidebar & Content Container
     local Side = Instance.new("Frame", Main); Side.Size = UDim2.new(0, 110, 1, -50); Side.Position = UDim2.new(0, 5, 0, 40); Side.BackgroundTransparency = 1; Side.ClipsDescendants = true
     local TScroll = Instance.new("ScrollingFrame", Side); TScroll.Size = UDim2.new(1, 0, 1, -55); TScroll.BackgroundTransparency = 1; TScroll.ScrollBarThickness = 0; TScroll.AutomaticCanvasSize = "Y"; Instance.new("UIListLayout", TScroll).Padding = UDim.new(0, 5)
     local UA = Instance.new("Frame", Side); UA.Size = UDim2.new(1, 0, 0, 50); UA.Position = UDim2.new(0, 0, 1, -45); UA.BackgroundTransparency = 1
     local AI = Instance.new("ImageLabel", UA); AI.Size = UDim2.new(0, 38, 0, 38); AI.Position = UDim2.new(0.5, -19, 0, 0); pcall(function() AI.Image = Players:GetUserThumbnailAsync(Players.LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100) end); Instance.new("UICorner", AI).CornerRadius = UDim.new(1,0); Instance.new("UIStroke", AI).Color = ACCENT
     local Cont = Instance.new("Frame", Main); Cont.Size = UDim2.new(1, -125, 1, -50); Cont.Position = UDim2.new(0, 120, 0, 40); Cont.BackgroundTransparency = 1; Cont.ClipsDescendants = true
 
+    -- // Nút Toggle UI (Floating Icon)
     local TBtn = Instance.new("TextButton", ScreenGui); TBtn.Size = UDim2.new(0, 45, 0, 45); TBtn.Position = UDim2.new(0, 15, 0.5, -22); TBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15); TBtn.Text = type(settings.Icon) == "string" and settings.Icon or ""; TBtn.TextColor3 = ACCENT; TBtn.TextSize = 18; Instance.new("UICorner", TBtn).CornerRadius = UDim.new(1,0); local TS = Instance.new("UIStroke", TBtn); TS.Color = ACCENT; TS.Thickness = 2; MakeDraggable(TBtn)
     if type(settings.Icon) == "number" then
         local FI = Instance.new("ImageLabel", TBtn); FI.Size = UDim2.new(0.6,0,0.6,0); FI.Position = UDim2.new(0.2,0,0.2,0); FI.BackgroundTransparency = 1; FI.Image = "rbxassetid://"..tostring(settings.Icon); FI.ImageColor3 = ACCENT
     end
     TBtn.MouseButton1Click:Connect(function() if not KeySolved and KUI then KUI.Visible = not KUI.Visible else Main.Visible = not Main.Visible end end)
 
+    -- // Notification System
     function NoirUI:Notify(t, m)
         local n = Instance.new("Frame", ScreenGui); n.Size = UDim2.new(0,220,0,65); n.Position = UDim2.new(1,20,0.8,0); n.BackgroundColor3 = Color3.fromRGB(15,15,15); Instance.new("UICorner", n); local ns = Instance.new("UIStroke", n); ns.Color = ACCENT
         local tl = Instance.new("TextLabel", n); tl.Size = UDim2.new(1,-10,0,20); tl.Position = UDim2.new(0,10,0,5); tl.Text = t; tl.TextColor3 = ACCENT; tl.BackgroundTransparency = 1; tl.Font = "GothamBold"; tl.TextSize = 13; tl.TextXAlignment = "Left"
@@ -104,6 +148,7 @@ function NoirUI:CreateWindow(settings)
         local Tab = { Count = 0 }
         local function GetO() Tab.Count = Tab.Count + 1 return Tab.Count end
 
+        -- // Các Elements trong Tab (Label, Button, Toggle, Slider, v.v...)
         function Tab:CreateLabel(t) 
             local l = Instance.new("TextLabel", P); l.Size = UDim2.new(0.95,0,0,20); l.BackgroundTransparency = 1; l.Text = t; l.TextColor3 = Color3.fromRGB(200,200,200); l.Font = "GothamMedium"; l.TextSize = 12; l.TextXAlignment = "Left"; l.LayoutOrder = GetO() 
         end
@@ -156,37 +201,39 @@ function NoirUI:CreateWindow(settings)
             
             local pvw = Instance.new("TextButton", f); pvw.Size = UDim2.new(0,40,0,18); pvw.Position = UDim2.new(1,-50,0,8.5); pvw.BackgroundColor3 = ColorSelected; pvw.Text = ""; Instance.new("UICorner", pvw)
             
-            local satBox = Instance.new("ImageButton", f); satBox.Size = UDim2.new(0,150,0,100); satBox.Position = UDim2.new(0,12,0,45); satBox.Image = "rbxassetid://4155801252"; satBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1); Instance.new("UICorner", satBox)
-            local cursor = Instance.new("Frame", satBox); cursor.Size = UDim2.new(0,6,0,6); cursor.AnchorPoint = Vector2.new(0.5,0.5); cursor.BackgroundColor3 = Color3.new(1,1,1); cursor.Position = UDim2.new(s,0,1-v,0); Instance.new("UICorner", cursor).CornerRadius = UDim.new(1,0)
-
-            local hueSlide = Instance.new("ImageButton", f); hueSlide.Size = UDim2.new(0,10,0,100); hueSlide.Position = UDim2.new(0,172,0,45); hueSlide.Image = "rbxassetid://3641079629"; Instance.new("UICorner", hueSlide)
+            local Holder = Instance.new("Frame", f); Holder.Size = UDim2.new(1,0,0,140); Holder.Position = UDim2.new(0,0,0,35); Holder.BackgroundTransparency = 1
+            local satBox = Instance.new("ImageButton", Holder); satBox.Size = UDim2.new(0.9,0,0,100); satBox.Position = UDim2.new(0.05,0,0,5); satBox.Image = "rbxassetid://4155801252"; satBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1); Instance.new("UICorner", satBox)
+            local cursor = Instance.new("Frame", satBox); cursor.Size = UDim2.new(0,8,0,8); cursor.AnchorPoint = Vector2.new(0.5,0.5); cursor.BackgroundColor3 = Color3.new(1,1,1); cursor.Position = UDim2.new(s,0,1-v,0); Instance.new("UICorner", cursor).CornerRadius = UDim.new(1,0); local cS = Instance.new("UIStroke", cursor); cS.Thickness = 1.2
+            local hueSlide = Instance.new("ImageButton", Holder); hueSlide.Size = UDim2.new(0.9,0,0,12); hueSlide.Position = UDim2.new(0.05,0,0,115); hueSlide.Image = "rbxassetid://3641079629"; Instance.new("UICorner", hueSlide)
+            local hCursor = Instance.new("Frame", hueSlide); hCursor.Size = UDim2.new(0,4,1,4); hCursor.Position = UDim2.new(1-h,0,0.5,0); hCursor.AnchorPoint = Vector2.new(0.5,0.5); hCursor.BackgroundColor3 = Color3.new(1,1,1); Instance.new("UICorner", hCursor)
 
             local function UpdateColor()
                 local finalCol = Color3.fromHSV(h, s, v)
                 pvw.BackgroundColor3 = finalCol
                 satBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
+                cursor.Position = UDim2.new(s, 0, 1-v, 0)
+                hCursor.Position = UDim2.new(1-h, 0, 0.5, 0)
                 opt.Callback(finalCol)
             end
 
             local hS, hH = false, false
-            satBox.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then hS = true end end)
-            hueSlide.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then hH = true end end)
-            UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then hS, hH = false, false end end)
+            satBox.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then hS = true end end)
+            hueSlide.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then hH = true end end)
+            UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then hS, hH = false, false end end)
             
             UIS.InputChanged:Connect(function(i)
-                if i.UserInputType == Enum.UserInputType.MouseMovement then
+                if (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
                     if hS then
                         s = math.clamp((i.Position.X - satBox.AbsolutePosition.X) / satBox.AbsoluteSize.X, 0, 1)
                         v = 1 - math.clamp((i.Position.Y - satBox.AbsolutePosition.Y) / satBox.AbsoluteSize.Y, 0, 1)
-                        cursor.Position = UDim2.new(s, 0, 1-v, 0); UpdateColor()
+                        UpdateColor()
                     elseif hH then
-                        h = 1 - math.clamp((i.Position.Y - hueSlide.AbsolutePosition.Y) / hueSlide.AbsoluteSize.Y, 0, 1)
+                        h = 1 - math.clamp((i.Position.X - hueSlide.AbsolutePosition.X) / hueSlide.AbsoluteSize.X, 0, 1)
                         UpdateColor()
                     end
                 end
             end)
-
-            pvw.MouseButton1Click:Connect(function() open = not open; TweenService:Create(f, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95,0,0,155) or UDim2.new(0.95,0,0,35)}):Play() end)
+            pvw.MouseButton1Click:Connect(function() open = not open; TweenService:Create(f, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95,0,0,180) or UDim2.new(0.95,0,0,35)}):Play() end)
         end
 
         function Tab:CreateDropdown(opt)
