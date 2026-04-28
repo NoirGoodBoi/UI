@@ -2,6 +2,7 @@ local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
 
 -- // Xóa UI cũ nếu tồn tại
 local OldGui = game.CoreGui:FindFirstChild("NoirUI_V3_Ultimate")
@@ -27,6 +28,43 @@ local function MakeDraggable(frame)
     end)
 end
 
+-- // Hàm tải background
+local function LoadBackground(frame, bgSetting)
+    if not bgSetting then return end
+    
+    local bgImage = Instance.new("ImageLabel", frame)
+    bgImage.Size = UDim2.new(1, 0, 1, 0)
+    bgImage.Position = UDim2.new(0, 0, 0, 0)
+    bgImage.BackgroundTransparency = 1
+    bgImage.ZIndex = 0
+    bgImage.ImageTransparency = bgSetting.Transparency or 0.5
+    bgImage.ScaleType = Enum.ScaleType.Crop
+    
+    -- Xử lý ID Roblox
+    if type(bgSetting.Image) == "number" or (type(bgSetting.Image) == "string" and bgSetting.Image:match("^%d+$")) then
+        bgImage.Image = "rbxassetid://" .. tostring(bgSetting.Image)
+    -- Xử lý URL
+    elseif type(bgSetting.Image) == "string" and bgSetting.Image:match("^http") then
+        bgImage.Image = bgSetting.Image
+    -- Xử lý rbxasset
+    elseif type(bgSetting.Image) == "string" then
+        bgImage.Image = bgSetting.Image
+    end
+    
+    -- Đưa background xuống dưới cùng
+    local function SendToBack()
+        bgImage.ZIndex = 0
+        for _, child in pairs(frame:GetChildren()) do
+            if child ~= bgImage and child:IsA("GuiObject") then
+                child.ZIndex = math.max(child.ZIndex, 1)
+            end
+        end
+    end
+    
+    SendToBack()
+    frame.ChildAdded:Connect(SendToBack)
+end
+
 -- // Đăng ký custom command
 function NoirUI:RegisterCommand(prefix, callback)
     NoirUI.CustomCommands[prefix:lower()] = callback
@@ -46,13 +84,19 @@ function NoirUI:CreateWindow(settings)
     local Main = Instance.new("Frame", ScreenGui)
     Main.Size = UDim2.new(0, 420, 0, 300)
     Main.Position = mainDefaultPos
-    Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    Main.BackgroundColor3 = settings.MainBgColor or Color3.fromRGB(10, 10, 10)
+    Main.BackgroundTransparency = settings.MainBgTransparency or 0
     Main.ClipsDescendants = true
     Main.Visible = false
     Main.BackgroundTransparency = 1
     Instance.new("UICorner", Main)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
+    
+    -- // Load Background cho Main UI
+    if settings.Background then
+        LoadBackground(Main, settings.Background)
+    end
     
     -- //////////////// BẢNG LOADING (CHỈ BACKGROUND FADE, CHỮ HIỆN RÕ NGAY) ////////////////
     local LoadingFrame = Instance.new("Frame", ScreenGui)
@@ -65,7 +109,12 @@ function NoirUI:CreateWindow(settings)
     local LoadingStroke = Instance.new("UIStroke", LoadingFrame)
     LoadingStroke.Color = ACCENT
     LoadingStroke.Thickness = 2
-    LoadingStroke.Transparency = 1  -- Viền fade in
+    LoadingStroke.Transparency = 1
+    
+    -- Load Background cho Loading nếu có
+    if settings.LoadingBackground then
+        LoadBackground(LoadingFrame, settings.LoadingBackground)
+    end
     
     -- Chữ hiện rõ ngay từ đầu (không fade)
     local LoadingTitle = Instance.new("TextLabel", LoadingFrame)
@@ -77,6 +126,7 @@ function NoirUI:CreateWindow(settings)
     LoadingTitle.Font = "GothamBold"
     LoadingTitle.TextSize = 18
     LoadingTitle.TextXAlignment = "Left"
+    LoadingTitle.ZIndex = 201
     
     local LoadingSub = Instance.new("TextLabel", LoadingFrame)
     LoadingSub.Size = UDim2.new(1, -40, 0, 20)
@@ -87,18 +137,21 @@ function NoirUI:CreateWindow(settings)
     LoadingSub.Font = "GothamMedium"
     LoadingSub.TextSize = 12
     LoadingSub.TextXAlignment = "Left"
+    LoadingSub.ZIndex = 201
     
-    -- Thanh loading hiện rõ ngay
     local LoadingBarBg = Instance.new("Frame", LoadingFrame)
     LoadingBarBg.Size = UDim2.new(0.86, 0, 0, 6)
     LoadingBarBg.Position = UDim2.new(0.07, 0, 0.7, 0)
     LoadingBarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    LoadingBarBg.BackgroundTransparency = 0.5
     Instance.new("UICorner", LoadingBarBg).CornerRadius = UDim.new(1, 0)
+    LoadingBarBg.ZIndex = 201
     
     local LoadingBar = Instance.new("Frame", LoadingBarBg)
     LoadingBar.Size = UDim2.new(0, 0, 1, 0)
     LoadingBar.BackgroundColor3 = ACCENT
     Instance.new("UICorner", LoadingBar).CornerRadius = UDim.new(1, 0)
+    LoadingBar.ZIndex = 201
     
     local LoadingPercent = Instance.new("TextLabel", LoadingFrame)
     LoadingPercent.Size = UDim2.new(1, 0, 0, 20)
@@ -108,18 +161,17 @@ function NoirUI:CreateWindow(settings)
     LoadingPercent.TextColor3 = ACCENT
     LoadingPercent.Font = "GothamBold"
     LoadingPercent.TextSize = 12
+    LoadingPercent.ZIndex = 201
     
     -- Hàm chạy loading: 0.5s fade in background, 1s chạy thanh, 0.5s fade out
     local function StartLoading()
         LoadingFrame.Visible = true
         
-        -- Fade in background và viền (chữ vẫn rõ)
         TweenService:Create(LoadingFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
         TweenService:Create(LoadingStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = 0}):Play()
         
         task.wait(0.5)
         
-        -- 1s chạy thanh loading
         local startTime = tick()
         local loadingConnection
         loadingConnection = RunService.RenderStepped:Connect(function()
@@ -132,7 +184,6 @@ function NoirUI:CreateWindow(settings)
                 loadingConnection:Disconnect()
                 LoadingSub.Text = "Loaded!"
                 
-                -- 0.5s fade out
                 TweenService:Create(LoadingFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
                 TweenService:Create(LoadingStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = 1}):Play()
                 task.wait(0.5)
@@ -157,8 +208,8 @@ function NoirUI:CreateWindow(settings)
     local KUI = nil
     
     local function ShowMainUIAfterLoading()
-        task.wait(2)  -- Tổng time loading: 0.5 fade in + 1s chạy thanh + 0.5 fade out = 2s
-        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
+        task.wait(2)
+        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = settings.MainBgTransparency or 0}):Play()
         Main.Visible = true
         Main.Position = mainDefaultPos
     end
@@ -195,6 +246,10 @@ function NoirUI:CreateWindow(settings)
             kstr.Color = ACCENT
             MakeDraggable(KUI)
             
+            if settings.KeyBackground then
+                LoadBackground(KUI, settings.KeyBackground)
+            end
+            
             TweenService:Create(KUI, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
             
             local KT = Instance.new("TextLabel", KUI)
@@ -205,6 +260,7 @@ function NoirUI:CreateWindow(settings)
             KT.Font = "GothamBold"
             KT.TextSize = 16
             KT.BackgroundTransparency = 1
+            KT.ZIndex = 2
             
             local KSub = Instance.new("TextLabel", KUI)
             KSub.Size = UDim2.new(1,0,0,20)
@@ -214,6 +270,7 @@ function NoirUI:CreateWindow(settings)
             KSub.Font = "GothamMedium"
             KSub.TextSize = 12
             KSub.BackgroundTransparency = 1
+            KSub.ZIndex = 2
             
             local KI = Instance.new("TextBox", KUI)
             KI.Size = UDim2.new(0.8, 0, 0, 35)
@@ -224,6 +281,7 @@ function NoirUI:CreateWindow(settings)
             KI.Text = ""
             Instance.new("UICorner", KI)
             Instance.new("UIStroke", KI).Color = Color3.fromRGB(40,40,40)
+            KI.ZIndex = 2
             
             local Note = Instance.new("TextLabel", KUI)
             Note.Size = UDim2.new(0.8,0,0,30)
@@ -234,6 +292,7 @@ function NoirUI:CreateWindow(settings)
             Note.TextSize = 10
             Note.BackgroundTransparency = 1
             Note.TextWrapped = true
+            Note.ZIndex = 2
             
             local KB = Instance.new("TextButton", KUI)
             KB.Size = UDim2.new(0.8, 0, 0, 35)
@@ -243,6 +302,7 @@ function NoirUI:CreateWindow(settings)
             KB.Font = "GothamBold"
             KB.TextColor3 = Color3.new(1,1,1)
             Instance.new("UICorner", KB)
+            KB.ZIndex = 2
             
             KB.MouseButton1Click:Connect(function()
                 if CheckKeys(KI.Text) then
@@ -365,8 +425,11 @@ function NoirUI:CreateWindow(settings)
     local Side = Instance.new("Frame", Main)
     Side.Size = UDim2.new(0, 110, 1, -50)
     Side.Position = UDim2.new(0, 5, 0, 40)
-    Side.BackgroundTransparency = 1
+    Side.BackgroundTransparency = settings.SidebarTransparency or 0.5
+    Side.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Side.ClipsDescendants = true
+    Instance.new("UICorner", Side).CornerRadius = UDim.new(0, 8)
+    
     local TScroll = Instance.new("ScrollingFrame", Side)
     TScroll.Size = UDim2.new(1, 0, 1, -55)
     TScroll.BackgroundTransparency = 1
@@ -389,8 +452,10 @@ function NoirUI:CreateWindow(settings)
     local Cont = Instance.new("Frame", Main)
     Cont.Size = UDim2.new(1, -125, 1, -50)
     Cont.Position = UDim2.new(0, 120, 0, 40)
-    Cont.BackgroundTransparency = 1
+    Cont.BackgroundTransparency = settings.ContentTransparency or 0.3
+    Cont.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Cont.ClipsDescendants = true
+    Instance.new("UICorner", Cont).CornerRadius = UDim.new(0, 8)
     
     -- //////////////// FLOAT BUTTON ////////////////
     local TBtn = Instance.new("TextButton", ScreenGui)
@@ -404,6 +469,10 @@ function NoirUI:CreateWindow(settings)
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
+    
+    if settings.FloatBackground then
+        LoadBackground(TBtn, settings.FloatBackground)
+    end
     
     local floatDragging = false
     local floatDragStart, floatStartPos, floatDragInput
@@ -447,7 +516,7 @@ function NoirUI:CreateWindow(settings)
         else
             if not Main.Visible then
                 Main.Position = mainDefaultPos
-                TweenService:Create(Main, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
+                TweenService:Create(Main, TweenInfo.new(0.2), {BackgroundTransparency = settings.MainBgTransparency or 0}):Play()
             else
                 TweenService:Create(Main, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
                 task.wait(0.2)
@@ -466,6 +535,11 @@ function NoirUI:CreateWindow(settings)
         Instance.new("UICorner", n)
         local ns = Instance.new("UIStroke", n)
         ns.Color = ACCENT
+        
+        if settings.NotificationBackground then
+            LoadBackground(n, settings.NotificationBackground)
+        end
+        
         local tl = Instance.new("TextLabel", n)
         tl.Size = UDim2.new(1,-10,0,20)
         tl.Position = UDim2.new(0,10,0,5)
@@ -475,6 +549,7 @@ function NoirUI:CreateWindow(settings)
         tl.Font = "GothamBold"
         tl.TextSize = 13
         tl.TextXAlignment = "Left"
+        
         local ml = Instance.new("TextLabel", n)
         ml.Size = UDim2.new(1,-20,0,35)
         ml.Position = UDim2.new(0,10,0,25)
@@ -486,6 +561,7 @@ function NoirUI:CreateWindow(settings)
         ml.TextYAlignment = "Top"
         ml.Font = "GothamMedium"
         ml.TextSize = 11
+        
         for i, v in ipairs(NoirUI.Notifications) do
             TweenService:Create(v, TweenInfo.new(0.3), {Position = UDim2.new(1,-240,0.8,-(i*75))}):Play()
         end
@@ -640,6 +716,7 @@ function NoirUI:CreateWindow(settings)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95,0,0,65)
             f.BackgroundColor3 = Color3.fromRGB(15,15,15)
+            f.BackgroundTransparency = 0.3
             Instance.new("UICorner", f)
             f.LayoutOrder = GetO()
             f.Name = opt.Title or ""
@@ -670,6 +747,7 @@ function NoirUI:CreateWindow(settings)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95,0,0,35)
             f.BackgroundColor3 = Color3.fromRGB(22,22,22)
+            f.BackgroundTransparency = 0.2
             Instance.new("UICorner", f)
             f.LayoutOrder = GetO()
             f.Name = opt.Name or ""
@@ -732,6 +810,7 @@ function NoirUI:CreateWindow(settings)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95,0,0,50)
             f.BackgroundColor3 = Color3.fromRGB(22,22,22)
+            f.BackgroundTransparency = 0.2
             Instance.new("UICorner", f)
             f.LayoutOrder = GetO()
             f.Name = opt.Name or ""
@@ -786,6 +865,7 @@ function NoirUI:CreateWindow(settings)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95,0,0,35)
             f.BackgroundColor3 = Color3.fromRGB(22,22,22)
+            f.BackgroundTransparency = 0.2
             Instance.new("UICorner", f)
             f.LayoutOrder = GetO()
             f.ClipsDescendants = true
@@ -873,6 +953,7 @@ function NoirUI:CreateWindow(settings)
             local d = Instance.new("Frame", ContentFrame)
             d.Size = UDim2.new(0.95,0,0,35)
             d.BackgroundColor3 = Color3.fromRGB(22,22,22)
+            d.BackgroundTransparency = 0.2
             Instance.new("UICorner", d)
             d.LayoutOrder = GetO()
             d.ClipsDescendants = true
@@ -938,6 +1019,7 @@ function NoirUI:CreateWindow(settings)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95,0,0,38)
             f.BackgroundColor3 = Color3.fromRGB(18,18,18)
+            f.BackgroundTransparency = 0.2
             Instance.new("UICorner", f)
             f.LayoutOrder = GetO()
             f.Name = "RunBox"
