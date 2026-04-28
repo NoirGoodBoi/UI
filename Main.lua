@@ -42,7 +42,19 @@ function NoirUI:CreateWindow(settings)
     local mainDefaultPos = settings.DefaultPosition or UDim2.new(0.5, -210, 0.5, -150)
     local floatDefaultPos = settings.FloatDefaultPosition or UDim2.new(0, 15, 0.5, -22)
     
-    -- //////////////// BẢNG LOADING ////////////////
+    -- //////////////// MAIN UI ////////////////
+    local Main = Instance.new("Frame", ScreenGui)
+    Main.Size = UDim2.new(0, 420, 0, 300)
+    Main.Position = mainDefaultPos
+    Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    Main.ClipsDescendants = true
+    Main.Visible = false
+    Main.BackgroundTransparency = 1
+    Instance.new("UICorner", Main)
+    local MainStroke = Instance.new("UIStroke", Main)
+    MainStroke.Thickness = 2
+    
+    -- //////////////// BẢNG LOADING (HIỆN TRƯỚC, CÓ FADE IN) ////////////////
     local LoadingFrame = Instance.new("Frame", ScreenGui)
     LoadingFrame.Size = UDim2.new(0, 300, 0, 120)
     LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
@@ -85,19 +97,39 @@ function NoirUI:CreateWindow(settings)
     LoadingBar.BackgroundColor3 = ACCENT
     Instance.new("UICorner", LoadingBar).CornerRadius = UDim.new(1, 0)
     
-    -- //////////////// MAIN UI ////////////////
-    local Main = Instance.new("Frame", ScreenGui)
-    Main.Size = UDim2.new(0, 420, 0, 300)
-    Main.Position = mainDefaultPos
-    Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-    Main.ClipsDescendants = true
-    Main.Visible = false
-    Instance.new("UICorner", Main)
-    local MainStroke = Instance.new("UIStroke", Main)
-    MainStroke.Thickness = 2
-    MakeDraggable(Main)
+    local LoadingPercent = Instance.new("TextLabel", LoadingFrame)
+    LoadingPercent.Size = UDim2.new(1, 0, 0, 20)
+    LoadingPercent.Position = UDim2.new(0, 0, 0.85, 0)
+    LoadingPercent.BackgroundTransparency = 1
+    LoadingPercent.Text = "0%"
+    LoadingPercent.TextColor3 = ACCENT
+    LoadingPercent.Font = "GothamBold"
+    LoadingPercent.TextSize = 12
     
-    -- Hiệu ứng cầu vồng viền
+    -- Fade in loading
+    TweenService:Create(LoadingFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
+    
+    -- Chạy thanh loading 0->100% trong 1s
+    local startTime = tick()
+    local loadingConnection
+    loadingConnection = RunService.RenderStepped:Connect(function()
+        local elapsed = tick() - startTime
+        local percent = math.min(1, elapsed / 1)
+        LoadingBar.Size = UDim2.new(percent, 0, 1, 0)
+        LoadingPercent.Text = math.floor(percent * 100) .. "%"
+        
+        if percent >= 1 then
+            loadingConnection:Disconnect()
+            LoadingSub.Text = "Loaded!"
+            task.wait(0.3)
+            -- Fade out loading
+            TweenService:Create(LoadingFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+            task.wait(0.3)
+            LoadingFrame.Visible = false
+        end
+    end)
+    
+    -- Hiệu ứng cầu vồng
     task.spawn(function()
         while Main and Main.Parent do
             for i = 0, 1, 0.01 do
@@ -108,22 +140,14 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- //////////////// HỆ THỐNG KEY + LOADING ////////////////
+    -- //////////////// HỆ THỐNG KEY (HIỆN TRƯỚC LOADING) ////////////////
     local KeySolved = false
     local KUI = nil
     
-    local function ShowLoadingAndUI()
-        LoadingFrame.Visible = true
-        LoadingFrame.BackgroundTransparency = 0
-        LoadingSub.Text = "Đang tải giao diện..."
-        
-        TweenService:Create(LoadingBar, TweenInfo.new(1.5), {Size = UDim2.new(1, 0, 1, 0)}):Play()
-        task.wait(1.5)
-        
-        LoadingSub.Text = "Hoàn tất! Đang khởi chạy..."
-        task.wait(0.5)
-        
-        LoadingFrame.Visible = false
+    local function ShowMainUIAfterLoading()
+        -- Đợi loading chạy xong
+        task.wait(1.3)
+        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
         Main.Visible = true
         Main.Position = mainDefaultPos
     end
@@ -137,13 +161,16 @@ function NoirUI:CreateWindow(settings)
             return false
         end
         
+        -- Ẩn loading khi chưa có key
         LoadingFrame.Visible = false
         
         if KS.SaveKey and isfile and isfile(KeyPath) then
             local saved = readfile(KeyPath)
             if CheckKeys(saved) then
                 KeySolved = true
-                ShowLoadingAndUI()
+                LoadingFrame.Visible = true
+                TweenService:Create(LoadingFrame, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+                ShowMainUIAfterLoading()
             end
         end
         
@@ -152,11 +179,15 @@ function NoirUI:CreateWindow(settings)
             KUI.Size = UDim2.new(0, 320, 0, 200)
             KUI.Position = UDim2.new(0.5, -160, 0.5, -100)
             KUI.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+            KUI.BackgroundTransparency = 0
             Instance.new("UICorner", KUI)
             local kstr = Instance.new("UIStroke", KUI)
             kstr.Thickness = 2
             kstr.Color = ACCENT
             MakeDraggable(KUI)
+            
+            -- Fade in key UI
+            TweenService:Create(KUI, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
             
             local KT = Instance.new("TextLabel", KUI)
             KT.Size = UDim2.new(1,0,0,35)
@@ -208,9 +239,13 @@ function NoirUI:CreateWindow(settings)
             KB.MouseButton1Click:Connect(function()
                 if CheckKeys(KI.Text) then
                     if KS.SaveKey and writefile then writefile(KeyPath, KI.Text) end
+                    TweenService:Create(KUI, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+                    task.wait(0.3)
                     KUI:Destroy()
                     KeySolved = true
-                    ShowLoadingAndUI()
+                    LoadingFrame.Visible = true
+                    TweenService:Create(LoadingFrame, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+                    ShowMainUIAfterLoading()
                 else
                     KI.Text = ""
                     KI.PlaceholderText = "Key không chính xác!"
@@ -220,7 +255,10 @@ function NoirUI:CreateWindow(settings)
             end)
         end
     else
-        ShowLoadingAndUI()
+        -- Không key, vẫn show loading
+        LoadingFrame.Visible = true
+        TweenService:Create(LoadingFrame, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+        ShowMainUIAfterLoading()
     end
     
     -- //////////////// HEADER ////////////////
@@ -399,22 +437,27 @@ function NoirUI:CreateWindow(settings)
     end
     
     TBtn.MouseButton1Click:Connect(function()
-        if not KeySolved and KUI then
+        if not KeySolved and KUI and KUI.Parent then
             KUI.Visible = not KUI.Visible
         else
             if not Main.Visible then
                 Main.Position = mainDefaultPos
+                TweenService:Create(Main, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
+            else
+                TweenService:Create(Main, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
+                task.wait(0.2)
             end
             Main.Visible = not Main.Visible
         end
     end)
     
-    -- //////////////// NOTIFICATIONS ////////////////
+    -- //////////////// NOTIFICATIONS (mờ 0.25) ////////////////
     function NoirUI:Notify(t, m)
         local n = Instance.new("Frame", ScreenGui)
         n.Size = UDim2.new(0,220,0,65)
         n.Position = UDim2.new(1,20,0.8,0)
         n.BackgroundColor3 = Color3.fromRGB(15,15,15)
+        n.BackgroundTransparency = 0.25
         Instance.new("UICorner", n)
         local ns = Instance.new("UIStroke", n)
         ns.Color = ACCENT
@@ -830,6 +873,8 @@ function NoirUI:CreateWindow(settings)
             d.ClipsDescendants = true
             d.Name = opt.Name or ""
             table.insert(Tab.Elements, d)
+            
+            -- Button chính (có mũi tên)
             local t = Instance.new("TextButton", d)
             t.Size = UDim2.new(1,0,0,35)
             t.BackgroundTransparency = 1
@@ -838,18 +883,36 @@ function NoirUI:CreateWindow(settings)
             t.Font = "GothamMedium"
             t.TextSize = 12
             t.TextXAlignment = "Left"
+            
+            -- Mũi tên
+            local Arrow = Instance.new("TextLabel", t)
+            Arrow.Size = UDim2.new(0, 30, 1, 0)
+            Arrow.Position = UDim2.new(1, -35, 0, 0)
+            Arrow.BackgroundTransparency = 1
+            Arrow.Text = "▼"
+            Arrow.TextColor3 = Color3.fromRGB(180, 180, 180)
+            Arrow.Font = "GothamMedium"
+            Arrow.TextSize = 14
+            Arrow.TextXAlignment = "Center"
+            
             local il = Instance.new("ScrollingFrame", d)
             il.Size = UDim2.new(1,0,0, math.min(#opt.Options, 4) * 30)
             il.Position = UDim2.new(0,0,0,35)
             il.BackgroundTransparency = 1
             il.ScrollBarThickness = 2
             il.AutomaticCanvasSize = "Y"
+            il.Visible = false
             Instance.new("UIListLayout", il)
+            
             local open = false
             t.MouseButton1Click:Connect(function()
                 open = not open
+                il.Visible = open
+                -- Xoay mũi tên
+                Arrow.Text = open and "▲" or "▼"
                 TweenService:Create(d, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95,0,0,35+il.Size.Y.Offset) or UDim2.new(0.95,0,0,35)}):Play()
             end)
+            
             for _, v in pairs(opt.Options) do
                 local it = Instance.new("TextButton", il)
                 it.Size = UDim2.new(1,0,0,30)
@@ -860,6 +923,8 @@ function NoirUI:CreateWindow(settings)
                 it.TextSize = 11
                 it.MouseButton1Click:Connect(function()
                     open = false
+                    il.Visible = false
+                    Arrow.Text = "▼"
                     t.Text = "  "..opt.Name.." : "..v
                     TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95,0,0,35)}):Play()
                     opt.Callback(v)
@@ -880,7 +945,7 @@ function NoirUI:CreateWindow(settings)
             i.Size = UDim2.new(1,-65,1,0)
             i.Position = UDim2.new(0,10,0,0)
             i.BackgroundTransparency = 1
-            i.PlaceholderText = opt.Placeholder or "Nhập custom command... (.heal, .fly, ...)"
+            i.PlaceholderText = opt.Placeholder or "Nhập: .cmd, loadstring('url'), or lua code"
             i.Text = ""
             i.TextColor3 = Color3.new(1,1,1)
             i.Font = "GothamMedium"
@@ -902,6 +967,7 @@ function NoirUI:CreateWindow(settings)
                 local input = i.Text
                 if input == "" then return end
                 
+                -- Auto detect: custom command (.xxx)
                 if input:sub(1,1) == "." then
                     local parts = input:sub(2):split(" ")
                     local cmd = parts[1]:lower()
@@ -921,8 +987,49 @@ function NoirUI:CreateWindow(settings)
                     else
                         NoirUI:Notify("❌ Unknown Command", "Không tìm thấy lệnh: ." .. cmd)
                     end
+                    
+                -- Auto detect: loadstring
+                elseif input:lower():match("loadstring") then
+                    local str = input:match("loadstring%((.+)%)")
+                    if str then
+                        local cleaned = str:gsub("^[\"'](.*)[\"']$", "%1")
+                        local success, err = loadstring(cleaned)
+                        if success then
+                            success()
+                            NoirUI:Notify("Loadstring", "Đã chạy thành công!")
+                        else
+                            NoirUI:Notify("Loadstring Error", err or "Lỗi cú pháp")
+                        end
+                    else
+                        NoirUI:Notify("Loadstring Error", "Cú pháp không hợp lệ")
+                    end
+                    
+                -- Auto detect: required
+                elseif input:lower():match("required") then
+                    local module = input:match("required%((.+)%)")
+                    if module then
+                        local cleaned = module:gsub("^[\"'](.*)[\"']$", "%1")
+                        local success, result = pcall(function()
+                            return require(game:GetService("Players").LocalPlayer:FindFirstChild("PlayerScripts"):WaitForChild(cleaned))
+                        end)
+                        if success then
+                            NoirUI:Notify("Required", "Đã require thành công!")
+                        else
+                            NoirUI:Notify("Required Error", "Không tìm thấy module: " .. cleaned)
+                        end
+                    else
+                        NoirUI:Notify("Required Error", "Cú pháp không hợp lệ")
+                    end
+                    
+                -- Auto detect: lua code
                 else
-                    NoirUI:Notify("⚠️ Invalid Command", "Lệnh phải bắt đầu bằng dấu .\nVí dụ: .heal")
+                    local success, err = loadstring(input)
+                    if success then
+                        success()
+                        NoirUI:Notify("Execute", "Code đã chạy thành công!")
+                    else
+                        NoirUI:Notify("Error", err or "Lỗi cú pháp")
+                    end
                 end
                 
                 if opt.ClearOnExecute then
