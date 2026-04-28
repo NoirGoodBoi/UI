@@ -54,7 +54,7 @@ function NoirUI:CreateWindow(settings)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
     
-    -- //////////////// BẢNG LOADING (FADE IN/OUT ĐÚNG CHUẨN) ////////////////
+    -- //////////////// BẢNG LOADING (CHỈ BACKGROUND FADE, CHỮ HIỆN RÕ NGAY) ////////////////
     local LoadingFrame = Instance.new("Frame", ScreenGui)
     LoadingFrame.Size = UDim2.new(0, 300, 0, 120)
     LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
@@ -65,7 +65,9 @@ function NoirUI:CreateWindow(settings)
     local LoadingStroke = Instance.new("UIStroke", LoadingFrame)
     LoadingStroke.Color = ACCENT
     LoadingStroke.Thickness = 2
+    LoadingStroke.Transparency = 1  -- Viền fade in
     
+    -- Chữ hiện rõ ngay từ đầu (không fade)
     local LoadingTitle = Instance.new("TextLabel", LoadingFrame)
     LoadingTitle.Size = UDim2.new(1, -40, 0, 30)
     LoadingTitle.Position = UDim2.new(0, 20, 0, 15)
@@ -86,6 +88,7 @@ function NoirUI:CreateWindow(settings)
     LoadingSub.TextSize = 12
     LoadingSub.TextXAlignment = "Left"
     
+    -- Thanh loading hiện rõ ngay
     local LoadingBarBg = Instance.new("Frame", LoadingFrame)
     LoadingBarBg.Size = UDim2.new(0.86, 0, 0, 6)
     LoadingBarBg.Position = UDim2.new(0.07, 0, 0.7, 0)
@@ -106,13 +109,17 @@ function NoirUI:CreateWindow(settings)
     LoadingPercent.Font = "GothamBold"
     LoadingPercent.TextSize = 12
     
-    -- Hàm chạy loading chuẩn: 0.5s fade in -> 1s chạy thanh -> 0.5s fade out
+    -- Hàm chạy loading: 0.5s fade in background, 1s chạy thanh, 0.5s fade out
     local function StartLoading()
         LoadingFrame.Visible = true
+        
+        -- Fade in background và viền (chữ vẫn rõ)
         TweenService:Create(LoadingFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
+        TweenService:Create(LoadingStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = 0}):Play()
         
         task.wait(0.5)
         
+        -- 1s chạy thanh loading
         local startTime = tick()
         local loadingConnection
         loadingConnection = RunService.RenderStepped:Connect(function()
@@ -125,7 +132,9 @@ function NoirUI:CreateWindow(settings)
                 loadingConnection:Disconnect()
                 LoadingSub.Text = "Loaded!"
                 
+                -- 0.5s fade out
                 TweenService:Create(LoadingFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+                TweenService:Create(LoadingStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = 1}):Play()
                 task.wait(0.5)
                 LoadingFrame:Destroy()
             end
@@ -148,7 +157,7 @@ function NoirUI:CreateWindow(settings)
     local KUI = nil
     
     local function ShowMainUIAfterLoading()
-        task.wait(2)
+        task.wait(2)  -- Tổng time loading: 0.5 fade in + 1s chạy thanh + 0.5 fade out = 2s
         TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
         Main.Visible = true
         Main.Position = mainDefaultPos
