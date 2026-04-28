@@ -54,7 +54,7 @@ function NoirUI:CreateWindow(settings)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
     
-    -- //////////////// BẢNG LOADING (HIỆN TRƯỚC, CÓ FADE IN) ////////////////
+    -- //////////////// BẢNG LOADING (FADE IN/OUT ĐÚNG CHUẨN) ////////////////
     local LoadingFrame = Instance.new("Frame", ScreenGui)
     LoadingFrame.Size = UDim2.new(0, 300, 0, 120)
     LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
@@ -106,30 +106,33 @@ function NoirUI:CreateWindow(settings)
     LoadingPercent.Font = "GothamBold"
     LoadingPercent.TextSize = 12
     
-    -- Fade in loading
-    TweenService:Create(LoadingFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
-    
-    -- Chạy thanh loading 0->100% trong 1s
-    local startTime = tick()
-    local loadingConnection
-    loadingConnection = RunService.RenderStepped:Connect(function()
-        local elapsed = tick() - startTime
-        local percent = math.min(1, elapsed / 1)
-        LoadingBar.Size = UDim2.new(percent, 0, 1, 0)
-        LoadingPercent.Text = math.floor(percent * 100) .. "%"
+    -- Hàm chạy loading chuẩn: 0.5s fade in -> 1s chạy thanh -> 0.5s fade out
+    local function StartLoading()
+        LoadingFrame.Visible = true
+        TweenService:Create(LoadingFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
         
-        if percent >= 1 then
-            loadingConnection:Disconnect()
-            LoadingSub.Text = "Loaded!"
-            task.wait(0.3)
-            -- Fade out loading
-            TweenService:Create(LoadingFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
-            task.wait(0.3)
-            LoadingFrame.Visible = false
-        end
-    end)
+        task.wait(0.5)
+        
+        local startTime = tick()
+        local loadingConnection
+        loadingConnection = RunService.RenderStepped:Connect(function()
+            local elapsed = tick() - startTime
+            local percent = math.min(1, elapsed / 1)
+            LoadingBar.Size = UDim2.new(percent, 0, 1, 0)
+            LoadingPercent.Text = math.floor(percent * 100) .. "%"
+            
+            if percent >= 1 then
+                loadingConnection:Disconnect()
+                LoadingSub.Text = "Loaded!"
+                
+                TweenService:Create(LoadingFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+                task.wait(0.5)
+                LoadingFrame:Destroy()
+            end
+        end)
+    end
     
-    -- Hiệu ứng cầu vồng
+    -- Hiệu ứng cầu vồng viền main
     task.spawn(function()
         while Main and Main.Parent do
             for i = 0, 1, 0.01 do
@@ -145,8 +148,7 @@ function NoirUI:CreateWindow(settings)
     local KUI = nil
     
     local function ShowMainUIAfterLoading()
-        -- Đợi loading chạy xong
-        task.wait(1.3)
+        task.wait(2)
         TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
         Main.Visible = true
         Main.Position = mainDefaultPos
@@ -161,15 +163,13 @@ function NoirUI:CreateWindow(settings)
             return false
         end
         
-        -- Ẩn loading khi chưa có key
         LoadingFrame.Visible = false
         
         if KS.SaveKey and isfile and isfile(KeyPath) then
             local saved = readfile(KeyPath)
             if CheckKeys(saved) then
                 KeySolved = true
-                LoadingFrame.Visible = true
-                TweenService:Create(LoadingFrame, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+                StartLoading()
                 ShowMainUIAfterLoading()
             end
         end
@@ -186,7 +186,6 @@ function NoirUI:CreateWindow(settings)
             kstr.Color = ACCENT
             MakeDraggable(KUI)
             
-            -- Fade in key UI
             TweenService:Create(KUI, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
             
             local KT = Instance.new("TextLabel", KUI)
@@ -243,8 +242,7 @@ function NoirUI:CreateWindow(settings)
                     task.wait(0.3)
                     KUI:Destroy()
                     KeySolved = true
-                    LoadingFrame.Visible = true
-                    TweenService:Create(LoadingFrame, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+                    StartLoading()
                     ShowMainUIAfterLoading()
                 else
                     KI.Text = ""
@@ -255,9 +253,7 @@ function NoirUI:CreateWindow(settings)
             end)
         end
     else
-        -- Không key, vẫn show loading
-        LoadingFrame.Visible = true
-        TweenService:Create(LoadingFrame, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+        StartLoading()
         ShowMainUIAfterLoading()
     end
     
@@ -874,7 +870,6 @@ function NoirUI:CreateWindow(settings)
             d.Name = opt.Name or ""
             table.insert(Tab.Elements, d)
             
-            -- Button chính (có mũi tên)
             local t = Instance.new("TextButton", d)
             t.Size = UDim2.new(1,0,0,35)
             t.BackgroundTransparency = 1
@@ -884,7 +879,6 @@ function NoirUI:CreateWindow(settings)
             t.TextSize = 12
             t.TextXAlignment = "Left"
             
-            -- Mũi tên
             local Arrow = Instance.new("TextLabel", t)
             Arrow.Size = UDim2.new(0, 30, 1, 0)
             Arrow.Position = UDim2.new(1, -35, 0, 0)
@@ -908,7 +902,6 @@ function NoirUI:CreateWindow(settings)
             t.MouseButton1Click:Connect(function()
                 open = not open
                 il.Visible = open
-                -- Xoay mũi tên
                 Arrow.Text = open and "▲" or "▼"
                 TweenService:Create(d, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95,0,0,35+il.Size.Y.Offset) or UDim2.new(0.95,0,0,35)}):Play()
             end)
@@ -945,7 +938,7 @@ function NoirUI:CreateWindow(settings)
             i.Size = UDim2.new(1,-65,1,0)
             i.Position = UDim2.new(0,10,0,0)
             i.BackgroundTransparency = 1
-            i.PlaceholderText = opt.Placeholder or "Nhập: .cmd, loadstring('url'), or lua code"
+            i.PlaceholderText = opt.Placeholder or "Nhập: .cmd, loadstring('url'), required('Module'), or lua code"
             i.Text = ""
             i.TextColor3 = Color3.new(1,1,1)
             i.Font = "GothamMedium"
@@ -967,7 +960,6 @@ function NoirUI:CreateWindow(settings)
                 local input = i.Text
                 if input == "" then return end
                 
-                -- Auto detect: custom command (.xxx)
                 if input:sub(1,1) == "." then
                     local parts = input:sub(2):split(" ")
                     local cmd = parts[1]:lower()
@@ -988,7 +980,6 @@ function NoirUI:CreateWindow(settings)
                         NoirUI:Notify("❌ Unknown Command", "Không tìm thấy lệnh: ." .. cmd)
                     end
                     
-                -- Auto detect: loadstring
                 elseif input:lower():match("loadstring") then
                     local str = input:match("loadstring%((.+)%)")
                     if str then
@@ -1004,7 +995,6 @@ function NoirUI:CreateWindow(settings)
                         NoirUI:Notify("Loadstring Error", "Cú pháp không hợp lệ")
                     end
                     
-                -- Auto detect: required
                 elseif input:lower():match("required") then
                     local module = input:match("required%((.+)%)")
                     if module then
@@ -1021,7 +1011,6 @@ function NoirUI:CreateWindow(settings)
                         NoirUI:Notify("Required Error", "Cú pháp không hợp lệ")
                     end
                     
-                -- Auto detect: lua code
                 else
                     local success, err = loadstring(input)
                     if success then
