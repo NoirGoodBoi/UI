@@ -28,11 +28,10 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Hàm tải background với ClipsDescendants (Cắt ảnh theo Frame cha)
+-- // Hàm tải background với ClipsDescendants
 local function LoadBackground(frame, bgSetting)
     if not bgSetting then return end
     
-    -- Tìm hoặc tạo ImageLabel cho background
     local bgImage = frame:FindFirstChild("_BackgroundImage")
     if not bgImage then
         bgImage = Instance.new("ImageLabel")
@@ -47,21 +46,16 @@ local function LoadBackground(frame, bgSetting)
     bgImage.ImageTransparency = bgSetting.Transparency or 0.5
     bgImage.ScaleType = Enum.ScaleType.Crop
     
-    -- Xử lý ID Roblox
     if type(bgSetting.Image) == "number" or (type(bgSetting.Image) == "string" and bgSetting.Image:match("^%d+$")) then
         bgImage.Image = "rbxassetid://" .. tostring(bgSetting.Image)
-    -- Xử lý URL
     elseif type(bgSetting.Image) == "string" and bgSetting.Image:match("^http") then
         bgImage.Image = bgSetting.Image
-    -- Xử lý rbxasset
     elseif type(bgSetting.Image) == "string" then
         bgImage.Image = bgSetting.Image
     end
     
-    -- QUAN TRỌNG: BẬT ClipsDescendants để cắt ảnh theo khung cha
     frame.ClipsDescendants = true
     
-    -- Gửi background xuống dưới cùng
     local function SendToBack()
         bgImage.ZIndex = 0
         for _, child in pairs(frame:GetChildren()) do
@@ -86,7 +80,6 @@ function NoirUI:CreateWindow(settings)
     ScreenGui.ResetOnSpawn = false
     local ACCENT = settings.Accent or Color3.fromRGB(170, 85, 255)
     
-    -- Lưu vị trí mặc định của MAIN UI
     local mainDefaultPos = settings.DefaultPosition or UDim2.new(0.5, -210, 0.5, -150)
     local floatDefaultPos = settings.FloatDefaultPosition or UDim2.new(0, 15, 0.5, -22)
     
@@ -103,12 +96,11 @@ function NoirUI:CreateWindow(settings)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
     
-    -- // Load Background cho Main UI
     if settings.Background then
         LoadBackground(Main, settings.Background)
     end
     
-    -- //////////////// BẢNG LOADING (CHỈ BACKGROUND FADE, CHỮ HIỆN RÕ NGAY) ////////////////
+    -- //////////////// BẢNG LOADING ////////////////
     local LoadingFrame = Instance.new("Frame", ScreenGui)
     LoadingFrame.Size = UDim2.new(0, 300, 0, 120)
     LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
@@ -121,12 +113,10 @@ function NoirUI:CreateWindow(settings)
     LoadingStroke.Thickness = 2
     LoadingStroke.Transparency = 1
     
-    -- Load Background cho Loading nếu có
     if settings.LoadingBackground then
         LoadBackground(LoadingFrame, settings.LoadingBackground)
     end
     
-    -- Chữ hiện rõ ngay từ đầu (không fade)
     local LoadingTitle = Instance.new("TextLabel", LoadingFrame)
     LoadingTitle.Size = UDim2.new(1, -40, 0, 30)
     LoadingTitle.Position = UDim2.new(0, 20, 0, 15)
@@ -173,7 +163,6 @@ function NoirUI:CreateWindow(settings)
     LoadingPercent.TextSize = 12
     LoadingPercent.ZIndex = 201
     
-    -- Hàm chạy loading: 0.5s fade in background, 1s chạy thanh, 0.5s fade out
     local function StartLoading()
         LoadingFrame.Visible = true
         
@@ -202,7 +191,6 @@ function NoirUI:CreateWindow(settings)
         end)
     end
     
-    -- Hiệu ứng cầu vồng viền main
     task.spawn(function()
         while Main and Main.Parent do
             for i = 0, 1, 0.01 do
@@ -213,7 +201,7 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- //////////////// HỆ THỐNG KEY (HIỆN TRƯỚC LOADING) ////////////////
+    -- //////////////// HỆ THỐNG KEY ////////////////
     local KeySolved = false
     local KUI = nil
     
@@ -345,7 +333,14 @@ function NoirUI:CreateWindow(settings)
         L.Size = UDim2.new(0, 24, 0, 24)
         L.Position = UDim2.new(0, 10, 0.5, -12)
         L.BackgroundTransparency = 1
-        L.Image = "rbxassetid://"..tostring(settings.LogoID)
+        local logoVal = settings.LogoID
+        if type(logoVal) == "number" then
+            L.Image = "rbxassetid://" .. tostring(logoVal)
+        elseif type(logoVal) == "string" and logoVal:match("^rbxassetid://") then
+            L.Image = logoVal
+        elseif type(logoVal) == "string" then
+            L.Image = logoVal
+        end
     end
     local Title = Instance.new("TextLabel", Header)
     Title.Size = UDim2.new(1, -120, 1, 0)
@@ -431,14 +426,19 @@ function NoirUI:CreateWindow(settings)
         end)
     end)
     
-    -- //////////////// SIDEBAR ////////////////
+    -- //////////////// SIDEBAR (TRONG SUỐT) ////////////////
     local Side = Instance.new("Frame", Main)
     Side.Size = UDim2.new(0, 110, 1, -50)
     Side.Position = UDim2.new(0, 5, 0, 40)
-    Side.BackgroundTransparency = settings.SidebarTransparency or 0.5
+    Side.BackgroundTransparency = 1
     Side.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Side.ClipsDescendants = true
     Instance.new("UICorner", Side).CornerRadius = UDim.new(0, 8)
+    
+    local SideStroke = Instance.new("UIStroke", Side)
+    SideStroke.Color = ACCENT
+    SideStroke.Thickness = 1
+    SideStroke.Transparency = 0.7
     
     local TScroll = Instance.new("ScrollingFrame", Side)
     TScroll.Size = UDim2.new(1, 0, 1, -55)
@@ -458,16 +458,21 @@ function NoirUI:CreateWindow(settings)
     Instance.new("UICorner", AI).CornerRadius = UDim.new(1,0)
     Instance.new("UIStroke", AI).Color = ACCENT
     
-    -- //////////////// CONTENT ////////////////
+    -- //////////////// CONTENT (TRONG SUỐT) ////////////////
     local Cont = Instance.new("Frame", Main)
     Cont.Size = UDim2.new(1, -125, 1, -50)
     Cont.Position = UDim2.new(0, 120, 0, 40)
-    Cont.BackgroundTransparency = settings.ContentTransparency or 0.3
+    Cont.BackgroundTransparency = 1
     Cont.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Cont.ClipsDescendants = true
     Instance.new("UICorner", Cont).CornerRadius = UDim.new(0, 8)
     
-    -- //////////////// FLOAT BUTTON (ẢNH LÀM NỀN, CÓ CLIPS) ////////////////
+    local ContStroke = Instance.new("UIStroke", Cont)
+    ContStroke.Color = ACCENT
+    ContStroke.Thickness = 1
+    ContStroke.Transparency = 0.7
+    
+    -- //////////////// FLOAT BUTTON ////////////////
     local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
@@ -481,15 +486,17 @@ function NoirUI:CreateWindow(settings)
     TS.Color = ACCENT
     TS.Thickness = 2
     
-    -- XỬ LÝ ICON / BACKGROUND CHO NÚT
     if settings.FloatBackground and settings.FloatBackground.Image then
         local bgImage = Instance.new("ImageLabel", TBtn)
         bgImage.Size = UDim2.new(1, 0, 1, 0)
         bgImage.Position = UDim2.new(0, 0, 0, 0)
         bgImage.BackgroundTransparency = 1
-        bgImage.Image = (type(settings.FloatBackground.Image) == "number" or (type(settings.FloatBackground.Image) == "string" and settings.FloatBackground.Image:match("^%d+$"))) 
-                         and "rbxassetid://" .. tostring(settings.FloatBackground.Image) 
-                         or settings.FloatBackground.Image
+        local bgImgVal = settings.FloatBackground.Image
+        if type(bgImgVal) == "number" or (type(bgImgVal) == "string" and bgImgVal:match("^%d+$")) then
+            bgImage.Image = "rbxassetid://" .. tostring(bgImgVal)
+        elseif type(bgImgVal) == "string" then
+            bgImage.Image = bgImgVal
+        end
         bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0.2
         bgImage.ScaleType = Enum.ScaleType.Crop
         bgImage.ZIndex = TBtn.ZIndex + 1
@@ -502,23 +509,36 @@ function NoirUI:CreateWindow(settings)
         overlay.ZIndex = TBtn.ZIndex + 2
     end
     
-    if type(settings.Icon) == "number" then
-        local FI = Instance.new("ImageLabel", TBtn)
-        FI.Size = UDim2.new(0.5, 0, 0.5, 0)
-        FI.Position = UDim2.new(0.25, 0, 0.25, 0)
-        FI.BackgroundTransparency = 1
-        FI.Image = "rbxassetid://" .. tostring(settings.Icon)
-        FI.ImageColor3 = ACCENT
-        FI.ZIndex = TBtn.ZIndex + 5
-    elseif type(settings.Icon) == "string" and settings.Icon ~= "" then
-        local textIcon = Instance.new("TextLabel", TBtn)
-        textIcon.Size = UDim2.new(1, 0, 1, 0)
-        textIcon.BackgroundTransparency = 1
-        textIcon.Text = settings.Icon
-        textIcon.TextColor3 = ACCENT
-        textIcon.TextSize = 22
-        textIcon.Font = Enum.Font.GothamBold
-        textIcon.ZIndex = TBtn.ZIndex + 5
+    local iconValue = settings.Icon
+    if iconValue then
+        if type(iconValue) == "number" then
+            local FI = Instance.new("ImageLabel", TBtn)
+            FI.Size = UDim2.new(0.5, 0, 0.5, 0)
+            FI.Position = UDim2.new(0.25, 0, 0.25, 0)
+            FI.BackgroundTransparency = 1
+            FI.Image = "rbxassetid://" .. tostring(iconValue)
+            FI.ImageColor3 = ACCENT
+            FI.ZIndex = TBtn.ZIndex + 5
+        elseif type(iconValue) == "string" then
+            if iconValue:match("^rbxassetid://") then
+                local FI = Instance.new("ImageLabel", TBtn)
+                FI.Size = UDim2.new(0.5, 0, 0.5, 0)
+                FI.Position = UDim2.new(0.25, 0, 0.25, 0)
+                FI.BackgroundTransparency = 1
+                FI.Image = iconValue
+                FI.ImageColor3 = ACCENT
+                FI.ZIndex = TBtn.ZIndex + 5
+            else
+                local textIcon = Instance.new("TextLabel", TBtn)
+                textIcon.Size = UDim2.new(1, 0, 1, 0)
+                textIcon.BackgroundTransparency = 1
+                textIcon.Text = iconValue
+                textIcon.TextColor3 = ACCENT
+                textIcon.TextSize = 22
+                textIcon.Font = Enum.Font.GothamBold
+                textIcon.ZIndex = TBtn.ZIndex + 5
+            end
+        end
     end
 
     local floatDragging = false
@@ -562,7 +582,7 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- //////////////// NOTIFICATIONS (mờ 0.25) ////////////////
+    -- //////////////// NOTIFICATIONS ////////////////
     function NoirUI:Notify(t, m)
         local n = Instance.new("Frame", ScreenGui)
         n.Size = UDim2.new(0,220,0,65)
@@ -624,6 +644,7 @@ function NoirUI:CreateWindow(settings)
         local B = Instance.new("TextButton", TScroll)
         B.Size = UDim2.new(1, -5, 0, 32)
         B.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        B.BackgroundTransparency = 0.7
         B.Text = ""
         Instance.new("UICorner", B)
         local BT = Instance.new("TextLabel", B)
@@ -640,7 +661,14 @@ function NoirUI:CreateWindow(settings)
             IC.Size = UDim2.new(0, 18, 0, 18)
             IC.Position = UDim2.new(0, 8, 0.5, -9)
             IC.BackgroundTransparency = 1
-            IC.Image = "rbxassetid://"..tostring(icon)
+            local iconVal = icon
+            if type(iconVal) == "number" then
+                IC.Image = "rbxassetid://" .. tostring(iconVal)
+            elseif type(iconVal) == "string" and iconVal:match("^rbxassetid://") then
+                IC.Image = iconVal
+            elseif type(iconVal) == "string" then
+                IC.Image = iconVal
+            end
             IC.ImageColor3 = Color3.fromRGB(150, 150, 150)
         end
         
@@ -655,7 +683,7 @@ function NoirUI:CreateWindow(settings)
         SearchFrame.Size = UDim2.new(1, -20, 0, 35)
         SearchFrame.Position = UDim2.new(0, 10, 0, 0)
         SearchFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-        SearchFrame.BackgroundTransparency = 0.8
+        SearchFrame.BackgroundTransparency = 0.5
         Instance.new("UICorner", SearchFrame).CornerRadius = UDim.new(0, 8)
         
         local SearchIcon = Instance.new("TextLabel", SearchFrame)
@@ -753,7 +781,7 @@ function NoirUI:CreateWindow(settings)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95,0,0,65)
             f.BackgroundColor3 = Color3.fromRGB(15,15,15)
-            f.BackgroundTransparency = 0.3
+            f.BackgroundTransparency = 0.5
             Instance.new("UICorner", f)
             f.LayoutOrder = GetO()
             f.Name = opt.Title or ""
@@ -784,7 +812,7 @@ function NoirUI:CreateWindow(settings)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95,0,0,35)
             f.BackgroundColor3 = Color3.fromRGB(22,22,22)
-            f.BackgroundTransparency = 0.2
+            f.BackgroundTransparency = 0.7
             Instance.new("UICorner", f)
             f.LayoutOrder = GetO()
             f.Name = opt.Name or ""
@@ -806,6 +834,7 @@ function NoirUI:CreateWindow(settings)
             local b = Instance.new("TextButton", ContentFrame)
             b.Size = UDim2.new(0.95,0,0,35)
             b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+            b.BackgroundTransparency = 0.6
             b.Text = opt.Name
             b.TextColor3 = Color3.new(1,1,1)
             b.Font = "GothamMedium"
@@ -822,6 +851,7 @@ function NoirUI:CreateWindow(settings)
             local t = Instance.new("TextButton", ContentFrame)
             t.Size = UDim2.new(0.95,0,0,35)
             t.BackgroundColor3 = Color3.fromRGB(25,25,25)
+            t.BackgroundTransparency = 0.6
             t.Text = "  "..opt.Name
             t.TextColor3 = s and ACCENT or Color3.fromRGB(180,180,180)
             t.TextXAlignment = "Left"
@@ -834,6 +864,7 @@ function NoirUI:CreateWindow(settings)
             bx.Size = UDim2.new(0,30,0,16)
             bx.Position = UDim2.new(1,-40,0.5,-8)
             bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40,40,40)
+            bx.BackgroundTransparency = 0.3
             Instance.new("UICorner", bx).CornerRadius = UDim.new(1,0)
             t.MouseButton1Click:Connect(function()
                 s = not s
@@ -847,7 +878,7 @@ function NoirUI:CreateWindow(settings)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95,0,0,50)
             f.BackgroundColor3 = Color3.fromRGB(22,22,22)
-            f.BackgroundTransparency = 0.2
+            f.BackgroundTransparency = 0.7
             Instance.new("UICorner", f)
             f.LayoutOrder = GetO()
             f.Name = opt.Name or ""
@@ -864,6 +895,7 @@ function NoirUI:CreateWindow(settings)
             sbg.Size = UDim2.new(0.9,0,0,8)
             sbg.Position = UDim2.new(0.05,0,0.7,0)
             sbg.BackgroundColor3 = Color3.fromRGB(40,40,40)
+            sbg.BackgroundTransparency = 0.5
             Instance.new("UICorner", sbg)
             local fill = Instance.new("Frame", sbg)
             fill.Size = UDim2.new(math.clamp((opt.Default-opt.Min)/(opt.Max-opt.Min),0,1),0,1,0)
@@ -902,7 +934,7 @@ function NoirUI:CreateWindow(settings)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95,0,0,35)
             f.BackgroundColor3 = Color3.fromRGB(22,22,22)
-            f.BackgroundTransparency = 0.2
+            f.BackgroundTransparency = 0.7
             Instance.new("UICorner", f)
             f.LayoutOrder = GetO()
             f.ClipsDescendants = true
@@ -990,7 +1022,7 @@ function NoirUI:CreateWindow(settings)
             local d = Instance.new("Frame", ContentFrame)
             d.Size = UDim2.new(0.95,0,0,35)
             d.BackgroundColor3 = Color3.fromRGB(22,22,22)
-            d.BackgroundTransparency = 0.2
+            d.BackgroundTransparency = 0.7
             Instance.new("UICorner", d)
             d.LayoutOrder = GetO()
             d.ClipsDescendants = true
@@ -1037,6 +1069,7 @@ function NoirUI:CreateWindow(settings)
                 local it = Instance.new("TextButton", il)
                 it.Size = UDim2.new(1,0,0,30)
                 it.BackgroundColor3 = Color3.fromRGB(28,28,28)
+                it.BackgroundTransparency = 0.5
                 it.Text = v
                 it.TextColor3 = Color3.fromRGB(200,200,200)
                 it.Font = "GothamMedium"
@@ -1056,7 +1089,7 @@ function NoirUI:CreateWindow(settings)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95,0,0,38)
             f.BackgroundColor3 = Color3.fromRGB(18,18,18)
-            f.BackgroundTransparency = 0.2
+            f.BackgroundTransparency = 0.7
             Instance.new("UICorner", f)
             f.LayoutOrder = GetO()
             f.Name = "RunBox"
