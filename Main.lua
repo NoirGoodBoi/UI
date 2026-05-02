@@ -28,15 +28,22 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Hàm tải background
+-- // Hàm tải background với ClipsDescendants (Cắt ảnh theo Frame cha)
 local function LoadBackground(frame, bgSetting)
     if not bgSetting then return end
     
-    local bgImage = Instance.new("ImageLabel", frame)
+    -- Tìm hoặc tạo ImageLabel cho background
+    local bgImage = frame:FindFirstChild("_BackgroundImage")
+    if not bgImage then
+        bgImage = Instance.new("ImageLabel")
+        bgImage.Name = "_BackgroundImage"
+        bgImage.Parent = frame
+        bgImage.ZIndex = 0
+    end
+    
     bgImage.Size = UDim2.new(1, 0, 1, 0)
     bgImage.Position = UDim2.new(0, 0, 0, 0)
     bgImage.BackgroundTransparency = 1
-    bgImage.ZIndex = 0
     bgImage.ImageTransparency = bgSetting.Transparency or 0.5
     bgImage.ScaleType = Enum.ScaleType.Crop
     
@@ -51,7 +58,10 @@ local function LoadBackground(frame, bgSetting)
         bgImage.Image = bgSetting.Image
     end
     
-    -- Đưa background xuống dưới cùng
+    -- QUAN TRỌNG: BẬT ClipsDescendants để cắt ảnh theo khung cha
+    frame.ClipsDescendants = true
+    
+    -- Gửi background xuống dưới cùng
     local function SendToBack()
         bgImage.ZIndex = 0
         for _, child in pairs(frame:GetChildren()) do
@@ -457,23 +467,60 @@ function NoirUI:CreateWindow(settings)
     Cont.ClipsDescendants = true
     Instance.new("UICorner", Cont).CornerRadius = UDim.new(0, 8)
     
-    -- //////////////// FLOAT BUTTON ////////////////
-    local TBtn = Instance.new("TextButton", ScreenGui)
+    -- //////////////// FLOAT BUTTON (ẢNH LÀM NỀN, CÓ CLIPS) ////////////////
+    local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
     TBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    TBtn.Text = type(settings.Icon) == "string" and settings.Icon or ""
-    TBtn.TextColor3 = ACCENT
-    TBtn.TextSize = 18
-    Instance.new("UICorner", TBtn).CornerRadius = UDim.new(1,0)
+    TBtn.Image = ""
+    TBtn.ImageTransparency = 0.2
+    TBtn.ZIndex = 10
+    TBtn.ClipsDescendants = true
+    Instance.new("UICorner", TBtn).CornerRadius = UDim.new(1, 0)
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
     
-    if settings.FloatBackground then
-        LoadBackground(TBtn, settings.FloatBackground)
+    -- XỬ LÝ ICON / BACKGROUND CHO NÚT
+    if settings.FloatBackground and settings.FloatBackground.Image then
+        local bgImage = Instance.new("ImageLabel", TBtn)
+        bgImage.Size = UDim2.new(1, 0, 1, 0)
+        bgImage.Position = UDim2.new(0, 0, 0, 0)
+        bgImage.BackgroundTransparency = 1
+        bgImage.Image = (type(settings.FloatBackground.Image) == "number" or (type(settings.FloatBackground.Image) == "string" and settings.FloatBackground.Image:match("^%d+$"))) 
+                         and "rbxassetid://" .. tostring(settings.FloatBackground.Image) 
+                         or settings.FloatBackground.Image
+        bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0.2
+        bgImage.ScaleType = Enum.ScaleType.Crop
+        bgImage.ZIndex = TBtn.ZIndex + 1
+        TBtn.BackgroundTransparency = 1
+        
+        local overlay = Instance.new("Frame", TBtn)
+        overlay.Size = UDim2.new(1, 0, 1, 0)
+        overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        overlay.BackgroundTransparency = 0.4
+        overlay.ZIndex = TBtn.ZIndex + 2
     end
     
+    if type(settings.Icon) == "number" then
+        local FI = Instance.new("ImageLabel", TBtn)
+        FI.Size = UDim2.new(0.5, 0, 0.5, 0)
+        FI.Position = UDim2.new(0.25, 0, 0.25, 0)
+        FI.BackgroundTransparency = 1
+        FI.Image = "rbxassetid://" .. tostring(settings.Icon)
+        FI.ImageColor3 = ACCENT
+        FI.ZIndex = TBtn.ZIndex + 5
+    elseif type(settings.Icon) == "string" and settings.Icon ~= "" then
+        local textIcon = Instance.new("TextLabel", TBtn)
+        textIcon.Size = UDim2.new(1, 0, 1, 0)
+        textIcon.BackgroundTransparency = 1
+        textIcon.Text = settings.Icon
+        textIcon.TextColor3 = ACCENT
+        textIcon.TextSize = 22
+        textIcon.Font = Enum.Font.GothamBold
+        textIcon.ZIndex = TBtn.ZIndex + 5
+    end
+
     local floatDragging = false
     local floatDragStart, floatStartPos, floatDragInput
     TBtn.InputBegan:Connect(function(input)
@@ -499,16 +546,6 @@ function NoirUI:CreateWindow(settings)
             floatDragging = false
         end
     end)
-    
-    if type(settings.Icon) == "number" then
-        local FI = Instance.new("ImageLabel", TBtn)
-        FI.Size = UDim2.new(0.6,0,0.6,0)
-        FI.Position = UDim2.new(0.2,0,0.2,0)
-        FI.BackgroundTransparency = 1
-        FI.Image = "rbxassetid://"..tostring(settings.Icon)
-        FI.ImageColor3 = ACCENT
-        TBtn.Text = ""
-    end
     
     TBtn.MouseButton1Click:Connect(function()
         if not KeySolved and KUI and KUI.Parent then
@@ -1052,8 +1089,11 @@ function NoirUI:CreateWindow(settings)
                 if input == "" then return end
                 
                 if input:sub(1,1) == "." then
-                    local parts = input:sub(2):split(" ")
-                    local cmd = parts[1]:lower()
+                    local parts = {}
+                    for part in input:sub(2):gmatch("%S+") do
+                        table.insert(parts, part)
+                    end
+                    local cmd = parts[1] and parts[1]:lower() or ""
                     local args = {}
                     for j = 2, #parts do
                         table.insert(args, parts[j])
