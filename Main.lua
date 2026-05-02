@@ -10,6 +10,325 @@ if OldGui then OldGui:Destroy() end
 
 local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {} }
 
+-- ========== LUCIDE ICONS TÍCH HỢP SẴN (KHÔNG CẦN LOAD FILE) ==========
+local LucideIcons = {
+    -- Essentials / Basic
+    ["home"] = "rbxassetid://6031081843",
+    ["house"] = "rbxassetid://6031081843",
+    ["user"] = "rbxassetid://6031094700",
+    ["users"] = "rbxassetid://6031115921",
+    ["user-plus"] = "rbxassetid://6031115057",
+    ["user-minus"] = "rbxassetid://6031115057",
+    ["user-check"] = "rbxassetid://6031115057",
+    ["user-x"] = "rbxassetid://6031115057",
+    ["settings"] = "rbxassetid://6031091396",
+    ["menu"] = "rbxassetid://6031087080",
+    ["more-horizontal"] = "rbxassetid://6031102344",
+    ["more-vertical"] = "rbxassetid://6031103642",
+    ["x"] = "rbxassetid://6031093801",
+    ["close"] = "rbxassetid://6031093801",
+    ["check"] = "rbxassetid://6031084546",
+    ["tick"] = "rbxassetid://6031084546",
+    ["plus"] = "rbxassetid://6031105239",
+    ["add"] = "rbxassetid://6031105239",
+    ["minus"] = "rbxassetid://6031083401",
+    ["search"] = "rbxassetid://6031089259",
+    ["find"] = "rbxassetid://6031089259",
+    ["filter"] = "rbxassetid://6031089259",
+    
+    -- Arrows / Navigation
+    ["arrow-left"] = "rbxassetid://6031079884",
+    ["arrow-right"] = "rbxassetid://6031081251",
+    ["arrow-up"] = "rbxassetid://6031079884",
+    ["arrow-down"] = "rbxassetid://6031081251",
+    ["chevron-left"] = "rbxassetid://6031079884",
+    ["chevron-right"] = "rbxassetid://6031081251",
+    ["chevron-up"] = "rbxassetid://6031084189",
+    ["chevron-down"] = "rbxassetid://6031083401",
+    ["chevrons-left"] = "rbxassetid://6031079884",
+    ["chevrons-right"] = "rbxassetid://6031081251",
+    ["chevrons-up"] = "rbxassetid://6031084189",
+    ["chevrons-down"] = "rbxassetid://6031083401",
+    ["corner-up-left"] = "rbxassetid://6031079884",
+    ["corner-up-right"] = "rbxassetid://6031081251",
+    ["corner-down-left"] = "rbxassetid://6031079884",
+    ["corner-down-right"] = "rbxassetid://6031081251",
+    ["move"] = "rbxassetid://6031081843",
+    ["move-horizontal"] = "rbxassetid://6031081251",
+    ["move-vertical"] = "rbxassetid://6031079884",
+    ["maximize"] = "rbxassetid://6031099873",
+    ["minimize"] = "rbxassetid://6031100687",
+    ["maximize-2"] = "rbxassetid://6031099873",
+    ["minimize-2"] = "rbxassetid://6031100687",
+    ["external-link"] = "rbxassetid://6031081251",
+    ["link"] = "rbxassetid://6031081251",
+    ["unlink"] = "rbxassetid://6031081251",
+    
+    -- Actions
+    ["edit"] = "rbxassetid://6031087645",
+    ["edit-2"] = "rbxassetid://6031087645",
+    ["edit-3"] = "rbxassetid://6031087645",
+    ["pen"] = "rbxassetid://6031087645",
+    ["pencil"] = "rbxassetid://6031087645",
+    ["trash"] = "rbxassetid://6031112211",
+    ["trash-2"] = "rbxassetid://6031112211",
+    ["delete"] = "rbxassetid://6031112211",
+    ["copy"] = "rbxassetid://6031085639",
+    ["cut"] = "rbxassetid://6031085639",
+    ["paste"] = "rbxassetid://6031085639",
+    ["clipboard"] = "rbxassetid://6031085639",
+    ["clipboard-list"] = "rbxassetid://6031085639",
+    ["clipboard-check"] = "rbxassetid://6031085639",
+    ["clipboard-x"] = "rbxassetid://6031085639",
+    ["refresh-cw"] = "rbxassetid://6031106984",
+    ["refresh-ccw"] = "rbxassetid://6031106984",
+    ["rotate-cw"] = "rbxassetid://6031106984",
+    ["rotate-ccw"] = "rbxassetid://6031106984",
+    ["undo"] = "rbxassetid://6031079884",
+    ["redo"] = "rbxassetid://6031081251",
+    ["save"] = "rbxassetid://6031107829",
+    ["download"] = "rbxassetid://6031086313",
+    ["upload"] = "rbxassetid://6031113854",
+    ["download-cloud"] = "rbxassetid://6031086313",
+    ["upload-cloud"] = "rbxassetid://6031113854",
+    ["log-in"] = "rbxassetid://6031079884",
+    ["log-out"] = "rbxassetid://6031081251",
+    ["power"] = "rbxassetid://6031106159",
+    ["off"] = "rbxassetid://6031106159",
+    
+    -- Files & Folders
+    ["folder"] = "rbxassetid://6031090280",
+    ["folder-open"] = "rbxassetid://6031090280",
+    ["folder-plus"] = "rbxassetid://6031090280",
+    ["folder-minus"] = "rbxassetid://6031090280",
+    ["folder-heart"] = "rbxassetid://6031090280",
+    ["file"] = "rbxassetid://6031090280",
+    ["file-text"] = "rbxassetid://6031090280",
+    ["file-plus"] = "rbxassetid://6031090280",
+    ["file-minus"] = "rbxassetid://6031090280",
+    ["archive"] = "rbxassetid://6031078526",
+    ["book"] = "rbxassetid://6031090280",
+    ["book-open"] = "rbxassetid://6031090280",
+    
+    -- Media / Entertainment
+    ["play"] = "rbxassetid://6031104410",
+    ["pause"] = "rbxassetid://6031105239",
+    ["stop"] = "rbxassetid://6031093801",
+    ["skip-back"] = "rbxassetid://6031079884",
+    ["skip-forward"] = "rbxassetid://6031081251",
+    ["rewind"] = "rbxassetid://6031079884",
+    ["fast-forward"] = "rbxassetid://6031081251",
+    ["volume"] = "rbxassetid://6031117635",
+    ["volume-1"] = "rbxassetid://6031117635",
+    ["volume-2"] = "rbxassetid://6031117635",
+    ["volume-x"] = "rbxassetid://6031118466",
+    ["mute"] = "rbxassetid://6031118466",
+    ["speaker"] = "rbxassetid://6031117635",
+    ["headphones"] = "rbxassetid://6031082291",
+    ["headset"] = "rbxassetid://6031082291",
+    ["mic"] = "rbxassetid://6031082291",
+    ["mic-off"] = "rbxassetid://6031082291",
+    ["music"] = "rbxassetid://6031104410",
+    ["film"] = "rbxassetid://6031116716",
+    ["video"] = "rbxassetid://6031116716",
+    ["camera"] = "rbxassetid://6031094632",
+    ["camera-off"] = "rbxassetid://6031094632",
+    ["image"] = "rbxassetid://6031094632",
+    ["picture"] = "rbxassetid://6031094632",
+    
+    -- Devices
+    ["smartphone"] = "rbxassetid://6031094632",
+    ["phone"] = "rbxassetid://6031098098",
+    ["phone-call"] = "rbxassetid://6031098098",
+    ["phone-forwarded"] = "rbxassetid://6031098098",
+    ["phone-incoming"] = "rbxassetid://6031098098",
+    ["phone-outgoing"] = "rbxassetid://6031098098",
+    ["phone-missed"] = "rbxassetid://6031098098",
+    ["tablet"] = "rbxassetid://6031094632",
+    ["monitor"] = "rbxassetid://6031094632",
+    ["tv"] = "rbxassetid://6031094632",
+    ["watch"] = "rbxassetid://6031094632",
+    ["cpu"] = "rbxassetid://6031093076",
+    ["hard-drive"] = "rbxassetid://6031093076",
+    ["server"] = "rbxassetid://6031093076",
+    ["database"] = "rbxassetid://6031093076",
+    
+    -- Social & Communication
+    ["mail"] = "rbxassetid://6031098098",
+    ["mail-open"] = "rbxassetid://6031098098",
+    ["inbox"] = "rbxassetid://6031098098",
+    ["send"] = "rbxassetid://6031113854",
+    ["message-circle"] = "rbxassetid://6031098098",
+    ["message-square"] = "rbxassetid://6031098098",
+    ["at-sign"] = "rbxassetid://6031098098",
+    ["hash"] = "rbxassetid://6031091396",
+    ["bell"] = "rbxassetid://6031082291",
+    ["bell-off"] = "rbxassetid://6031082291",
+    ["eye"] = "rbxassetid://6031088606",
+    ["eye-off"] = "rbxassetid://6031088606",
+    
+    -- Social Media Brands
+    ["github"] = "rbxassetid://6031091056",
+    ["youtube"] = "rbxassetid://6031119420",
+    ["twitter"] = "rbxassetid://6031113035",
+    ["facebook"] = "rbxassetid://6031089508",
+    ["instagram"] = "rbxassetid://6031089508",
+    ["linkedin"] = "rbxassetid://6031096274",
+    ["discord"] = "rbxassetid://6031091056",
+    ["twitch"] = "rbxassetid://6031119420",
+    ["tiktok"] = "rbxassetid://6031119420",
+    ["reddit"] = "rbxassetid://6031091056",
+    ["whatsapp"] = "rbxassetid://6031098098",
+    ["telegram"] = "rbxassetid://6031098098",
+    ["spotify"] = "rbxassetid://6031104410",
+    ["apple"] = "rbxassetid://6031089508",
+    ["google"] = "rbxassetid://6031092169",
+    
+    -- Security & Status
+    ["lock"] = "rbxassetid://6031097269",
+    ["unlock"] = "rbxassetid://6031097269",
+    ["shield"] = "rbxassetid://6031108700",
+    ["shield-check"] = "rbxassetid://6031108700",
+    ["shield-alert"] = "rbxassetid://6031108700",
+    ["shield-off"] = "rbxassetid://6031108700",
+    ["alert-circle"] = "rbxassetid://6031077329",
+    ["alert-triangle"] = "rbxassetid://6031077329",
+    ["warning"] = "rbxassetid://6031077329",
+    ["info"] = "rbxassetid://6031095493",
+    ["help-circle"] = "rbxassetid://6031093855",
+    ["question"] = "rbxassetid://6031093855",
+    
+    -- Weather & Nature
+    ["sun"] = "rbxassetid://6031111296",
+    ["moon"] = "rbxassetid://6031101481",
+    ["cloud"] = "rbxassetid://6031092169",
+    ["cloud-rain"] = "rbxassetid://6031092169",
+    ["cloud-snow"] = "rbxassetid://6031092169",
+    ["cloud-lightning"] = "rbxassetid://6031092169",
+    ["droplet"] = "rbxassetid://6031092169",
+    ["wind"] = "rbxassetid://6031092169",
+    ["compass"] = "rbxassetid://6031098887",
+    ["globe"] = "rbxassetid://6031092169",
+    ["map"] = "rbxassetid://6031098887",
+    ["map-pin"] = "rbxassetid://6031098887",
+    ["navigation"] = "rbxassetid://6031098887",
+    ["anchor"] = "rbxassetid://6031081251",
+    
+    -- Time & Calendar
+    ["calendar"] = "rbxassetid://6031098887",
+    ["clock"] = "rbxassetid://6031098887",
+    ["alarm-clock"] = "rbxassetid://6031098887",
+    ["timer"] = "rbxassetid://6031098887",
+    ["hourglass"] = "rbxassetid://6031098887",
+    
+    -- Health & Fitness
+    ["heart"] = "rbxassetid://6031093076",
+    ["activity"] = "rbxassetid://6031093076",
+    ["battery"] = "rbxassetid://6031093076",
+    ["battery-charging"] = "rbxassetid://6031093076",
+    
+    -- Gaming
+    ["gamepad"] = "rbxassetid://6031094632",
+    ["controller"] = "rbxassetid://6031094632",
+    ["joystick"] = "rbxassetid://6031094632",
+    ["dice"] = "rbxassetid://6031094632",
+    ["trophy"] = "rbxassetid://6031093076",
+    ["award"] = "rbxassetid://6031093076",
+    ["medal"] = "rbxassetid://6031093076",
+    ["star"] = "rbxassetid://6031110336",
+    
+    -- Shopping & Money
+    ["shopping-cart"] = "rbxassetid://6031109471",
+    ["shopping-bag"] = "rbxassetid://6031109471",
+    ["credit-card"] = "rbxassetid://6031109471",
+    ["wallet"] = "rbxassetid://6031109471",
+    ["dollar-sign"] = "rbxassetid://6031109471",
+    ["coin"] = "rbxassetid://6031109471",
+    ["truck"] = "rbxassetid://6031109471",
+    ["package"] = "rbxassetid://6031109471",
+    ["gift"] = "rbxassetid://6031093076",
+    ["tag"] = "rbxassetid://6031093076",
+    ["percent"] = "rbxassetid://6031077329",
+    
+    -- Development & Code
+    ["code"] = "rbxassetid://6031085639",
+    ["terminal"] = "rbxassetid://6031085639",
+    ["command"] = "rbxassetid://6031085639",
+    ["git-branch"] = "rbxassetid://6031085639",
+    ["git-commit"] = "rbxassetid://6031085639",
+    ["git-merge"] = "rbxassetid://6031085639",
+    ["git-pull-request"] = "rbxassetid://6031085639",
+    
+    -- Charts & Analytics
+    ["bar-chart"] = "rbxassetid://6031077329",
+    ["bar-chart-2"] = "rbxassetid://6031077329",
+    ["pie-chart"] = "rbxassetid://6031077329",
+    ["line-chart"] = "rbxassetid://6031077329",
+    ["trending-up"] = "rbxassetid://6031081251",
+    ["trending-down"] = "rbxassetid://6031079884",
+    
+    -- Other / Misc
+    ["zap"] = "rbxassetid://6031120184",
+    ["bolt"] = "rbxassetid://6031120184",
+    ["loader"] = "rbxassetid://6031106984",
+    ["loading"] = "rbxassetid://6031106984",
+    ["feather"] = "rbxassetid://6031093076",
+    ["flag"] = "rbxassetid://6031093076",
+    ["bookmark"] = "rbxassetid://6031093076",
+    ["key"] = "rbxassetid://6031097269",
+    ["sliders"] = "rbxassetid://6031091396",
+    ["aperture"] = "rbxassetid://6031094632",
+    ["crop"] = "rbxassetid://6031094632",
+    ["layers"] = "rbxassetid://6031090280",
+    ["grid"] = "rbxassetid://6031087080",
+    ["list"] = "rbxassetid://6031087080",
+    ["check-square"] = "rbxassetid://6031084546",
+    ["square"] = "rbxassetid://6031084546",
+    ["circle"] = "rbxassetid://6031077329",
+    ["target"] = "rbxassetid://6031098887",
+    ["crosshair"] = "rbxassetid://6031098887",
+    ["radio"] = "rbxassetid://6031098887",
+    ["wifi"] = "rbxassetid://6031098887",
+    ["wifi-off"] = "rbxassetid://6031098887",
+}
+
+-- Hàm xử lý icon (tích hợp Lucide)
+local function ResolveIcon(iconInput, defaultIconId)
+    if not iconInput then return nil end
+    
+    -- Nếu là số (Asset ID)
+    if type(iconInput) == "number" then
+        return "rbxassetid://" .. tostring(iconInput)
+    end
+    
+    -- Nếu là string
+    if type(iconInput) == "string" then
+        -- Nếu đã có dạng rbxassetid://
+        if iconInput:match("^rbxassetid://") then
+            return iconInput
+        end
+        
+        -- Nếu là URL http
+        if iconInput:match("^http") then
+            return iconInput
+        end
+        
+        -- Nếu là tên Lucide Icon (ví dụ: "user", "home", "settings")
+        local iconName = iconInput:lower()
+        if LucideIcons[iconName] then
+            return LucideIcons[iconName]
+        end
+        
+        -- Nếu không tìm thấy, dùng default
+        if defaultIconId then
+            return "rbxassetid://" .. tostring(defaultIconId)
+        end
+        return nil
+    end
+    
+    return nil
+end
+
 -- // Hàm kéo thả
 local function MakeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
@@ -333,14 +652,8 @@ function NoirUI:CreateWindow(settings)
         L.Size = UDim2.new(0, 24, 0, 24)
         L.Position = UDim2.new(0, 10, 0.5, -12)
         L.BackgroundTransparency = 1
-        local logoVal = settings.LogoID
-        if type(logoVal) == "number" then
-            L.Image = "rbxassetid://" .. tostring(logoVal)
-        elseif type(logoVal) == "string" and logoVal:match("^rbxassetid://") then
-            L.Image = logoVal
-        elseif type(logoVal) == "string" then
-            L.Image = logoVal
-        end
+        local logoImage = ResolveIcon(settings.LogoID, settings.LogoID)
+        if logoImage then L.Image = logoImage end
     end
     local Title = Instance.new("TextLabel", Header)
     Title.Size = UDim2.new(1, -120, 1, 0)
@@ -511,33 +824,25 @@ function NoirUI:CreateWindow(settings)
     
     local iconValue = settings.Icon
     if iconValue then
-        if type(iconValue) == "number" then
+        local iconImage = ResolveIcon(iconValue)
+        
+        if iconImage then
             local FI = Instance.new("ImageLabel", TBtn)
             FI.Size = UDim2.new(0.5, 0, 0.5, 0)
             FI.Position = UDim2.new(0.25, 0, 0.25, 0)
             FI.BackgroundTransparency = 1
-            FI.Image = "rbxassetid://" .. tostring(iconValue)
+            FI.Image = iconImage
             FI.ImageColor3 = ACCENT
             FI.ZIndex = TBtn.ZIndex + 5
         elseif type(iconValue) == "string" then
-            if iconValue:match("^rbxassetid://") then
-                local FI = Instance.new("ImageLabel", TBtn)
-                FI.Size = UDim2.new(0.5, 0, 0.5, 0)
-                FI.Position = UDim2.new(0.25, 0, 0.25, 0)
-                FI.BackgroundTransparency = 1
-                FI.Image = iconValue
-                FI.ImageColor3 = ACCENT
-                FI.ZIndex = TBtn.ZIndex + 5
-            else
-                local textIcon = Instance.new("TextLabel", TBtn)
-                textIcon.Size = UDim2.new(1, 0, 1, 0)
-                textIcon.BackgroundTransparency = 1
-                textIcon.Text = iconValue
-                textIcon.TextColor3 = ACCENT
-                textIcon.TextSize = 22
-                textIcon.Font = Enum.Font.GothamBold
-                textIcon.ZIndex = TBtn.ZIndex + 5
-            end
+            local textIcon = Instance.new("TextLabel", TBtn)
+            textIcon.Size = UDim2.new(1, 0, 1, 0)
+            textIcon.BackgroundTransparency = 1
+            textIcon.Text = iconValue
+            textIcon.TextColor3 = ACCENT
+            textIcon.TextSize = 22
+            textIcon.Font = Enum.Font.GothamBold
+            textIcon.ZIndex = TBtn.ZIndex + 5
         end
     end
 
@@ -582,12 +887,12 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- //////////////// NOTIFICATIONS ////////////////
-    function NoirUI:Notify(t, m)
+    -- //////////////// NOTIFICATIONS (CÓ ICON LUCIDE) ////////////////
+    function NoirUI:Notify(title, message, iconName)
         local n = Instance.new("Frame", ScreenGui)
-        n.Size = UDim2.new(0,220,0,65)
-        n.Position = UDim2.new(1,20,0.8,0)
-        n.BackgroundColor3 = Color3.fromRGB(15,15,15)
+        n.Size = UDim2.new(0, 260, 0, 65)
+        n.Position = UDim2.new(1, 20, 0.8, 0)
+        n.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
         n.BackgroundTransparency = 0.25
         Instance.new("UICorner", n)
         local ns = Instance.new("UIStroke", n)
@@ -597,10 +902,24 @@ function NoirUI:CreateWindow(settings)
             LoadBackground(n, settings.NotificationBackground)
         end
         
+        -- Icon notification (nếu có)
+        if iconName then
+            local iconImg = ResolveIcon(iconName)
+            if iconImg then
+                local icon = Instance.new("ImageLabel", n)
+                icon.Size = UDim2.new(0, 24, 0, 24)
+                icon.Position = UDim2.new(0, 10, 0.5, -12)
+                icon.BackgroundTransparency = 1
+                icon.Image = iconImg
+                icon.ImageColor3 = ACCENT
+                icon.ZIndex = 2
+            end
+        end
+        
         local tl = Instance.new("TextLabel", n)
-        tl.Size = UDim2.new(1,-10,0,20)
-        tl.Position = UDim2.new(0,10,0,5)
-        tl.Text = t
+        tl.Size = UDim2.new(1, iconName and -45 or -15, 0, 20)
+        tl.Position = UDim2.new(0, iconName and 40 or 15, 0, 5)
+        tl.Text = title
         tl.TextColor3 = ACCENT
         tl.BackgroundTransparency = 1
         tl.Font = "GothamBold"
@@ -608,9 +927,9 @@ function NoirUI:CreateWindow(settings)
         tl.TextXAlignment = "Left"
         
         local ml = Instance.new("TextLabel", n)
-        ml.Size = UDim2.new(1,-20,0,35)
-        ml.Position = UDim2.new(0,10,0,25)
-        ml.Text = m
+        ml.Size = UDim2.new(1, iconName and -45 or -25, 0, 35)
+        ml.Position = UDim2.new(0, iconName and 40 or 15, 0, 25)
+        ml.Text = message
         ml.TextColor3 = Color3.new(1,1,1)
         ml.BackgroundTransparency = 1
         ml.TextWrapped = true
@@ -620,12 +939,12 @@ function NoirUI:CreateWindow(settings)
         ml.TextSize = 11
         
         for i, v in ipairs(NoirUI.Notifications) do
-            TweenService:Create(v, TweenInfo.new(0.3), {Position = UDim2.new(1,-240,0.8,-(i*75))}):Play()
+            TweenService:Create(v, TweenInfo.new(0.3), {Position = UDim2.new(1, -280, 0.8, -(i * 75))}):Play()
         end
         table.insert(NoirUI.Notifications, 1, n)
-        TweenService:Create(n, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Position = UDim2.new(1,-240,0.8,0)}):Play()
+        TweenService:Create(n, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Position = UDim2.new(1, -280, 0.8, 0)}):Play()
         task.delay(4, function()
-            TweenService:Create(n, TweenInfo.new(0.5), {Position = UDim2.new(1,20,n.Position.Y.Scale,n.Position.Y.Offset), BackgroundTransparency = 1}):Play()
+            TweenService:Create(n, TweenInfo.new(0.5), {Position = UDim2.new(1, 20, n.Position.Y.Scale, n.Position.Y.Offset), BackgroundTransparency = 1}):Play()
             task.wait(0.5)
             for i, v in ipairs(NoirUI.Notifications) do
                 if v == n then
@@ -648,7 +967,7 @@ function NoirUI:CreateWindow(settings)
         B.Text = ""
         Instance.new("UICorner", B)
         local BT = Instance.new("TextLabel", B)
-        BT.Size = UDim2.new(1,-10,1,0)
+        BT.Size = UDim2.new(1, -10, 1, 0)
         BT.Position = UDim2.new(0, icon and 35 or 8, 0, 0)
         BT.BackgroundTransparency = 1
         BT.Text = name
@@ -656,20 +975,21 @@ function NoirUI:CreateWindow(settings)
         BT.Font = "GothamMedium"
         BT.TextSize = 11
         BT.TextXAlignment = "Left"
+        
+        -- Xử lý icon tab với Lucide
         if icon then
             local IC = Instance.new("ImageLabel", B)
             IC.Size = UDim2.new(0, 18, 0, 18)
             IC.Position = UDim2.new(0, 8, 0.5, -9)
             IC.BackgroundTransparency = 1
-            local iconVal = icon
-            if type(iconVal) == "number" then
-                IC.Image = "rbxassetid://" .. tostring(iconVal)
-            elseif type(iconVal) == "string" and iconVal:match("^rbxassetid://") then
-                IC.Image = iconVal
-            elseif type(iconVal) == "string" then
-                IC.Image = iconVal
+            local iconImage = ResolveIcon(icon)
+            if iconImage then
+                IC.Image = iconImage
+            else
+                IC.Image = "rbxassetid://6031094700"
             end
             IC.ImageColor3 = Color3.fromRGB(150, 150, 150)
+            IC.ZIndex = 2
         end
         
         local TabContainer = Instance.new("ScrollingFrame", Cont)
@@ -728,19 +1048,22 @@ function NoirUI:CreateWindow(settings)
                 if v:IsA("TextButton") then
                     local t = v:FindFirstChild("TextLabel")
                     if t then t.TextColor3 = Color3.fromRGB(150, 150, 150) end
-                    if v:FindFirstChild("ImageLabel") then v.ImageLabel.ImageColor3 = Color3.fromRGB(150, 150, 150) end
+                    local img = v:FindFirstChild("ImageLabel")
+                    if img then img.ImageColor3 = Color3.fromRGB(150, 150, 150) end
                 end
             end
             TabContainer.Visible = true
             BT.TextColor3 = ACCENT
-            if B:FindFirstChild("ImageLabel") then B.ImageLabel.ImageColor3 = ACCENT end
+            local tabImg = B:FindFirstChild("ImageLabel")
+            if tabImg then tabImg.ImageColor3 = ACCENT end
             updateCanvas()
         end)
         
         if #TScroll:GetChildren() == 2 then
             TabContainer.Visible = true
             BT.TextColor3 = ACCENT
-            if B:FindFirstChild("ImageLabel") then B.ImageLabel.ImageColor3 = ACCENT end
+            local tabImg = B:FindFirstChild("ImageLabel")
+            if tabImg then tabImg.ImageColor3 = ACCENT end
         end
         
         local Tab = { Count = 0, Elements = {}, Connections = {} }
@@ -762,7 +1085,7 @@ function NoirUI:CreateWindow(settings)
             if prop == "Text" then filterElements(SearchBox.Text) end
         end)
         
-        -- ========== LABEL (HỖ TRỢ UPDATE ĐỘNG) ==========
+        -- ========== CÁC ELEMENT ==========
         function Tab:CreateLabel(text, updateFunction)
             local l = Instance.new("TextLabel", ContentFrame)
             l.Size = UDim2.new(0.95,0,0,20)
@@ -776,7 +1099,6 @@ function NoirUI:CreateWindow(settings)
             l.Name = "Label"
             table.insert(Tab.Elements, l)
             
-            -- Nếu có updateFunction, tự động cập nhật
             if type(text) == "function" then
                 local connection = RunService.RenderStepped:Connect(function()
                     if l and l.Parent then
@@ -791,7 +1113,6 @@ function NoirUI:CreateWindow(settings)
             return l
         end
         
-        -- ========== PARAGRAPH (HỖ TRỢ UPDATE ĐỘNG) ==========
         function Tab:CreateParagraph(opt)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95,0,0,65)
@@ -824,7 +1145,6 @@ function NoirUI:CreateWindow(settings)
             content.TextXAlignment = "Left"
             content.TextYAlignment = "Top"
             
-            -- Hỗ trợ update động
             if opt.UpdateFunction then
                 local connection = RunService.RenderStepped:Connect(function()
                     if f and f.Parent then
@@ -841,156 +1161,6 @@ function NoirUI:CreateWindow(settings)
             return f
         end
         
-        -- ========== DROPDOWN (HỖ TRỢ REFRESH ĐỘNG) ==========
-        function Tab:CreateDropdown(opt)
-            local d = Instance.new("Frame", ContentFrame)
-            d.Size = UDim2.new(0.95,0,0,35)
-            d.BackgroundColor3 = Color3.fromRGB(22,22,22)
-            d.BackgroundTransparency = 0.7
-            Instance.new("UICorner", d)
-            d.LayoutOrder = GetO()
-            d.ClipsDescendants = true
-            d.Name = opt.Name or ""
-            table.insert(Tab.Elements, d)
-            
-            local t = Instance.new("TextButton", d)
-            t.Name = "DropdownButton"
-            t.Size = UDim2.new(1,0,0,35)
-            t.BackgroundTransparency = 1
-            t.Text = "  "..opt.Name.." : "..(opt.Default or "Đang tải...")
-            t.TextColor3 = Color3.new(1,1,1)
-            t.Font = "GothamMedium"
-            t.TextSize = 12
-            t.TextXAlignment = "Left"
-            
-            local Arrow = Instance.new("TextLabel", t)
-            Arrow.Name = "ArrowLabel"
-            Arrow.Size = UDim2.new(0, 30, 1, 0)
-            Arrow.Position = UDim2.new(1, -35, 0, 0)
-            Arrow.BackgroundTransparency = 1
-            Arrow.Text = "▼"
-            Arrow.TextColor3 = Color3.fromRGB(180, 180, 180)
-            Arrow.Font = "GothamMedium"
-            Arrow.TextSize = 14
-            Arrow.TextXAlignment = "Center"
-            
-            local il = Instance.new("ScrollingFrame", d)
-            il.Name = "OptionsList"
-            il.Size = UDim2.new(1,0,0,120)
-            il.Position = UDim2.new(0,0,0,35)
-            il.BackgroundTransparency = 1
-            il.ScrollBarThickness = 2
-            il.AutomaticCanvasSize = "Y"
-            il.Visible = false
-            Instance.new("UIListLayout", il)
-            
-            -- Hàm refresh options
-            local function refreshOptions()
-                if not opt.GetOptions then return end
-                local newOptions = opt.GetOptions()
-                if not newOptions then return end
-                
-                -- Xóa options cũ
-                for _, child in pairs(il:GetChildren()) do
-                    if child:IsA("TextButton") then
-                        child:Destroy()
-                    end
-                end
-                
-                -- Thêm options mới
-                for _, option in pairs(newOptions) do
-                    local it = Instance.new("TextButton", il)
-                    it.Size = UDim2.new(1,0,0,30)
-                    it.BackgroundColor3 = Color3.fromRGB(28,28,28)
-                    it.BackgroundTransparency = 0.5
-                    it.Text = option
-                    it.TextColor3 = Color3.fromRGB(200,200,200)
-                    it.Font = "GothamMedium"
-                    it.TextSize = 11
-                    it.MouseButton1Click:Connect(function()
-                        local open = false
-                        il.Visible = false
-                        Arrow.Text = "▼"
-                        t.Text = "  "..opt.Name.." : "..option
-                        TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95,0,0,35)}):Play()
-                        if opt.Callback then opt.Callback(option) end
-                    end)
-                end
-                
-                local optionCount = math.min(#newOptions, 4)
-                il.Size = UDim2.new(1,0,0, optionCount * 30)
-                
-                if opt.Default then
-                    t.Text = "  "..opt.Name.." : "..opt.Default
-                elseif newOptions[1] then
-                    t.Text = "  "..opt.Name.." : "..newOptions[1]
-                end
-            end
-            
-            local open = false
-            t.MouseButton1Click:Connect(function()
-                open = not open
-                il.Visible = open
-                Arrow.Text = open and "▲" or "▼"
-                
-                -- Refresh trước khi mở
-                if open and opt.RefreshOnOpen then
-                    refreshOptions()
-                end
-                
-                TweenService:Create(d, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95,0,0,35+il.Size.Y.Offset) or UDim2.new(0.95,0,0,35)}):Play()
-            end)
-            
-            -- Refresh lần đầu
-            if opt.GetOptions then
-                refreshOptions()
-            elseif opt.Options then
-                -- Trường hợp options tĩnh
-                for _, v in pairs(opt.Options) do
-                    local it = Instance.new("TextButton", il)
-                    it.Size = UDim2.new(1,0,0,30)
-                    it.BackgroundColor3 = Color3.fromRGB(28,28,28)
-                    it.BackgroundTransparency = 0.5
-                    it.Text = v
-                    it.TextColor3 = Color3.fromRGB(200,200,200)
-                    it.Font = "GothamMedium"
-                    it.TextSize = 11
-                    it.MouseButton1Click:Connect(function()
-                        open = false
-                        il.Visible = false
-                        Arrow.Text = "▼"
-                        t.Text = "  "..opt.Name.." : "..v
-                        TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95,0,0,35)}):Play()
-                        opt.Callback(v)
-                    end)
-                end
-                local optionCount = math.min(#opt.Options, 4)
-                il.Size = UDim2.new(1,0,0, optionCount * 30)
-            end
-            
-            -- Tự động refresh theo interval
-            if opt.RefreshInterval and opt.GetOptions then
-                local refreshConnection = RunService.RenderStepped:Connect(function()
-                    if d and d.Parent then
-                        local newOptions = opt.GetOptions()
-                        if newOptions then
-                            local currentCount = 0
-                            for _, child in pairs(il:GetChildren()) do
-                                if child:IsA("TextButton") then currentCount = currentCount + 1 end
-                            end
-                            if currentCount ~= #newOptions then
-                                refreshOptions()
-                            end
-                        end
-                    else
-                        refreshConnection:Disconnect()
-                    end
-                end)
-                table.insert(Tab.Connections, refreshConnection)
-            end
-        end
-        
-        -- ========== CÁC ELEMENT CƠ BẢN KHÁC ==========
         function Tab:CreateTextBox(opt)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95,0,0,35)
@@ -1199,6 +1369,147 @@ function NoirUI:CreateWindow(settings)
                 open = not open
                 TweenService:Create(f, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95,0,0,180) or UDim2.new(0.95,0,0,35)}):Play()
             end)
+        end
+        
+        function Tab:CreateDropdown(opt)
+            local d = Instance.new("Frame", ContentFrame)
+            d.Size = UDim2.new(0.95,0,0,35)
+            d.BackgroundColor3 = Color3.fromRGB(22,22,22)
+            d.BackgroundTransparency = 0.7
+            Instance.new("UICorner", d)
+            d.LayoutOrder = GetO()
+            d.ClipsDescendants = true
+            d.Name = opt.Name or ""
+            table.insert(Tab.Elements, d)
+            
+            local t = Instance.new("TextButton", d)
+            t.Name = "DropdownButton"
+            t.Size = UDim2.new(1,0,0,35)
+            t.BackgroundTransparency = 1
+            t.Text = "  "..opt.Name.." : "..(opt.Default or (opt.Options and opt.Options[1] or "Đang tải..."))
+            t.TextColor3 = Color3.new(1,1,1)
+            t.Font = "GothamMedium"
+            t.TextSize = 12
+            t.TextXAlignment = "Left"
+            
+            local Arrow = Instance.new("TextLabel", t)
+            Arrow.Name = "ArrowLabel"
+            Arrow.Size = UDim2.new(0, 30, 1, 0)
+            Arrow.Position = UDim2.new(1, -35, 0, 0)
+            Arrow.BackgroundTransparency = 1
+            Arrow.Text = "▼"
+            Arrow.TextColor3 = Color3.fromRGB(180, 180, 180)
+            Arrow.Font = "GothamMedium"
+            Arrow.TextSize = 14
+            Arrow.TextXAlignment = "Center"
+            
+            local il = Instance.new("ScrollingFrame", d)
+            il.Name = "OptionsList"
+            il.Size = UDim2.new(1,0,0,120)
+            il.Position = UDim2.new(0,0,0,35)
+            il.BackgroundTransparency = 1
+            il.ScrollBarThickness = 2
+            il.AutomaticCanvasSize = "Y"
+            il.Visible = false
+            Instance.new("UIListLayout", il)
+            
+            local function refreshOptions()
+                if not opt.GetOptions then return end
+                local newOptions = opt.GetOptions()
+                if not newOptions then return end
+                
+                for _, child in pairs(il:GetChildren()) do
+                    if child:IsA("TextButton") then
+                        child:Destroy()
+                    end
+                end
+                
+                for _, option in pairs(newOptions) do
+                    local it = Instance.new("TextButton", il)
+                    it.Size = UDim2.new(1,0,0,30)
+                    it.BackgroundColor3 = Color3.fromRGB(28,28,28)
+                    it.BackgroundTransparency = 0.5
+                    it.Text = option
+                    it.TextColor3 = Color3.fromRGB(200,200,200)
+                    it.Font = "GothamMedium"
+                    it.TextSize = 11
+                    it.MouseButton1Click:Connect(function()
+                        local open = false
+                        il.Visible = false
+                        Arrow.Text = "▼"
+                        t.Text = "  "..opt.Name.." : "..option
+                        TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95,0,0,35)}):Play()
+                        if opt.Callback then opt.Callback(option) end
+                    end)
+                end
+                
+                local optionCount = math.min(#newOptions, 4)
+                il.Size = UDim2.new(1,0,0, optionCount * 30)
+                
+                if opt.Default then
+                    t.Text = "  "..opt.Name.." : "..opt.Default
+                elseif newOptions[1] then
+                    t.Text = "  "..opt.Name.." : "..newOptions[1]
+                end
+            end
+            
+            local open = false
+            t.MouseButton1Click:Connect(function()
+                open = not open
+                il.Visible = open
+                Arrow.Text = open and "▲" or "▼"
+                
+                if open and opt.RefreshOnOpen then
+                    refreshOptions()
+                end
+                
+                TweenService:Create(d, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95,0,0,35+il.Size.Y.Offset) or UDim2.new(0.95,0,0,35)}):Play()
+            end)
+            
+            if opt.GetOptions then
+                refreshOptions()
+            elseif opt.Options then
+                for _, v in pairs(opt.Options) do
+                    local it = Instance.new("TextButton", il)
+                    it.Size = UDim2.new(1,0,0,30)
+                    it.BackgroundColor3 = Color3.fromRGB(28,28,28)
+                    it.BackgroundTransparency = 0.5
+                    it.Text = v
+                    it.TextColor3 = Color3.fromRGB(200,200,200)
+                    it.Font = "GothamMedium"
+                    it.TextSize = 11
+                    it.MouseButton1Click:Connect(function()
+                        open = false
+                        il.Visible = false
+                        Arrow.Text = "▼"
+                        t.Text = "  "..opt.Name.." : "..v
+                        TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95,0,0,35)}):Play()
+                        opt.Callback(v)
+                    end)
+                end
+                local optionCount = math.min(#opt.Options, 4)
+                il.Size = UDim2.new(1,0,0, optionCount * 30)
+            end
+            
+            if opt.RefreshInterval and opt.GetOptions then
+                local refreshConnection = RunService.RenderStepped:Connect(function()
+                    if d and d.Parent then
+                        local newOptions = opt.GetOptions()
+                        if newOptions then
+                            local currentCount = 0
+                            for _, child in pairs(il:GetChildren()) do
+                                if child:IsA("TextButton") then currentCount = currentCount + 1 end
+                            end
+                            if currentCount ~= #newOptions then
+                                refreshOptions()
+                            end
+                        end
+                    else
+                        refreshConnection:Disconnect()
+                    end
+                end)
+                table.insert(Tab.Connections, refreshConnection)
+            end
         end
         
         function Tab:CreateRunBox(opt)
