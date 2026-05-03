@@ -171,7 +171,6 @@ local LucideIcons = {
     ["crosshair"] = "rbxassetid://128754759661663",
     ["gauge"] = "rbxassetid://101229152211624",
     ["scale-3d"] = "rbxassetid://94186223589758",
-    ["fps"] = "rbxassetid://id",
     ["anime-1"] = "rbxassetid://6421296794",
     ["anime-2"] = "rbxassetid://6675147490",
     ["anime-3"] = "rbxassetid://10149736922",
