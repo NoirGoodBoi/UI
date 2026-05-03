@@ -1124,11 +1124,9 @@ function NoirUI:CreateWindow(settings)
             table.insert(Tab.Elements, b)
             
             if opt.Align == false then
-                -- Căn trái
                 b.TextXAlignment = "Left"
                 b.Text = "  " .. opt.Name
                 
-                -- Thêm chữ "button" nhỏ màu xám bên phải
                 local hint = Instance.new("TextLabel", b)
                 hint.Size = UDim2.new(0, 50, 1, 0)
                 hint.Position = UDim2.new(1, -55, 0, 0)
@@ -1141,7 +1139,6 @@ function NoirUI:CreateWindow(settings)
                 hint.TextYAlignment = "Center"
                 hint.ZIndex = 2
             else
-                -- Căn giữa (mặc định)
                 b.TextXAlignment = "Center"
             end
             
@@ -1177,8 +1174,17 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- ========== SLIDER ==========
+        -- ========== SLIDER (CÓ RANGE, INCREMENT) ==========
         function Tab:CreateSlider(opt)
+            local range = opt.range or {0, 100}
+            local min = range[1]
+            local max = range[2]
+            local increment = opt.increment or 1
+            local defaultValue = opt.Default or min
+            
+            defaultValue = math.floor((defaultValue - min) / increment) * increment + min
+            defaultValue = math.clamp(defaultValue, min, max)
+            
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95, 0, 0, 50)
             f.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
@@ -1187,43 +1193,55 @@ function NoirUI:CreateWindow(settings)
             f.LayoutOrder = GetO()
             f.Name = opt.Name or ""
             table.insert(Tab.Elements, f)
+            
             local l = Instance.new("TextLabel", f)
             l.Size = UDim2.new(1, 0, 0, 20)
             l.Position = UDim2.new(0, 12, 0, 5)
             l.BackgroundTransparency = 1
-            l.Text = opt.Name .. ": " .. opt.Default
+            l.Text = opt.Name .. ": " .. defaultValue
             l.TextColor3 = Color3.new(1, 1, 1)
             l.TextXAlignment = "Left"
             l.TextSize = 11
+            
             local sbg = Instance.new("Frame", f)
             sbg.Size = UDim2.new(0.9, 0, 0, 8)
             sbg.Position = UDim2.new(0.05, 0, 0.7, 0)
             sbg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
             sbg.BackgroundTransparency = 0.5
             Instance.new("UICorner", sbg)
+            
             local fill = Instance.new("Frame", sbg)
-            fill.Size = UDim2.new(math.clamp((opt.Default - opt.Min) / (opt.Max - opt.Min), 0, 1), 0, 1, 0)
+            local percent = (defaultValue - min) / (max - min)
+            fill.Size = UDim2.new(percent, 0, 1, 0)
             fill.BackgroundColor3 = ACCENT
             Instance.new("UICorner", fill)
+            
             local isHeld = false
+            
             local function UpdateSlider(input)
                 local p = math.clamp((input.Position.X - sbg.AbsolutePosition.X) / sbg.AbsoluteSize.X, 0, 1)
-                local v = math.floor(opt.Min + (opt.Max - opt.Min) * p)
-                fill.Size = UDim2.new(p, 0, 1, 0)
+                local rawValue = min + (max - min) * p
+                local v = math.floor((rawValue - min) / increment) * increment + min
+                v = math.clamp(v, min, max)
+                local newPercent = (v - min) / (max - min)
+                fill.Size = UDim2.new(newPercent, 0, 1, 0)
                 l.Text = opt.Name .. ": " .. v
                 opt.Callback(v)
             end
+            
             sbg.InputBegan:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
                     isHeld = true
                     UpdateSlider(i)
                 end
             end)
+            
             UIS.InputEnded:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
                     isHeld = false
                 end
             end)
+            
             UIS.InputChanged:Connect(function(i)
                 if isHeld and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
                     UpdateSlider(i)
