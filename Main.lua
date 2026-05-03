@@ -1,17 +1,16 @@
---// Service
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 
--- // Destroy Dupe
+-- // Xóa UI cũ nếu tồn tại
 local OldGui = game.CoreGui:FindFirstChild("NoirUI_V3_Ultimate")
 if OldGui then OldGui:Destroy() end
 
 local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {} }
 
---// Lucide Icon
+-- ========== LUCIDE ICONS TÍCH HỢP SẴN (250+ ICONS) ==========
 local LucideIcons = {
     ["home"] = "rbxassetid://13060262582",
     ["user"] = "rbxassetid://76527276016929",
@@ -207,7 +206,7 @@ local function ResolveIcon(iconInput)
     return nil
 end
 
--- // Draggable
+-- // Hàm kéo thả
 local function MakeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
     frame.InputBegan:Connect(function(input)
@@ -225,7 +224,7 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Bgr + clipping mask 
+-- // Hàm tải background với ClipsDescendants
 local function LoadBackground(frame, bgSetting)
     if not bgSetting then return end
     
@@ -266,7 +265,7 @@ local function LoadBackground(frame, bgSetting)
     frame.ChildAdded:Connect(SendToBack)
 end
 
--- // rg cmd
+-- // Đăng ký custom command
 function NoirUI:RegisterCommand(prefix, callback)
     NoirUI.CustomCommands[prefix:lower()] = callback
 end
@@ -280,7 +279,7 @@ function NoirUI:CreateWindow(settings)
     local mainDefaultPos = settings.DefaultPosition or UDim2.new(0.5, -210, 0.5, -150)
     local floatDefaultPos = settings.FloatDefaultPosition or UDim2.new(0, 15, 0.5, -22)
     
-    -- Main UI
+    -- //////////////// MAIN UI ////////////////
     local Main = Instance.new("Frame", ScreenGui)
     Main.Size = UDim2.new(0, 420, 0, 300)
     Main.Position = mainDefaultPos
@@ -297,7 +296,7 @@ function NoirUI:CreateWindow(settings)
         LoadBackground(Main, settings.Background)
     end
     
-    -- Loading UI
+    -- //////////////// BẢNG LOADING ////////////////
     local LoadingFrame = Instance.new("Frame", ScreenGui)
     LoadingFrame.Size = UDim2.new(0, 300, 0, 120)
     LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
@@ -388,6 +387,7 @@ function NoirUI:CreateWindow(settings)
         end)
     end
     
+    -- Hiệu ứng cầu vồng viền main
     task.spawn(function()
         while Main and Main.Parent do
             for i = 0, 1, 0.01 do
@@ -398,7 +398,7 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- Key System 
+    -- //////////////// HỆ THỐNG KEY ////////////////
     local KeySolved = false
     local KUI = nil
     
@@ -521,7 +521,7 @@ function NoirUI:CreateWindow(settings)
         ShowMainUIAfterLoading()
     end
     
-    -- Header
+    -- //////////////// HEADER ////////////////
     local Header = Instance.new("Frame", Main)
     Header.Size = UDim2.new(1, 0, 0, 40)
     Header.BackgroundTransparency = 1
@@ -617,7 +617,7 @@ function NoirUI:CreateWindow(settings)
         end)
     end)
     
-    -- Sidebar
+    -- //////////////// SIDEBAR (CHỈ TABS SCROLL, AVATAR CỐ ĐỊNH) ////////////////
     local Side = Instance.new("Frame", Main)
     Side.Size = UDim2.new(0, 110, 1, -50)
     Side.Position = UDim2.new(0, 5, 0, 40)
@@ -652,6 +652,7 @@ function NoirUI:CreateWindow(settings)
     end
     TLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSidebarCanvas)
     
+    -- Avatar cố định ở cuối sidebar (không bị scroll)
     local UA = Instance.new("Frame", Side)
     UA.Size = UDim2.new(1, 0, 0, 50)
     UA.Position = UDim2.new(0, 0, 1, -45)
@@ -665,7 +666,7 @@ function NoirUI:CreateWindow(settings)
     Instance.new("UICorner", AI).CornerRadius = UDim.new(1,0)
     Instance.new("UIStroke", AI).Color = ACCENT
     
-    -- Content UI
+    -- //////////////// CONTENT ////////////////
     local Cont = Instance.new("Frame", Main)
     Cont.Size = UDim2.new(1, -125, 1, -50)
     Cont.Position = UDim2.new(0, 120, 0, 40)
@@ -679,7 +680,7 @@ function NoirUI:CreateWindow(settings)
     ContStroke.Thickness = 1
     ContStroke.Transparency = 0.7
     
-    -- ICON float
+    -- //////////////// FLOAT BUTTON ////////////////
     local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
@@ -780,7 +781,7 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- notify
+    -- //////////////// NOTIFICATIONS ////////////////
     function NoirUI:Notify(title, message, iconName)
         local n = Instance.new("Frame", ScreenGui)
         n.Size = UDim2.new(0, 260, 0, 65)
@@ -848,7 +849,7 @@ function NoirUI:CreateWindow(settings)
         end)
     end
     
-    -- tab+ element 
+    -- //////////////// TẠO TAB & ELEMENTS ////////////////
     local Window = {}
     
     function Window:CreateTab(name, icon)
@@ -979,7 +980,7 @@ function NoirUI:CreateWindow(settings)
             if prop == "Text" then filterElements(SearchBox.Text) end
         end)
         
-        -- label
+        -- ========== LABEL (CÓ THỂ UPDATE ĐỘNG) ==========
         function Tab:CreateLabel(text, updateFunction)
             local l = Instance.new("TextLabel", ContentFrame)
             l.Size = UDim2.new(0.95, 0, 0, 20)
@@ -1015,7 +1016,7 @@ function NoirUI:CreateWindow(settings)
             return l
         end
         
-        -- sect
+        -- ========== SECTION (CÓ ĐƯỜNG KẺ NGĂN CÁCH) ==========
         function Tab:CreateSection(title, noLine)
             local s = Instance.new("Frame", ContentFrame)
             s.Size = UDim2.new(0.95, 0, 0, noLine and 25 or 35)
@@ -1046,7 +1047,7 @@ function NoirUI:CreateWindow(settings)
             return s
         end
         
-        -- prg
+        -- ========== PARAGRAPH ==========
         function Tab:CreateParagraph(opt)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95, 0, 0, 65)
@@ -1082,7 +1083,7 @@ function NoirUI:CreateWindow(settings)
             return f
         end
         
-        -- text
+        -- ========== TEXTBOX ==========
         function Tab:CreateTextBox(opt)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95, 0, 0, 35)
@@ -1105,7 +1106,7 @@ function NoirUI:CreateWindow(settings)
             i.FocusLost:Connect(function() if opt.Callback then opt.Callback(i.Text) end end)
         end
         
-        -- button
+        -- ========== BUTTON (CÓ ALIGN) ==========
         function Tab:CreateButton(opt)
             local b = Instance.new("TextButton", ContentFrame)
             b.Size = UDim2.new(0.95, 0, 0, 35)
@@ -1142,7 +1143,7 @@ function NoirUI:CreateWindow(settings)
             b.MouseButton1Click:Connect(opt.Callback)
         end
         
-        -- toggle
+        -- ========== TOGGLE ==========
         function Tab:CreateToggle(opt)
             local s = opt.Default or false
             local t = Instance.new("TextButton", ContentFrame)
@@ -1171,7 +1172,7 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- slider
+        -- ========== SLIDER (CÓ RANGE, INCREMENT) ==========
         function Tab:CreateSlider(opt)
             local range = opt.range or {0, 100}
             local min = range[1]
@@ -1246,7 +1247,7 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- cp
+        -- ========== COLOR PICKER ==========
         function Tab:CreateColorPicker(opt)
             local ColorSelected = opt.Default or Color3.fromRGB(170, 85, 255)
             local h, s, v = ColorSelected:ToHSV()
@@ -1338,7 +1339,7 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- dd
+        -- ========== DROPDOWN ==========
         function Tab:CreateDropdown(opt)
             local d = Instance.new("Frame", ContentFrame)
             d.Size = UDim2.new(0.95, 0, 0, 35)
@@ -1479,7 +1480,7 @@ function NoirUI:CreateWindow(settings)
             end
         end
         
-        -- runb
+        -- ========== RUNBOX ==========
         function Tab:CreateRunBox(opt)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95, 0, 0, 38)
