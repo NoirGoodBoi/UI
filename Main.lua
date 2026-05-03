@@ -1118,16 +1118,33 @@ function NoirUI:CreateWindow(settings)
             b.TextColor3 = Color3.new(1, 1, 1)
             b.Font = "GothamMedium"
             b.TextSize = 12
-            if opt.Align == false then
-                b.TextXAlignment = "Left"
-                b.Text = "  " .. opt.Name
-            else
-                b.TextXAlignment = "Center"
-            end
             Instance.new("UICorner", b)
             b.LayoutOrder = GetO()
             b.Name = opt.Name
             table.insert(Tab.Elements, b)
+            
+            if opt.Align == false then
+                -- Căn trái
+                b.TextXAlignment = "Left"
+                b.Text = "  " .. opt.Name
+                
+                -- Thêm chữ "button" nhỏ màu xám bên phải
+                local hint = Instance.new("TextLabel", b)
+                hint.Size = UDim2.new(0, 50, 1, 0)
+                hint.Position = UDim2.new(1, -55, 0, 0)
+                hint.BackgroundTransparency = 1
+                hint.Text = "button"
+                hint.TextColor3 = Color3.fromRGB(120, 120, 120)
+                hint.Font = "GothamMedium"
+                hint.TextSize = 10
+                hint.TextXAlignment = "Right"
+                hint.TextYAlignment = "Center"
+                hint.ZIndex = 2
+            else
+                -- Căn giữa (mặc định)
+                b.TextXAlignment = "Center"
+            end
+            
             b.MouseButton1Click:Connect(opt.Callback)
         end
         
