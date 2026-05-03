@@ -1,193 +1,192 @@
+--// Service
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 
--- // Xóa UI cũ nếu tồn tại
+-- // Destroy Dupe
 local OldGui = game.CoreGui:FindFirstChild("NoirUI_V3_Ultimate")
 if OldGui then OldGui:Destroy() end
 
 local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {} }
 
--- ========== LUCIDE ICONS TÍCH HỢP SẴN (250+ ICONS) ==========
+--// Lucide Icon
 local LucideIcons = {
-    ["home"] = "rbxassetid://6031081843",
-    ["user"] = "rbxassetid://6031094700",
-    ["users"] = "rbxassetid://6031115921",
-    ["user-plus"] = "rbxassetid://6031115057",
-    ["user-minus"] = "rbxassetid://6031115057",
-    ["settings"] = "rbxassetid://6031091396",
-    ["menu"] = "rbxassetid://6031087080",
-    ["more-horizontal"] = "rbxassetid://6031102344",
-    ["more-vertical"] = "rbxassetid://6031103642",
-    ["x"] = "rbxassetid://6031093801",
-    ["check"] = "rbxassetid://6031084546",
-    ["plus"] = "rbxassetid://6031105239",
-    ["minus"] = "rbxassetid://6031083401",
-    ["search"] = "rbxassetid://6031089259",
-    ["arrow-left"] = "rbxassetid://6031079884",
-    ["arrow-right"] = "rbxassetid://6031081251",
-    ["arrow-up"] = "rbxassetid://6031079884",
-    ["arrow-down"] = "rbxassetid://6031081251",
-    ["chevron-left"] = "rbxassetid://6031079884",
-    ["chevron-right"] = "rbxassetid://6031081251",
-    ["chevron-up"] = "rbxassetid://6031084189",
-    ["chevron-down"] = "rbxassetid://6031083401",
-    ["chevrons-left"] = "rbxassetid://6031079884",
-    ["chevrons-right"] = "rbxassetid://6031081251",
-    ["chevrons-up"] = "rbxassetid://6031084189",
-    ["chevrons-down"] = "rbxassetid://6031083401",
-    ["edit"] = "rbxassetid://6031087645",
-    ["trash"] = "rbxassetid://6031112211",
-    ["copy"] = "rbxassetid://6031085639",
-    ["clipboard"] = "rbxassetid://6031085639",
-    ["refresh-cw"] = "rbxassetid://6031106984",
-    ["save"] = "rbxassetid://6031107829",
-    ["download"] = "rbxassetid://6031086313",
-    ["upload"] = "rbxassetid://6031113854",
-    ["log-in"] = "rbxassetid://6031079884",
-    ["log-out"] = "rbxassetid://6031081251",
-    ["power"] = "rbxassetid://6031106159",
-    ["folder"] = "rbxassetid://6031090280",
-    ["folder-open"] = "rbxassetid://6031090280",
-    ["file"] = "rbxassetid://6031090280",
-    ["archive"] = "rbxassetid://6031078526",
-    ["play"] = "rbxassetid://6031104410",
-    ["pause"] = "rbxassetid://6031105239",
-    ["stop"] = "rbxassetid://6031093801",
-    ["skip-back"] = "rbxassetid://6031079884",
-    ["skip-forward"] = "rbxassetid://6031081251",
-    ["volume"] = "rbxassetid://6031117635",
-    ["volume-1"] = "rbxassetid://6031117635",
-    ["volume-2"] = "rbxassetid://6031117635",
-    ["volume-x"] = "rbxassetid://6031118466",
-    ["headphones"] = "rbxassetid://6031082291",
-    ["mic"] = "rbxassetid://6031082291",
-    ["mic-off"] = "rbxassetid://6031082291",
-    ["music"] = "rbxassetid://6031104410",
-    ["video"] = "rbxassetid://6031116716",
-    ["camera"] = "rbxassetid://6031094632",
-    ["image"] = "rbxassetid://6031094632",
-    ["smartphone"] = "rbxassetid://6031094632",
-    ["phone"] = "rbxassetid://6031098098",
-    ["tablet"] = "rbxassetid://6031094632",
-    ["monitor"] = "rbxassetid://6031094632",
-    ["tv"] = "rbxassetid://6031094632",
-    ["cpu"] = "rbxassetid://6031093076",
-    ["hard-drive"] = "rbxassetid://6031093076",
-    ["server"] = "rbxassetid://6031093076",
-    ["database"] = "rbxassetid://6031093076",
-    ["mail"] = "rbxassetid://6031098098",
-    ["mail-open"] = "rbxassetid://6031098098",
-    ["inbox"] = "rbxassetid://6031098098",
-    ["send"] = "rbxassetid://6031113854",
-    ["message-circle"] = "rbxassetid://6031098098",
-    ["message-square"] = "rbxassetid://6031098098",
-    ["at-sign"] = "rbxassetid://6031098098",
-    ["bell"] = "rbxassetid://6031082291",
-    ["bell-off"] = "rbxassetid://6031082291",
-    ["eye"] = "rbxassetid://6031088606",
-    ["eye-off"] = "rbxassetid://6031088606",
-    ["github"] = "rbxassetid://6031091056",
-    ["youtube"] = "rbxassetid://6031119420",
-    ["twitter"] = "rbxassetid://6031113035",
-    ["facebook"] = "rbxassetid://6031089508",
-    ["instagram"] = "rbxassetid://6031089508",
-    ["linkedin"] = "rbxassetid://6031096274",
-    ["discord"] = "rbxassetid://6031091056",
-    ["twitch"] = "rbxassetid://6031119420",
-    ["tiktok"] = "rbxassetid://6031119420",
-    ["reddit"] = "rbxassetid://6031091056",
-    ["whatsapp"] = "rbxassetid://6031098098",
-    ["telegram"] = "rbxassetid://6031098098",
-    ["spotify"] = "rbxassetid://6031104410",
-    ["apple"] = "rbxassetid://6031089508",
-    ["google"] = "rbxassetid://6031092169",
-    ["lock"] = "rbxassetid://6031097269",
-    ["unlock"] = "rbxassetid://6031097269",
+    ["home"] = "rbxassetid://13060262582",
+    ["user"] = "rbxassetid://76527276016929",
+    ["users"] = "rbxassetid://16485180101",
+    ["user-plus"] = "rbxassetid://11893826158",
+    ["user-minus"] = "rbxassetid://103838034038356",
+    ["settings"] = "rbxassetid://7059346386",
+    ["menu"] = "rbxassetid://8622237918",
+    ["more-horizontal"] = "rbxassetid://94997510374551",
+    ["more-vertical"] = "rbxassetid://78955744061195",
+    ["x"] = "rbxassetid://4458805218",
+    ["check"] = "rbxassetid://5959696895",
+    ["plus"] = "rbxassetid://401613237",
+    ["minus"] = "rbxassetid://136825236896355",
+    ["search"] = "rbxassetid://5107220223",
+    ["arrow-left"] = "rbxassetid://12338896710",
+    ["arrow-right"] = "rbxassetid://12338895342",
+    ["arrow-up"] = "rbxassetid://12338897588",
+    ["arrow-down"] = "rbxassetid://12338898430",
+    ["chevron-left"] = "rbxassetid://127486125287644",
+    ["chevron-right"] = "rbxassetid://134501100267193",
+    ["chevron-up"] = "rbxassetid://121806247498446",
+    ["chevron-down"] = "rbxassetid://82896764709372",
+    ["chevrons-left"] = "rbxassetid://12338396067",
+    ["chevrons-right"] = "rbxassetid://12338394694",
+    ["chevrons-up"] = "rbxassetid://12338397077",
+    ["chevrons-down"] = "rbxassetid://12338397699",
+    ["edit"] = "rbxassetid://5595830746",
+    ["trash"] = "rbxassetid://14002617522",
+    ["copy"] = "rbxassetid://94931642634780",
+    ["clipboard"] = "rbxassetid://120515450196257",
+    ["refresh-cw"] = "rbxassetid://87873470710971",
+    ["save"] = "rbxassetid://4458874653",
+    ["download"] = "rbxassetid://90953125352813",
+    ["upload"] = "rbxassetid://134605885675446",
+    ["log-in"] = "rbxassetid://618861110",
+    ["log-out"] = "rbxassetid://6264845490",
+    ["power"] = "rbxassetid://12557422579",
+    ["folder"] = "rbxassetid://101029391974629",
+    ["folder-open"] = "rbxassetid://4974562741",
+    ["file"] = "rbxassetid://83975687527738",
+    ["archive"] = "rbxassetid://101480379389396",
+    ["play"] = "rbxassetid://114746068457942",
+    ["pause"] = "rbxassetid://4458862495",
+    ["stop"] = "rbxassetid://4458885437",
+    ["skip-back"] = "rbxassetid://18802845108",
+    ["skip-forward"] = "rbxassetid://109624422779492",
+    ["volume"] = "rbxassetid://6824925363",
+    ["volume-1"] = "rbxassetid://6824925224",
+    ["volume-2"] = "rbxassetid://6824925104",
+    ["volume-x"] = "rbxassetid://71516439698375",
+    ["headphones"] = "rbxassetid://14425582292",
+    ["mic"] = "rbxassetid://219092696",
+    ["mic-off"] = "rbxassetid://219092694",
+    ["music"] = "rbxassetid://17387359663",
+    ["video"] = "rbxassetid://12624074103",
+    ["camera"] = "rbxassetid://13085201776",
+    ["image"] = "rbxassetid://4458863833",
+    ["smartphone"] = "rbxassetid://125134688917333",
+    ["phone"] = "rbxassetid://8411963061",
+    ["tablet"] = "rbxassetid://132361591008690",
+    ["monitor"] = "rbxassetid://3120635719",
+    ["tv"] = "rbxassetid://4458888129",
+    ["cpu"] = "rbxassetid://83450759665400",
+    ["hard-drive"] = "rbxassetid://112994903201203",
+    ["server"] = "rbxassetid://15567974338",
+    ["database"] = "rbxassetid://115160174389795",
+    ["mail"] = "rbxassetid://16149098667",
+    ["mail-open"] = "rbxassetid://5673469847",
+    ["inbox"] = "rbxassetid://71880689480407",
+    ["send"] = "rbxassetid://132876386179389",
+    ["message-circle"] = "rbxassetid://80014727562377",
+    ["message-square"] = "rbxassetid://93034566542591",
+    ["at-sign"] = "rbxassetid://104749831452394",
+    ["bell"] = "rbxassetid://11401835408",
+    ["bell-off"] = "rbxassetid://102509579674335",
+    ["eye"] = "rbxassetid://5219208999",
+    ["eye-off"] = "rbxassetid://6473252655",
+    ["github"] = "rbxassetid://130785772548152",
+    ["youtube"] = "rbxassetid://139037997997612",
+    ["twitter"] = "rbxassetid://1324431876",
+    ["facebook"] = "rbxassetid://11163700830",
+    ["instagram"] = "rbxassetid://117964181842594",
+    ["linkedin"] = "rbxassetid://261568406",
+    ["discord"] = "rbxassetid://119731774091515",
+    ["twitch"] = "rbxassetid://7060611821",
+    ["tiktok"] = "rbxassetid://111619424242372",
+    ["reddit"] = "rbxassetid://10586157868",
+    ["whatsapp"] = "rbxassetid://6749672377",
+    ["telegram"] = "rbxassetid://115832009343384",
+    ["spotify"] = "rbxassetid://137318104035971",
+    ["apple"] = "rbxassetid://41715859",
+    ["google"] = "rbxassetid://72784437694619",
+    ["lock"] = "rbxassetid://12060512749",
+    ["unlock"] = "rbxassetid://96121551754691",
     ["shield"] = "rbxassetid://6031108700",
-    ["shield-check"] = "rbxassetid://6031108700",
-    ["shield-alert"] = "rbxassetid://6031108700",
-    ["alert-circle"] = "rbxassetid://6031077329",
-    ["alert-triangle"] = "rbxassetid://6031077329",
-    ["info"] = "rbxassetid://6031095493",
-    ["help-circle"] = "rbxassetid://6031093855",
-    ["sun"] = "rbxassetid://6031111296",
-    ["moon"] = "rbxassetid://6031101481",
-    ["cloud"] = "rbxassetid://6031092169",
-    ["cloud-rain"] = "rbxassetid://6031092169",
-    ["cloud-snow"] = "rbxassetid://6031092169",
-    ["cloud-lightning"] = "rbxassetid://6031092169",
-    ["droplet"] = "rbxassetid://6031092169",
-    ["wind"] = "rbxassetid://6031092169",
-    ["compass"] = "rbxassetid://6031098887",
-    ["globe"] = "rbxassetid://6031092169",
-    ["map"] = "rbxassetid://6031098887",
-    ["map-pin"] = "rbxassetid://6031098887",
-    ["navigation"] = "rbxassetid://6031098887",
-    ["calendar"] = "rbxassetid://6031098887",
-    ["clock"] = "rbxassetid://6031098887",
-    ["alarm-clock"] = "rbxassetid://6031098887",
-    ["timer"] = "rbxassetid://6031098887",
-    ["heart"] = "rbxassetid://6031093076",
-    ["activity"] = "rbxassetid://6031093076",
-    ["battery"] = "rbxassetid://6031093076",
-    ["battery-charging"] = "rbxassetid://6031093076",
-    ["gamepad"] = "rbxassetid://6031094632",
-    ["controller"] = "rbxassetid://6031094632",
-    ["joystick"] = "rbxassetid://6031094632",
-    ["dice"] = "rbxassetid://6031094632",
-    ["trophy"] = "rbxassetid://6031093076",
-    ["award"] = "rbxassetid://6031093076",
-    ["medal"] = "rbxassetid://6031093076",
-    ["star"] = "rbxassetid://6031110336",
-    ["shopping-cart"] = "rbxassetid://6031109471",
-    ["shopping-bag"] = "rbxassetid://6031109471",
-    ["credit-card"] = "rbxassetid://6031109471",
-    ["wallet"] = "rbxassetid://6031109471",
-    ["dollar-sign"] = "rbxassetid://6031109471",
-    ["truck"] = "rbxassetid://6031109471",
-    ["package"] = "rbxassetid://6031109471",
-    ["gift"] = "rbxassetid://6031093076",
-    ["tag"] = "rbxassetid://6031093076",
-    ["percent"] = "rbxassetid://6031077329",
-    ["code"] = "rbxassetid://6031085639",
-    ["terminal"] = "rbxassetid://6031085639",
-    ["command"] = "rbxassetid://6031085639",
-    ["git-branch"] = "rbxassetid://6031085639",
-    ["git-commit"] = "rbxassetid://6031085639",
-    ["git-merge"] = "rbxassetid://6031085639",
-    ["bar-chart"] = "rbxassetid://6031077329",
-    ["pie-chart"] = "rbxassetid://6031077329",
-    ["line-chart"] = "rbxassetid://6031077329",
-    ["trending-up"] = "rbxassetid://6031081251",
-    ["trending-down"] = "rbxassetid://6031079884",
-    ["zap"] = "rbxassetid://6031120184",
-    ["loader"] = "rbxassetid://6031106984",
-    ["feather"] = "rbxassetid://6031093076",
-    ["flag"] = "rbxassetid://6031093076",
-    ["bookmark"] = "rbxassetid://6031093076",
-    ["key"] = "rbxassetid://6031097269",
-    ["sliders"] = "rbxassetid://6031091396",
-    ["aperture"] = "rbxassetid://6031094632",
-    ["crop"] = "rbxassetid://6031094632",
-    ["layers"] = "rbxassetid://6031090280",
-    ["grid"] = "rbxassetid://6031087080",
-    ["list"] = "rbxassetid://6031087080",
-    ["check-square"] = "rbxassetid://6031084546",
-    ["square"] = "rbxassetid://6031084546",
-    ["circle"] = "rbxassetid://6031077329",
-    ["target"] = "rbxassetid://6031098887",
-    ["crosshair"] = "rbxassetid://6031098887",
-    ["radio"] = "rbxassetid://6031098887",
-    ["wifi"] = "rbxassetid://6031098887",
-    ["wifi-off"] = "rbxassetid://6031098887",
-    ["maximize"] = "rbxassetid://6031099873",
-    ["minimize"] = "rbxassetid://6031100687",
-    ["external-link"] = "rbxassetid://6031081251",
-    ["link"] = "rbxassetid://6031081251",
-    ["anchor"] = "rbxassetid://6031081251",
+    ["shield-check"] = "rbxassetid://110457125738695",
+    ["shield-alert"] = "rbxassetid://12988744936",
+    ["alert-circle"] = "rbxassetid://11282218732",
+    ["alert-triangle"] = "rbxassetid://87824282931713",
+    ["info"] = "rbxassetid://135453418174430",
+    ["help-circle"] = "rbxassetid://12120704381",
+    ["sun"] = "rbxassetid://73114667772087",
+    ["moon"] = "rbxassetid://8498174624",
+    ["cloud"] = "rbxassetid://4458806382",
+    ["cloud-rain"] = "rbxassetid://72129458427880",
+    ["cloud-snow"] = "rbxassetid://132770120",
+    ["cloud-lightning"] = "rbxassetid://113465542546511",
+    ["droplet"] = "rbxassetid://118482940715549",
+    ["wind"] = "rbxassetid://261307451",
+    ["compass"] = "rbxassetid://126609230986847",
+    ["globe"] = "rbxassetid://80984584737538",
+    ["map"] = "rbxassetid://11345509397",
+    ["map-pin"] = "rbxassetid://9661173952",
+    ["navigation"] = "rbxassetid://119714567896183",
+    ["calendar"] = "rbxassetid://95118673765809",
+    ["clock"] = "rbxassetid://71763290890768",
+    ["alarm-clock"] = "rbxassetid://130573719829571",
+    ["timer"] = "rbxassetid://6761866159",
+    ["heart"] = "rbxassetid://323045991",
+    ["activity"] = "rbxassetid://107228950093824",
+    ["battery"] = "rbxassetid://140385784907577",
+    ["battery-charging"] = "rbxassetid://86784447322014",
+    ["gamepad"] = "rbxassetid://11894535953",
+    ["controller"] = "rbxassetid://12684121195",
+    ["joystick"] = "rbxassetid://114600591384579",
+    ["dice"] = "rbxassetid://88362522676824",
+    ["trophy"] = "rbxassetid://13321838585",
+    ["award"] = "rbxassetid://12941038904",
+    ["medal"] = "rbxassetid://16170504083",
+    ["star"] = "rbxassetid://95134188293701",
+    ["shopping-cart"] = "rbxassetid://11385419687",
+    ["shopping-bag"] = "rbxassetid://106996295869562",
+    ["credit-card"] = "rbxassetid://18759664386",
+    ["wallet"] = "rbxassetid://136666387916066",
+    ["dollar-sign"] = "rbxassetid://113051557984606",
+    ["truck"] = "rbxassetid://126107760238699",
+    ["package"] = "rbxassetid://89528045721909",
+    ["gift"] = "rbxassetid://132398163610877",
+    ["tag"] = "rbxassetid://73181461832934",
+    ["percent"] = "rbxassetid://116610160977931",
+    ["code"] = "rbxassetid://98055120378520",
+    ["terminal"] = "rbxassetid://16149179369",
+    ["command"] = "rbxassetid://8278333385",
+    ["zap"] = "rbxassetid://91850781296464",
+    ["loader"] = "rbxassetid://81934662961263",
+    ["feather"] = "rbxassetid://121746910148552",
+    ["flag"] = "rbxassetid://11379131845",
+    ["bookmark"] = "rbxassetid://140535467858552",
+    ["key"] = "rbxassetid://134372662903913",
+    ["sliders"] = "rbxassetid://109065241613994",
+    ["aperture"] = "rbxassetid://9940311417",
+    ["crop"] = "rbxassetid://100265053983744",
+    ["layers"] = "rbxassetid://13853348374",
+    ["grid"] = "rbxassetid://6953993763",
+    ["list"] = "rbxassetid://15567843411",
+    ["target"] = "rbxassetid://13557340550",
+    ["crosshair"] = "rbxassetid://128754759661663",
+    ["gauge"] = "rbxassetid://101229152211624",
+    ["scale-3d"] = "rbxassetid://94186223589758",
+    ["fps"] = "rbxassetid://id",
+    ["anime-1"] = "rbxassetid://6421296794",
+    ["anime-2"] = "rbxassetid://6675147490",
+    ["anime-3"] = "rbxassetid://10149736922",
+    ["anime-4"] = "rbxassetid://5248865575",
+    ["anime-5"] = "rbxassetid://7710824618",
+    ["anime-6"] = "rbxassetid://5410949709",
+    ["anime-7"] = "rbxassetid://11696859442",
+    ["anime-8] = "rbxassetid://11424961500",
+    ["anime-9"] = "rbxassetid://10983517742",
+    ["anime-10"] = "rbxassetid://10899663842",
+    ["anime-11"] = "rbxassetid://8677816496",
+    ["anime-12"] = "rbxassetid://6993174720",
+    ["anime-13"] = "rbxassetid://8680995438",
+    ["anime-14"] = "rbxassetid://6982730549",
 }
 
 local function ResolveIcon(iconInput)
@@ -208,7 +207,7 @@ local function ResolveIcon(iconInput)
     return nil
 end
 
--- // Hàm kéo thả
+-- // Draggable
 local function MakeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
     frame.InputBegan:Connect(function(input)
@@ -226,7 +225,7 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Hàm tải background với ClipsDescendants
+-- // Bgr + clipping mask 
 local function LoadBackground(frame, bgSetting)
     if not bgSetting then return end
     
@@ -267,7 +266,7 @@ local function LoadBackground(frame, bgSetting)
     frame.ChildAdded:Connect(SendToBack)
 end
 
--- // Đăng ký custom command
+-- // rg cmd
 function NoirUI:RegisterCommand(prefix, callback)
     NoirUI.CustomCommands[prefix:lower()] = callback
 end
@@ -281,7 +280,7 @@ function NoirUI:CreateWindow(settings)
     local mainDefaultPos = settings.DefaultPosition or UDim2.new(0.5, -210, 0.5, -150)
     local floatDefaultPos = settings.FloatDefaultPosition or UDim2.new(0, 15, 0.5, -22)
     
-    -- //////////////// MAIN UI ////////////////
+    -- Main UI
     local Main = Instance.new("Frame", ScreenGui)
     Main.Size = UDim2.new(0, 420, 0, 300)
     Main.Position = mainDefaultPos
@@ -298,7 +297,7 @@ function NoirUI:CreateWindow(settings)
         LoadBackground(Main, settings.Background)
     end
     
-    -- //////////////// BẢNG LOADING ////////////////
+    -- Loading UI
     local LoadingFrame = Instance.new("Frame", ScreenGui)
     LoadingFrame.Size = UDim2.new(0, 300, 0, 120)
     LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
@@ -389,7 +388,6 @@ function NoirUI:CreateWindow(settings)
         end)
     end
     
-    -- Hiệu ứng cầu vồng viền main
     task.spawn(function()
         while Main and Main.Parent do
             for i = 0, 1, 0.01 do
@@ -400,7 +398,7 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- //////////////// HỆ THỐNG KEY ////////////////
+    -- Key System 
     local KeySolved = false
     local KUI = nil
     
@@ -523,7 +521,7 @@ function NoirUI:CreateWindow(settings)
         ShowMainUIAfterLoading()
     end
     
-    -- //////////////// HEADER ////////////////
+    -- Header
     local Header = Instance.new("Frame", Main)
     Header.Size = UDim2.new(1, 0, 0, 40)
     Header.BackgroundTransparency = 1
@@ -619,7 +617,7 @@ function NoirUI:CreateWindow(settings)
         end)
     end)
     
-    -- //////////////// SIDEBAR (CHỈ TABS SCROLL, AVATAR CỐ ĐỊNH) ////////////////
+    -- Sidebar
     local Side = Instance.new("Frame", Main)
     Side.Size = UDim2.new(0, 110, 1, -50)
     Side.Position = UDim2.new(0, 5, 0, 40)
@@ -654,7 +652,6 @@ function NoirUI:CreateWindow(settings)
     end
     TLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSidebarCanvas)
     
-    -- Avatar cố định ở cuối sidebar (không bị scroll)
     local UA = Instance.new("Frame", Side)
     UA.Size = UDim2.new(1, 0, 0, 50)
     UA.Position = UDim2.new(0, 0, 1, -45)
@@ -668,7 +665,7 @@ function NoirUI:CreateWindow(settings)
     Instance.new("UICorner", AI).CornerRadius = UDim.new(1,0)
     Instance.new("UIStroke", AI).Color = ACCENT
     
-    -- //////////////// CONTENT ////////////////
+    -- Content UI
     local Cont = Instance.new("Frame", Main)
     Cont.Size = UDim2.new(1, -125, 1, -50)
     Cont.Position = UDim2.new(0, 120, 0, 40)
@@ -682,7 +679,7 @@ function NoirUI:CreateWindow(settings)
     ContStroke.Thickness = 1
     ContStroke.Transparency = 0.7
     
-    -- //////////////// FLOAT BUTTON ////////////////
+    -- ICON float
     local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
@@ -783,7 +780,7 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- //////////////// NOTIFICATIONS ////////////////
+    -- notify
     function NoirUI:Notify(title, message, iconName)
         local n = Instance.new("Frame", ScreenGui)
         n.Size = UDim2.new(0, 260, 0, 65)
@@ -851,7 +848,7 @@ function NoirUI:CreateWindow(settings)
         end)
     end
     
-    -- //////////////// TẠO TAB & ELEMENTS ////////////////
+    -- tab+ element 
     local Window = {}
     
     function Window:CreateTab(name, icon)
@@ -982,7 +979,7 @@ function NoirUI:CreateWindow(settings)
             if prop == "Text" then filterElements(SearchBox.Text) end
         end)
         
-        -- ========== LABEL (CÓ THỂ UPDATE ĐỘNG) ==========
+        -- label
         function Tab:CreateLabel(text, updateFunction)
             local l = Instance.new("TextLabel", ContentFrame)
             l.Size = UDim2.new(0.95, 0, 0, 20)
@@ -1018,7 +1015,7 @@ function NoirUI:CreateWindow(settings)
             return l
         end
         
-        -- ========== SECTION (CÓ ĐƯỜNG KẺ NGĂN CÁCH) ==========
+        -- sect
         function Tab:CreateSection(title, noLine)
             local s = Instance.new("Frame", ContentFrame)
             s.Size = UDim2.new(0.95, 0, 0, noLine and 25 or 35)
@@ -1049,7 +1046,7 @@ function NoirUI:CreateWindow(settings)
             return s
         end
         
-        -- ========== PARAGRAPH ==========
+        -- prg
         function Tab:CreateParagraph(opt)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95, 0, 0, 65)
@@ -1085,7 +1082,7 @@ function NoirUI:CreateWindow(settings)
             return f
         end
         
-        -- ========== TEXTBOX ==========
+        -- text
         function Tab:CreateTextBox(opt)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95, 0, 0, 35)
@@ -1108,7 +1105,7 @@ function NoirUI:CreateWindow(settings)
             i.FocusLost:Connect(function() if opt.Callback then opt.Callback(i.Text) end end)
         end
         
-        -- ========== BUTTON (CÓ ALIGN) ==========
+        -- button
         function Tab:CreateButton(opt)
             local b = Instance.new("TextButton", ContentFrame)
             b.Size = UDim2.new(0.95, 0, 0, 35)
@@ -1145,7 +1142,7 @@ function NoirUI:CreateWindow(settings)
             b.MouseButton1Click:Connect(opt.Callback)
         end
         
-        -- ========== TOGGLE ==========
+        -- toggle
         function Tab:CreateToggle(opt)
             local s = opt.Default or false
             local t = Instance.new("TextButton", ContentFrame)
@@ -1174,7 +1171,7 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- ========== SLIDER (CÓ RANGE, INCREMENT) ==========
+        -- slider
         function Tab:CreateSlider(opt)
             local range = opt.range or {0, 100}
             local min = range[1]
@@ -1249,7 +1246,7 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- ========== COLOR PICKER ==========
+        -- cp
         function Tab:CreateColorPicker(opt)
             local ColorSelected = opt.Default or Color3.fromRGB(170, 85, 255)
             local h, s, v = ColorSelected:ToHSV()
@@ -1341,7 +1338,7 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- ========== DROPDOWN ==========
+        -- dd
         function Tab:CreateDropdown(opt)
             local d = Instance.new("Frame", ContentFrame)
             d.Size = UDim2.new(0.95, 0, 0, 35)
@@ -1482,7 +1479,7 @@ function NoirUI:CreateWindow(settings)
             end
         end
         
-        -- ========== RUNBOX ==========
+        -- runb
         function Tab:CreateRunBox(opt)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95, 0, 0, 38)
