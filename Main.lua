@@ -12,31 +12,20 @@ local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = 
 
 -- ========== LUCIDE ICONS TÍCH HỢP SẴN (250+ ICONS) ==========
 local LucideIcons = {
-    -- Essentials
     ["home"] = "rbxassetid://6031081843",
-    ["house"] = "rbxassetid://6031081843",
     ["user"] = "rbxassetid://6031094700",
     ["users"] = "rbxassetid://6031115921",
     ["user-plus"] = "rbxassetid://6031115057",
     ["user-minus"] = "rbxassetid://6031115057",
-    ["user-check"] = "rbxassetid://6031115057",
-    ["user-x"] = "rbxassetid://6031115057",
     ["settings"] = "rbxassetid://6031091396",
     ["menu"] = "rbxassetid://6031087080",
     ["more-horizontal"] = "rbxassetid://6031102344",
     ["more-vertical"] = "rbxassetid://6031103642",
     ["x"] = "rbxassetid://6031093801",
-    ["close"] = "rbxassetid://6031093801",
     ["check"] = "rbxassetid://6031084546",
-    ["tick"] = "rbxassetid://6031084546",
     ["plus"] = "rbxassetid://6031105239",
-    ["add"] = "rbxassetid://6031105239",
     ["minus"] = "rbxassetid://6031083401",
     ["search"] = "rbxassetid://6031089259",
-    ["find"] = "rbxassetid://6031089259",
-    ["filter"] = "rbxassetid://6031089259",
-    
-    -- Navigation
     ["arrow-left"] = "rbxassetid://6031079884",
     ["arrow-right"] = "rbxassetid://6031081251",
     ["arrow-up"] = "rbxassetid://6031079884",
@@ -49,49 +38,21 @@ local LucideIcons = {
     ["chevrons-right"] = "rbxassetid://6031081251",
     ["chevrons-up"] = "rbxassetid://6031084189",
     ["chevrons-down"] = "rbxassetid://6031083401",
-    ["maximize"] = "rbxassetid://6031099873",
-    ["minimize"] = "rbxassetid://6031100687",
-    ["external-link"] = "rbxassetid://6031081251",
-    ["link"] = "rbxassetid://6031081251",
-    
-    -- Actions
     ["edit"] = "rbxassetid://6031087645",
-    ["edit-2"] = "rbxassetid://6031087645",
-    ["pen"] = "rbxassetid://6031087645",
     ["trash"] = "rbxassetid://6031112211",
-    ["trash-2"] = "rbxassetid://6031112211",
-    ["delete"] = "rbxassetid://6031112211",
     ["copy"] = "rbxassetid://6031085639",
-    ["cut"] = "rbxassetid://6031085639",
-    ["paste"] = "rbxassetid://6031085639",
     ["clipboard"] = "rbxassetid://6031085639",
-    ["clipboard-list"] = "rbxassetid://6031085639",
-    ["clipboard-check"] = "rbxassetid://6031085639",
     ["refresh-cw"] = "rbxassetid://6031106984",
-    ["refresh-ccw"] = "rbxassetid://6031106984",
-    ["rotate-cw"] = "rbxassetid://6031106984",
-    ["rotate-ccw"] = "rbxassetid://6031106984",
-    ["undo"] = "rbxassetid://6031079884",
-    ["redo"] = "rbxassetid://6031081251",
     ["save"] = "rbxassetid://6031107829",
     ["download"] = "rbxassetid://6031086313",
     ["upload"] = "rbxassetid://6031113854",
     ["log-in"] = "rbxassetid://6031079884",
     ["log-out"] = "rbxassetid://6031081251",
     ["power"] = "rbxassetid://6031106159",
-    
-    -- Files & Folders
     ["folder"] = "rbxassetid://6031090280",
     ["folder-open"] = "rbxassetid://6031090280",
-    ["folder-plus"] = "rbxassetid://6031090280",
-    ["folder-minus"] = "rbxassetid://6031090280",
     ["file"] = "rbxassetid://6031090280",
-    ["file-text"] = "rbxassetid://6031090280",
     ["archive"] = "rbxassetid://6031078526",
-    ["book"] = "rbxassetid://6031090280",
-    ["book-open"] = "rbxassetid://6031090280",
-    
-    -- Media
     ["play"] = "rbxassetid://6031104410",
     ["pause"] = "rbxassetid://6031105239",
     ["stop"] = "rbxassetid://6031093801",
@@ -101,7 +62,6 @@ local LucideIcons = {
     ["volume-1"] = "rbxassetid://6031117635",
     ["volume-2"] = "rbxassetid://6031117635",
     ["volume-x"] = "rbxassetid://6031118466",
-    ["mute"] = "rbxassetid://6031118466",
     ["headphones"] = "rbxassetid://6031082291",
     ["mic"] = "rbxassetid://6031082291",
     ["mic-off"] = "rbxassetid://6031082291",
@@ -109,8 +69,6 @@ local LucideIcons = {
     ["video"] = "rbxassetid://6031116716",
     ["camera"] = "rbxassetid://6031094632",
     ["image"] = "rbxassetid://6031094632",
-    
-    -- Devices
     ["smartphone"] = "rbxassetid://6031094632",
     ["phone"] = "rbxassetid://6031098098",
     ["tablet"] = "rbxassetid://6031094632",
@@ -120,8 +78,6 @@ local LucideIcons = {
     ["hard-drive"] = "rbxassetid://6031093076",
     ["server"] = "rbxassetid://6031093076",
     ["database"] = "rbxassetid://6031093076",
-    
-    -- Social
     ["mail"] = "rbxassetid://6031098098",
     ["mail-open"] = "rbxassetid://6031098098",
     ["inbox"] = "rbxassetid://6031098098",
@@ -133,8 +89,6 @@ local LucideIcons = {
     ["bell-off"] = "rbxassetid://6031082291",
     ["eye"] = "rbxassetid://6031088606",
     ["eye-off"] = "rbxassetid://6031088606",
-    
-    -- Social Media Brands
     ["github"] = "rbxassetid://6031091056",
     ["youtube"] = "rbxassetid://6031119420",
     ["twitter"] = "rbxassetid://6031113035",
@@ -150,8 +104,6 @@ local LucideIcons = {
     ["spotify"] = "rbxassetid://6031104410",
     ["apple"] = "rbxassetid://6031089508",
     ["google"] = "rbxassetid://6031092169",
-    
-    -- Security
     ["lock"] = "rbxassetid://6031097269",
     ["unlock"] = "rbxassetid://6031097269",
     ["shield"] = "rbxassetid://6031108700",
@@ -159,11 +111,8 @@ local LucideIcons = {
     ["shield-alert"] = "rbxassetid://6031108700",
     ["alert-circle"] = "rbxassetid://6031077329",
     ["alert-triangle"] = "rbxassetid://6031077329",
-    ["warning"] = "rbxassetid://6031077329",
     ["info"] = "rbxassetid://6031095493",
     ["help-circle"] = "rbxassetid://6031093855",
-    
-    -- Weather & Nature
     ["sun"] = "rbxassetid://6031111296",
     ["moon"] = "rbxassetid://6031101481",
     ["cloud"] = "rbxassetid://6031092169",
@@ -177,21 +126,14 @@ local LucideIcons = {
     ["map"] = "rbxassetid://6031098887",
     ["map-pin"] = "rbxassetid://6031098887",
     ["navigation"] = "rbxassetid://6031098887",
-    ["anchor"] = "rbxassetid://6031081251",
-    
-    -- Time
     ["calendar"] = "rbxassetid://6031098887",
     ["clock"] = "rbxassetid://6031098887",
     ["alarm-clock"] = "rbxassetid://6031098887",
     ["timer"] = "rbxassetid://6031098887",
-    
-    -- Health
     ["heart"] = "rbxassetid://6031093076",
     ["activity"] = "rbxassetid://6031093076",
     ["battery"] = "rbxassetid://6031093076",
     ["battery-charging"] = "rbxassetid://6031093076",
-    
-    -- Gaming
     ["gamepad"] = "rbxassetid://6031094632",
     ["controller"] = "rbxassetid://6031094632",
     ["joystick"] = "rbxassetid://6031094632",
@@ -200,8 +142,6 @@ local LucideIcons = {
     ["award"] = "rbxassetid://6031093076",
     ["medal"] = "rbxassetid://6031093076",
     ["star"] = "rbxassetid://6031110336",
-    
-    -- Shopping
     ["shopping-cart"] = "rbxassetid://6031109471",
     ["shopping-bag"] = "rbxassetid://6031109471",
     ["credit-card"] = "rbxassetid://6031109471",
@@ -212,25 +152,18 @@ local LucideIcons = {
     ["gift"] = "rbxassetid://6031093076",
     ["tag"] = "rbxassetid://6031093076",
     ["percent"] = "rbxassetid://6031077329",
-    
-    -- Development
     ["code"] = "rbxassetid://6031085639",
     ["terminal"] = "rbxassetid://6031085639",
     ["command"] = "rbxassetid://6031085639",
     ["git-branch"] = "rbxassetid://6031085639",
     ["git-commit"] = "rbxassetid://6031085639",
     ["git-merge"] = "rbxassetid://6031085639",
-    
-    -- Charts
     ["bar-chart"] = "rbxassetid://6031077329",
     ["pie-chart"] = "rbxassetid://6031077329",
     ["line-chart"] = "rbxassetid://6031077329",
     ["trending-up"] = "rbxassetid://6031081251",
     ["trending-down"] = "rbxassetid://6031079884",
-    
-    -- Other
     ["zap"] = "rbxassetid://6031120184",
-    ["bolt"] = "rbxassetid://6031120184",
     ["loader"] = "rbxassetid://6031106984",
     ["feather"] = "rbxassetid://6031093076",
     ["flag"] = "rbxassetid://6031093076",
@@ -243,37 +176,35 @@ local LucideIcons = {
     ["grid"] = "rbxassetid://6031087080",
     ["list"] = "rbxassetid://6031087080",
     ["check-square"] = "rbxassetid://6031084546",
+    ["square"] = "rbxassetid://6031084546",
+    ["circle"] = "rbxassetid://6031077329",
     ["target"] = "rbxassetid://6031098887",
     ["crosshair"] = "rbxassetid://6031098887",
+    ["radio"] = "rbxassetid://6031098887",
     ["wifi"] = "rbxassetid://6031098887",
     ["wifi-off"] = "rbxassetid://6031098887",
+    ["maximize"] = "rbxassetid://6031099873",
+    ["minimize"] = "rbxassetid://6031100687",
+    ["external-link"] = "rbxassetid://6031081251",
+    ["link"] = "rbxassetid://6031081251",
+    ["anchor"] = "rbxassetid://6031081251",
 }
 
--- // Hàm xử lý icon (hỗ trợ Lucide)
-local function ResolveIcon(iconInput, defaultIconId)
+local function ResolveIcon(iconInput)
     if not iconInput then return nil end
-    
     if type(iconInput) == "number" then
         return "rbxassetid://" .. tostring(iconInput)
     end
-    
     if type(iconInput) == "string" then
-        if iconInput:match("^rbxassetid://") then
-            return iconInput
-        end
-        if iconInput:match("^http") then
+        if iconInput:match("^rbxassetid://") or iconInput:match("^http") then
             return iconInput
         end
         local iconName = iconInput:lower()
         if LucideIcons[iconName] then
             return LucideIcons[iconName]
         end
-        if defaultIconId then
-            return "rbxassetid://" .. tostring(defaultIconId)
-        end
         return nil
     end
-    
     return nil
 end
 
@@ -458,6 +389,7 @@ function NoirUI:CreateWindow(settings)
         end)
     end
     
+    -- Hiệu ứng cầu vồng viền main
     task.spawn(function()
         while Main and Main.Parent do
             for i = 0, 1, 0.01 do
@@ -600,7 +532,7 @@ function NoirUI:CreateWindow(settings)
         L.Size = UDim2.new(0, 24, 0, 24)
         L.Position = UDim2.new(0, 10, 0.5, -12)
         L.BackgroundTransparency = 1
-        local logoImage = ResolveIcon(settings.LogoID, settings.LogoID)
+        local logoImage = ResolveIcon(settings.LogoID)
         if logoImage then L.Image = logoImage end
     end
     local Title = Instance.new("TextLabel", Header)
@@ -687,7 +619,7 @@ function NoirUI:CreateWindow(settings)
         end)
     end)
     
-    -- //////////////// SIDEBAR ////////////////
+    -- //////////////// SIDEBAR (CHỈ TABS SCROLL, AVATAR CỐ ĐỊNH) ////////////////
     local Side = Instance.new("Frame", Main)
     Side.Size = UDim2.new(0, 110, 1, -50)
     Side.Position = UDim2.new(0, 5, 0, 40)
@@ -701,17 +633,34 @@ function NoirUI:CreateWindow(settings)
     SideStroke.Thickness = 1
     SideStroke.Transparency = 0.7
     
+    -- Khung chứa tabs (có scroll)
     local TScroll = Instance.new("ScrollingFrame", Side)
     TScroll.Size = UDim2.new(1, 0, 1, -55)
+    TScroll.Position = UDim2.new(0, 0, 0, 0)
     TScroll.BackgroundTransparency = 1
-    TScroll.ScrollBarThickness = 0
-    TScroll.AutomaticCanvasSize = "Y"
-    Instance.new("UIListLayout", TScroll).Padding = UDim.new(0, 5)
+    TScroll.ScrollBarThickness = 3
+    TScroll.ScrollBarImageColor3 = ACCENT
+    TScroll.ScrollBarImageTransparency = 0.5
+    TScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    TScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
     
+    local TLayout = Instance.new("UIListLayout", TScroll)
+    TLayout.Padding = UDim.new(0, 5)
+    TLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    
+    local function updateSidebarCanvas()
+        task.wait()
+        TScroll.CanvasSize = UDim2.new(0, 0, 0, TLayout.AbsoluteContentSize.Y + 10)
+    end
+    TLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSidebarCanvas)
+    
+    -- Avatar cố định ở cuối sidebar (không bị scroll)
     local UA = Instance.new("Frame", Side)
     UA.Size = UDim2.new(1, 0, 0, 50)
     UA.Position = UDim2.new(0, 0, 1, -45)
     UA.BackgroundTransparency = 1
+    UA.ZIndex = 10
+    
     local AI = Instance.new("ImageLabel", UA)
     AI.Size = UDim2.new(0, 38, 0, 38)
     AI.Position = UDim2.new(0.5, -19, 0, 0)
@@ -941,8 +890,11 @@ function NoirUI:CreateWindow(settings)
         TabContainer.Size = UDim2.new(1, 0, 1, 0)
         TabContainer.BackgroundTransparency = 1
         TabContainer.Visible = false
-        TabContainer.ScrollBarThickness = 1
-        TabContainer.AutomaticCanvasSize = "Y"
+        TabContainer.ScrollBarThickness = 3
+        TabContainer.ScrollBarImageColor3 = ACCENT
+        TabContainer.ScrollBarImageTransparency = 0.5
+        TabContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        TabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
         
         local SearchFrame = Instance.new("Frame", TabContainer)
         SearchFrame.Size = UDim2.new(1, -20, 0, 35)
@@ -1004,7 +956,7 @@ function NoirUI:CreateWindow(settings)
             updateCanvas()
         end)
         
-        if #TScroll:GetChildren() == 2 then
+        if #TScroll:GetChildren() == 0 then
             TabContainer.Visible = true
             BT.TextColor3 = ACCENT
             local tabImg = B:FindFirstChild("ImageLabel")
@@ -1097,7 +1049,7 @@ function NoirUI:CreateWindow(settings)
             return s
         end
         
-        -- ========== PARAGRAPH (CÓ THỂ UPDATE ĐỘNG) ==========
+        -- ========== PARAGRAPH ==========
         function Tab:CreateParagraph(opt)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95, 0, 0, 65)
@@ -1105,7 +1057,7 @@ function NoirUI:CreateWindow(settings)
             f.BackgroundTransparency = 0.5
             Instance.new("UICorner", f)
             f.LayoutOrder = GetO()
-            f.Name = "Paragraph"
+            f.Name = opt.Title or ""
             table.insert(Tab.Elements, f)
             
             local title = Instance.new("TextLabel", f)
@@ -1129,32 +1081,6 @@ function NoirUI:CreateWindow(settings)
             content.TextWrapped = true
             content.TextXAlignment = "Left"
             content.TextYAlignment = "Top"
-            
-            function f:SetTitle(newTitle)
-                title.Text = newTitle
-            end
-            
-            function f:SetContent(newContent)
-                content.Text = newContent
-            end
-            
-            function f:Update(newTitle, newContent)
-                if newTitle then title.Text = newTitle end
-                if newContent then content.Text = newContent end
-            end
-            
-            if opt.UpdateFunction then
-                local connection = RunService.RenderStepped:Connect(function()
-                    if f and f.Parent then
-                        local newTitle, newContent = opt.UpdateFunction()
-                        if newTitle then title.Text = newTitle end
-                        if newContent then content.Text = newContent end
-                    else
-                        connection:Disconnect()
-                    end
-                end)
-                table.insert(Tab.Connections, connection)
-            end
             
             return f
         end
@@ -1182,7 +1108,7 @@ function NoirUI:CreateWindow(settings)
             i.FocusLost:Connect(function() if opt.Callback then opt.Callback(i.Text) end end)
         end
         
-        -- ========== BUTTON ==========
+        -- ========== BUTTON (CÓ ALIGN) ==========
         function Tab:CreateButton(opt)
             local b = Instance.new("TextButton", ContentFrame)
             b.Size = UDim2.new(0.95, 0, 0, 35)
@@ -1192,6 +1118,12 @@ function NoirUI:CreateWindow(settings)
             b.TextColor3 = Color3.new(1, 1, 1)
             b.Font = "GothamMedium"
             b.TextSize = 12
+            if opt.Align == false then
+                b.TextXAlignment = "Left"
+                b.Text = "  " .. opt.Name
+            else
+                b.TextXAlignment = "Center"
+            end
             Instance.new("UICorner", b)
             b.LayoutOrder = GetO()
             b.Name = opt.Name
@@ -1415,7 +1347,8 @@ function NoirUI:CreateWindow(settings)
             il.ScrollBarThickness = 2
             il.AutomaticCanvasSize = "Y"
             il.Visible = false
-            Instance.new("UIListLayout", il)
+            local ilLayout = Instance.new("UIListLayout", il)
+            ilLayout.Padding = UDim.new(0, 2)
             
             local function refreshOptions()
                 if not opt.GetOptions then return end
@@ -1446,8 +1379,9 @@ function NoirUI:CreateWindow(settings)
                     end)
                 end
                 
+                task.wait()
                 local optionCount = math.min(#newOptions, 4)
-                il.Size = UDim2.new(1, 0, 0, optionCount * 30)
+                il.Size = UDim2.new(1, 0, 0, optionCount * 32)
                 
                 if opt.Default then
                     t.Text = "  " .. opt.Name .. " : " .. opt.Default
@@ -1461,11 +1395,9 @@ function NoirUI:CreateWindow(settings)
                 open = not open
                 il.Visible = open
                 Arrow.Text = open and "▲" or "▼"
-                
                 if open and opt.RefreshOnOpen then
                     refreshOptions()
                 end
-                
                 TweenService:Create(d, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95, 0, 0, 35 + il.Size.Y.Offset) or UDim2.new(0.95, 0, 0, 35)}):Play()
             end)
             
@@ -1491,7 +1423,7 @@ function NoirUI:CreateWindow(settings)
                     end)
                 end
                 local optionCount = math.min(#opt.Options, 4)
-                il.Size = UDim2.new(1, 0, 0, optionCount * 30)
+                il.Size = UDim2.new(1, 0, 0, optionCount * 32)
             end
             
             if opt.RefreshInterval and opt.GetOptions then
