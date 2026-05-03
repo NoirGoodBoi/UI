@@ -1,120 +1,143 @@
-📘 NOIRUI - HƯỚNG DẪN SỬ DỤNG A-Z (SIÊU CHI TIẾT)
+📘 NOIRUI V3 ULTIMATE - HƯỚNG DẪN SỬ DỤNG A-Z (SIÊU CHI TIẾT)
 
 ---
 
 MỤC LỤC
 
 1. Giới thiệu
-2. Tải và khởi tạo
+2. Cách tải và khởi tạo
 3. Cấu hình cửa sổ & Background
-4. Hệ thống Key
+4. Hệ thống Key (MỚI)
 5. Tạo Tab
-6. Các thành phần UI
-7. Custom Commands
-8. RunBox - Thực thi lệnh
-9. Notifications
-10. Ví dụ hoàn chỉnh
-11. Mẹo & Thủ thuật
+6. Các thành phần UI cơ bản
+7. Các thành phần UI nâng cao (MỚI)
+8. Custom Commands (MỚI)
+9. RunBox - Thực thi lệnh đa năng (MỚI)
+10. Notifications
+11. Ví dụ hoàn chỉnh
+12. Mẹo & Thủ thuật
+13. Bảng tổng kết nhanh
 
 ---
 
 1. GIỚI THIỆU
 
-NoirUI là thư viện giao diện người dùng (UI Library) cho Roblox Executor, với các tính năng:
+NoirUI V3 Ultimate là thư viện giao diện người dùng thế hệ mới dành cho Roblox Executor, được nâng cấp toàn diện từ phiên bản Classic.
+
+🎯 Tính năng nổi bật
 
 Tính năng Mô tả
-🎨 Custom Background Hỗ trợ ảnh nền từ ID Roblox, URL, rbxasset
-🖱️ Kéo thả Cửa sổ chính và nút float kéo thả độc lập
-🔐 Key System Bảo vệ UI bằng key, lưu key vào file
-🌈 Hiệu ứng cầu vồng Viền UI chuyển màu liên tục
-📱 Hỗ trợ Mobile Touch-friendly, kéo thả bằng tay
-🔍 Search Bar Tìm kiếm nội dung trong từng tab
-⌨️ RunBox đa năng Custom command, loadstring, required, lua code
-💬 Notifications Thông báo đẹp mắt, tự động biến mất
+🎨 Custom Background Hỗ trợ ảnh nền từ ID Roblox, URL, rbxasset cho từng thành phần riêng biệt
+🖱️ Kéo thả độc lập Cửa sổ chính và nút float có thể kéo thả riêng biệt, lưu vị trí
+🔐 Key System Pro Bảo vệ UI bằng key, lưu key vào file, hỗ trợ nhiều key cùng lúc
+🌈 Hiệu ứng cầu vồng Viền UI chuyển màu liên tục với tốc độ có thể tùy chỉnh
+📱 Hỗ trợ Mobile Touch-friendly, kéo thả và tương tác bằng tay mượt mà
+🔍 Search Bar Tìm kiếm nội dung trong từng tab theo thời gian thực
+⌨️ RunBox đa năng Thực thi custom command, loadstring, required, lua code
+💬 Notifications Thông báo xếp chồng thông minh, tự động biến mất
+🎨 250+ Icon Lucide Kho icon khổng lồ tích hợp sẵn, chỉ cần gọi tên
+📦 Loading Effect Hiệu ứng loading đẹp mắt khi khởi tạo
+🔄 Refresh On Open Dropdown tự động cập nhật danh sách khi mở
 
 ---
 
-2. TẢI VÀ KHỞI TẠO
+2. CÁCH TẢI VÀ KHỞI TẠO
+
+Cách 1: Load từ URL (Khuyến nghị)
 
 ```lua
--- Cách 1: Load từ URL (khuyến nghị)
 local NoirUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/UI/refs/heads/main/Main.lua"))()
+```
 
--- Cách 2: Nếu file đã được lưu local (ko nên dùng lắm)
--- local NoirUI = loadstring(readfile("NoirUI.lua"))()
+Cách 2: Kiểm tra tồn tại trước khi load
+
+```lua
+local NoirUI = nil
+local url = "https://raw.githubusercontent.com/NoirGoodBoi/UI/refs/heads/main/Main.lua"
+
+local success, result = pcall(function()
+    return loadstring(game:HttpGet(url))()
+end)
+
+if success then
+    NoirUI = result
+    print("✅ NoirUI loaded successfully!")
+else
+    warn("❌ Failed to load NoirUI:", result)
+end
 ```
 
 ---
 
 3. CẤU HÌNH CỬA SỔ & BACKGROUND
 
-Cấu trúc đầy đủ:
+Cấu trúc đầy đủ các tham số
 
 ```lua
 local Window = NoirUI:CreateWindow({
-    -- === CƠ BẢN ===
-    Name = "Tên UI",                          -- Tiêu đề header
-    Accent = Color3.fromRGB(170, 85, 255),    -- Màu chủ đạo
-    Icon = "🚀",                               -- Icon nút float (emoji hoặc ID)
-    LogoID = 1234567890,                      -- Logo header (Image ID)
+    -- ===== CƠ BẢN =====
+    Name = "Tên UI",                              -- Tiêu đề header
+    Accent = Color3.fromRGB(170, 85, 255),        -- Màu chủ đạo
+    Icon = "🚀",                                   -- Icon nút float (emoji hoặc ID)
+    LogoID = 1234567890,                          -- Logo header (Image ID)
     
-    -- === VỊ TRÍ ===
-    DefaultPosition = UDim2.new(0.5, -210, 0.5, -150),  -- Vị trí main UI
-    FloatDefaultPosition = UDim2.new(0, 15, 0.5, -22),   -- Vị trí nút float
+    -- ===== VỊ TRÍ =====
+    DefaultPosition = UDim2.new(0.5, -210, 0.5, -150),   -- Vị trí main UI
+    FloatDefaultPosition = UDim2.new(0, 15, 0.5, -22),    -- Vị trí nút float
     
-    -- === BACKGROUND CHO MAIN UI ===
+    -- ===== BACKGROUND CHO MAIN UI (MỚI) =====
     Background = {
-        Image = 1234567890,          -- ID Roblox (number)
+        Image = 1234567890,            -- ID Roblox (number hoặc string)
         -- Hoặc: Image = "rbxassetid://1234567890"
         -- Hoặc: Image = "https://example.com/bg.png"
         -- Hoặc: Image = "rbxasset://textures/ui/Gradient.png"
-        Transparency = 0.5           -- Độ mờ (0-1)
+        Transparency = 0.5              -- Độ mờ (0-1)
     },
     
-    -- === BACKGROUND CHO LOADING ===
+    -- ===== BACKGROUND CHO LOADING (MỚI) =====
     LoadingBackground = {
         Image = 1234567890,
         Transparency = 0.3
     },
     
-    -- === BACKGROUND CHO KEY UI ===
+    -- ===== BACKGROUND CHO KEY UI (MỚI) =====
     KeyBackground = {
         Image = 1234567890,
         Transparency = 0.4
     },
     
-    -- === BACKGROUND CHO NOTIFICATION ===
+    -- ===== BACKGROUND CHO NOTIFICATION (MỚI) =====
     NotificationBackground = {
         Image = 1234567890,
         Transparency = 0.2
     },
     
-    -- === BACKGROUND CHO FLOAT BUTTON ===
+    -- ===== BACKGROUND CHO FLOAT BUTTON (MỚI) =====
     FloatBackground = {
         Image = 1234567890,
         Transparency = 0.3
     },
     
-    -- === ĐỘ TRONG SUỐT CÁC THÀNH PHẦN ===
-    MainBgColor = Color3.fromRGB(10, 10, 10),  -- Màu nền main
-    MainBgTransparency = 0,                    -- Độ mờ nền main
-    SidebarTransparency = 0.5,                -- Độ mờ sidebar 
-    ContentTransparency = 0.3,                -- Độ mờ vùng nội dung
+    -- ===== ĐỘ TRONG SUỐT CÁC THÀNH PHẦN (MỚI) =====
+    MainBgColor = Color3.fromRGB(10, 10, 10),     -- Màu nền main
+    MainBgTransparency = 0,                       -- Độ mờ nền main
+    SidebarTransparency = 0.5,                    -- Độ mờ sidebar
+    ContentTransparency = 0.3,                    -- Độ mờ vùng nội dung
     
-    -- === HỆ THỐNG KEY ===
-    KeySystem = true,                          -- Bật/tắt key system
+    -- ===== HỆ THỐNG KEY (MỚI) =====
+    KeySystem = true,                             -- Bật/tắt key system
     KeySettings = {
-        Key = {"key1", "key2"},                -- Một hoặc nhiều key
-        SaveKey = true,                        -- Lưu key vào file
-        FileName = "MyHubKey",                 -- Tên file lưu key
-        Title = "🔐 WELCOME",                  -- Tiêu đề key window
-        Subtitle = "Nhập key để tiếp tục",     -- Subtitle
-        Note = "Mua key tại discord.gg/xxx"    -- Ghi chú
+        Key = {"key1", "key2"},                   -- Một hoặc nhiều key
+        SaveKey = true,                           -- Lưu key vào file
+        FileName = "MyHubKey",                    -- Tên file lưu key
+        Title = "🔐 WELCOME",                     -- Tiêu đề key window
+        Subtitle = "Nhập key để tiếp tục",        -- Subtitle
+        Note = "Mua key tại discord.gg/xxx"       -- Ghi chú
     }
 })
 ```
 
-Ví dụ background đẹp:
+Ví dụ Background đẹp
 
 ```lua
 local Window = NoirUI:CreateWindow({
@@ -134,94 +157,169 @@ local Window = NoirUI:CreateWindow({
     SidebarTransparency = 0.6,
     ContentTransparency = 0.2,
     
+    -- Notification background
+    NotificationBackground = {
+        Image = 1234567890,
+        Transparency = 0.15
+    },
+    
     KeySystem = false
 })
 ```
 
 ---
 
-4. HỆ THỐNG KEY
+4. HỆ THỐNG KEY (MỚI)
 
-Bật Key System:
+Bật Key System
 
 ```lua
 KeySystem = true,
 KeySettings = {
-    Key = "free123",                    -- Một key
-    -- Hoặc nhiều key: Key = {"free123", "vip456", "admin789"},
-    SaveKey = true,                     -- Lưu key (không cần nhập lại)
-    FileName = "MyKey",                 -- Tên file lưu
-    Title = "🔐 KEY SYSTEM",            -- Tiêu đề
-    Subtitle = "Nhập key để tiếp tục",  -- Phụ đề
-    Note = "Liên hệ admin để lấy key"   -- Ghi chú
+    -- Key đơn
+    Key = "free123",
+    
+    -- Hoặc nhiều key (VIP, Admin, Free)
+    Key = {"free123", "vip456", "admin789"},
+    
+    -- Lưu key (không cần nhập lại khi chạy lại)
+    SaveKey = true,
+    
+    -- Tên file lưu
+    FileName = "MyAwesomeHubKey",
+    
+    -- Giao diện key window
+    Title = "🔐 KEY SYSTEM",
+    Subtitle = "Nhập key để tiếp tục",
+    Note = "Liên hệ admin để lấy key\nDiscord: discord.gg/xxx"
 }
 ```
 
-Tắt Key System:
+Tắt Key System
 
 ```lua
 KeySystem = false   -- UI hiện loading ngay lập tức
 ```
 
-Luồng hoạt động Key:
+Luồng hoạt động Key
 
 ```
-Chạy script → Kiểm tra file key đã lưu chưa?
-                ↓
-         Đã lưu → So khớp → Đúng → Hiện loading → UI chính
-                ↓
-         Chưa lưu → Hiện bảng key → Nhập key → Đúng → Lưu → Loading → UI
-                                                ↓
-                                          Sai → Báo lỗi, nhập lại
+Chạy script
+    │
+    ▼
+Kiểm tra file key đã lưu chưa?
+    │
+    ├── Đã lưu → So khớp key
+    │              │
+    │              ├── Đúng → Hiện loading → UI chính
+    │              │
+    │              └── Sai → Xóa file cũ → Hiện bảng key
+    │
+    └── Chưa lưu → Hiện bảng key
+                    │
+                    ▼
+              Nhập key
+                    │
+                    ├── Đúng → Lưu key → Loading → UI chính
+                    │
+                    └── Sai → Báo lỗi "Key không chính xác!"
+                              │
+                              └── Xóa text, yêu cầu nhập lại
 ```
 
 ---
 
 5. TẠO TAB
 
+Cú pháp
+
 ```lua
--- Có icon (Image ID)
-local CombatTab = Window:CreateTab("⚔️ Combat", 1234567890)
+-- Có icon (Image ID hoặc tên icon từ Lucide)
+local Tab1 = Window:CreateTab("Tên Tab", "icon_name")
 
 -- Không icon
-local VisualTab = Window:CreateTab("👁️ Visual")
+local Tab2 = Window:CreateTab("Tên Tab")
 
--- Chỉ emoji
-local PlayerTab = Window:CreateTab("👤 Player")
+-- Chỉ emoji làm icon
+local Tab3 = Window:CreateTab("👤 Player")
 ```
+
+Ví dụ
+
+```lua
+local CombatTab = Window:CreateTab("⚔️ Combat", "sword")
+local VisualTab = Window:CreateTab("👁️ Visual", "eye")
+local PlayerTab = Window:CreateTab("👤 Player", "user")
+local TeleportTab = Window:CreateTab("🌍 Teleport", "map-pin")
+local ConsoleTab = Window:CreateTab("⌨️ Console", "terminal")
+```
+
+Danh sách icon Lucide có sẵn
+
+Danh mục Icon names
+Cơ bản home, house, user, users, settings, menu, x, close, check, plus, minus, search
+Điều hướng arrow-left, arrow-right, arrow-up, arrow-down, chevron-left, chevron-right
+Hành động edit, pen, trash, delete, copy, cut, paste, save, download, upload
+Media play, pause, stop, volume, volume-x, mute, music, video, camera
+Mạng xã hội github, youtube, twitter, facebook, instagram, discord, twitch, tiktok
+Bảo mật lock, unlock, shield, alert-circle, alert-triangle, warning, info
+Thời tiết sun, moon, cloud, cloud-rain, wind, compass, globe, map
+Thời gian calendar, clock, alarm-clock, timer
+Sức khỏe heart, activity, battery
+Game gamepad, controller, joystick, dice, trophy, award, medal, star
+Mua sắm shopping-cart, credit-card, wallet, dollar-sign, gift, tag
+Lập trình code, terminal, command, git-branch
 
 ---
 
-6. CÁC THÀNH PHẦN UI
+6. CÁC THÀNH PHẦN UI CƠ BẢN
 
 6.1 CreateLabel - Nhãn văn bản
 
-```lua
-CombatTab:CreateLabel("Thông tin người chơi")
-CombatTab:CreateLabel("Username: " .. game.Players.LocalPlayer.Name)
-```
-
 Công dụng: Hiển thị văn bản đơn giản, không tương tác.
+
+```lua
+Tab:CreateLabel("Thông tin người chơi")
+Tab:CreateLabel("Username: " .. game.Players.LocalPlayer.Name)
+Tab:CreateLabel("User ID: " .. game.Players.LocalPlayer.UserId)
+```
 
 ---
 
-6.2 CreateParagraph - Đoạn văn dài
+6.2 CreateSection - Dòng phân cách
+
+Công dụng: Phân nhóm các thành phần trong tab.
 
 ```lua
-VisualTab:CreateParagraph({
+Tab:CreateSection("⚔️ CHIẾN ĐẤU")
+Tab:CreateButton({ Name = "Tấn công", Callback = function() end })
+Tab:CreateButton({ Name = "Phòng thủ", Callback = function() end })
+
+Tab:CreateSection("🛡️ PHÒNG THỦ")
+Tab:CreateToggle({ Name = "Auto Block", Callback = function(s) end })
+```
+
+---
+
+6.3 CreateParagraph - Đoạn văn dài
+
+Công dụng: Hiển thị đoạn văn bản có tiêu đề và nội dung, tự động xuống dòng.
+
+```lua
+Tab:CreateParagraph({
     Title = "🎨 Hướng dẫn sử dụng",
     Content = "Đây là nội dung hướng dẫn chi tiết.\nBạn có thể xuống dòng bằng \\n."
 })
 ```
 
-Công dụng: Hiển thị đoạn văn bản có tiêu đề và nội dung.
-
 ---
 
-6.3 CreateButton - Nút bấm
+6.4 CreateButton - Nút bấm
+
+Công dụng: Tạo nút có thể click, thực thi callback.
 
 ```lua
-CombatTab:CreateButton({
+Tab:CreateButton({
     Name = "💥 Tấn công",
     Callback = function()
         print("Đã tấn công!")
@@ -230,15 +328,15 @@ CombatTab:CreateButton({
 })
 ```
 
-Công dụng: Tạo nút có thể click, thực thi callback.
-
 ---
 
-6.4 CreateToggle - Công tắc bật/tắt
+6.5 CreateToggle - Công tắc bật/tắt
+
+Công dụng: Tạo switch bật/tắt, trả về trạng thái boolean.
 
 ```lua
 local autoFarm = false
-CombatTab:CreateToggle({
+Tab:CreateToggle({
     Name = "🤖 Auto Farm",
     Default = false,      -- Trạng thái ban đầu
     Callback = function(state)
@@ -248,14 +346,14 @@ CombatTab:CreateToggle({
 })
 ```
 
-Công dụng: Tạo switch bật/tắt, trả về trạng thái boolean.
-
 ---
 
-6.5 CreateSlider - Thanh trượt
+6.6 CreateSlider - Thanh trượt
+
+Công dụng: Điều chỉnh giá trị số trong khoảng min-max.
 
 ```lua
-VisualTab:CreateSlider({
+Tab:CreateSlider({
     Name = "🎯 WalkSpeed",
     Min = 16,
     Max = 250,
@@ -267,128 +365,183 @@ VisualTab:CreateSlider({
 })
 ```
 
-Công dụng: Điều chỉnh giá trị số trong khoảng min-max.
-
 ---
 
-6.6 CreateTextBox - Ô nhập văn bản
+6.7 CreateTextBox - Ô nhập văn bản
+
+Công dụng: Nhập văn bản, callback khi mất focus.
 
 ```lua
-PlayerTab:CreateTextBox({
+Tab:CreateTextBox({
     Name = "💬 Nhập tin nhắn",
     Callback = function(text)
         if text ~= "" then
+            -- Gửi tin nhắn chat
             game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(text, "All")
         end
     end
 })
 ```
 
-Công dụng: Nhập văn bản, callback khi mất focus.
-
 ---
 
-6.7 CreateDropdown - Danh sách chọn
+7. CÁC THÀNH PHẦN UI NÂNG CAO (MỚI)
+
+7.1 CreateDropdown - Danh sách chọn lọc
+
+Đặc điểm: Có mũi tên xoay khi mở/đóng, tự động cuộn nếu nhiều option.
 
 ```lua
+-- Cách 1: Options tĩnh
 VisualTab:CreateDropdown({
     Name = "🎒 Chọn vũ khí",
-    Options = {"🔫 AK-47", "🔪 Knife", "💣 Grenade"},
+    Options = {"🔫 AK-47", "🔪 Knife", "💣 Grenade", "🏹 Bow", "🔫 Pistol"},
     Default = "🔫 AK-47",
     Callback = function(selected)
         NoirUI:Notify("Weapon", "Đã trang bị: " .. selected)
     end
 })
-```
 
-Đặc điểm: Có mũi tên xoay khi mở/đóng.
+-- Cách 2: Options động (tự động cập nhật khi mở) - TÍNH NĂNG MỚI
+local playerList = {}
+local function refreshPlayerList()
+    playerList = {}
+    for _, v in pairs(game:GetService("Players"):GetPlayers()) do
+        table.insert(playerList, v.Name)
+    end
+    return playerList
+end
 
----
-
-6.8 CreateColorPicker - Bảng chọn màu
-
-```lua
-VisualTab:CreateColorPicker({
-    Name = "🎨 Màu chữ",
-    Default = Color3.fromRGB(255, 255, 255),
-    Callback = function(color)
-        print("Màu đã chọn:", color)
-        NoirUI:Notify("Color", "Đã đổi màu!")
+TeleportTab:CreateDropdown({
+    Name = "👥 TP đến player",
+    GetOptions = refreshPlayerList,     -- Hàm trả về danh sách mới
+    RefreshOnOpen = true,               -- Tự động refresh khi mở dropdown
+    Callback = function(selected)
+        local target = game:GetService("Players"):FindFirstChild(selected)
+        if target and target.Character then
+            local hrp = game.Players.LocalPlayer.Character.HumanoidRootPart
+            hrp.CFrame = target.Character.HumanoidRootPart.CFrame
+        end
     end
 })
 ```
 
-Đặc điểm: Bảng màu HSV đầy đủ, có thể kéo thả chọn màu.
+---
+
+7.2 CreateColorPicker - Bảng chọn màu
+
+Đặc điểm: Bảng màu HSV đầy đủ, có thể kéo thả chọn màu, hiển thị màu xem trước.
+
+```lua
+VisualTab:CreateColorPicker({
+    Name = "🎨 Màu ESP",
+    Default = Color3.fromRGB(255, 0, 0),
+    Callback = function(color)
+        print("Màu đã chọn:", color)
+        -- Cập nhật màu ESP
+        for _, v in pairs(game:GetService("Players"):GetPlayers()) do
+            if v ~= game.Players.LocalPlayer then
+                -- Code ESP ở đây
+            end
+        end
+    end
+})
+```
 
 ---
 
-6.9 CreateRunBox - Ô thực thi lệnh
+7.3 CreateRunBox - Ô thực thi lệnh đa năng (MỚI)
+
+Công dụng: Nhập và thực thi nhiều loại lệnh khác nhau.
 
 ```lua
 local ConsoleTab = Window:CreateTab("💻 Console")
 ConsoleTab:CreateRunBox({
-    Placeholder = "Nhập lệnh: .heal, loadstring('url'), hoặc Lua code...",
-    ClearOnExecute = true   -- Xóa text sau khi chạy
+    Placeholder = "Nhập lệnh: .heal, loadstring('url'), required('Module'), hoặc Lua code...",
+    ClearOnExecute = true   -- Xóa text sau khi chạy (tùy chọn)
 })
 ```
 
-Xem chi tiết ở mục 8.
+Các loại lệnh được hỗ trợ:
 
----
+Loại Cú pháp Ví dụ Kết quả
+Custom Command .tên_lệnh .heal Chạy lệnh đã đăng ký
+Custom Command có tham số .tên_lệnh tham số .speed 100 Truyền tham số vào lệnh
+Loadstring loadstring("code") loadstring(game:HttpGet("url"))() Tải và chạy script từ URL
+Required required("TênModule") required("ChatModule") Gọi module client-side
+Lua code Câu lệnh Lua print("Hello") Thực thi trực tiếp
 
-6.10 CreateSection - Dòng phân cách
+Ví dụ trong RunBox:
 
-```lua
-CombatTab:CreateSection("⚔️ CHIẾN ĐẤU")
-CombatTab:CreateButton({ Name = "Tấn công", ... })
-CombatTab:CreateSection("🛡️ PHÒNG THỦ")
+```
+.heal                    → Hồi máu
+.speed 100               → Tăng tốc lên 100
+.fly                     → Bật/tắt bay
+.tp 0 100 0              → Bay lên độ cao 100
+.tp Admin                → Teleport đến player Admin
+.god                     → Bật bất tử
+.unload                  → Tắt UI
+loadstring(game:HttpGet("https://example.com/script.lua"))()
+print("Hello World")
+for i = 1, 10 do print(i) end
+required("PlayerModule")
 ```
 
-Công dụng: Phân nhóm các thành phần trong tab.
-
 ---
 
-7. CUSTOM COMMANDS
+8. CUSTOM COMMANDS (MỚI)
 
-Cú pháp đăng ký:
+Đăng ký lệnh
+
+Cú pháp:
 
 ```lua
 NoirUI:RegisterCommand("tên_lệnh", function(args)
     -- Xử lý lệnh
-    -- args là table chứa các tham số
+    -- args là table chứa các tham số (đã tách theo khoảng trắng)
 end)
 ```
 
-Ví dụ các lệnh cơ bản:
+Ví dụ các lệnh cơ bản
 
 ```lua
--- Lệnh .heal
+-- Lệnh .heal (không tham số)
 NoirUI:RegisterCommand("heal", function(args)
-    game.Players.LocalPlayer.Character.Humanoid.Health = 100
-    NoirUI:Notify("💚 Heal", "Đã hồi 100 máu!")
+    local char = game.Players.LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.Health = 100
+        NoirUI:Notify("💚 Heal", "Đã hồi 100 máu!")
+    end
 end)
 
--- Lệnh .speed [tốc độ]
+-- Lệnh .speed [tốc độ] (1 tham số)
 NoirUI:RegisterCommand("speed", function(args)
     local speed = tonumber(args[1]) or 16
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
-    NoirUI:Notify("⚡ Speed", "Speed: " .. speed)
+    local char = game.Players.LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.WalkSpeed = speed
+        NoirUI:Notify("⚡ Speed", "Tốc độ: " .. speed)
+    end
 end)
 
--- Lệnh .tp [x] [y] [z] hoặc .tp [tên]
+-- Lệnh .tp x y z hoặc .tp [tên] (nhiều tham số)
 NoirUI:RegisterCommand("tp", function(args)
     local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     
     if #args >= 3 then
+        -- Teleport theo tọa độ
         local x, y, z = tonumber(args[1]), tonumber(args[2]), tonumber(args[3])
         hrp.CFrame = CFrame.new(x, y, z)
         NoirUI:Notify("🌍 Teleport", string.format("Đã dịch đến (%.0f, %.0f, %.0f)", x, y, z))
     elseif #args == 1 then
+        -- Teleport đến player
         local target = game:GetService("Players"):FindFirstChild(args[1])
         if target and target.Character then
             hrp.CFrame = target.Character.HumanoidRootPart.CFrame
             NoirUI:Notify("🌍 Teleport", "Đã dịch đến " .. target.Name)
+        else
+            NoirUI:Notify("❌ Lỗi", "Không tìm thấy player: " .. args[1])
         end
     end
 end)
@@ -416,18 +569,23 @@ end)
 
 -- Lệnh .god (bật/tắt bất tử)
 local godMode = false
+local healthConnection = nil
+
 NoirUI:RegisterCommand("god", function(args)
     local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
     if humanoid then
         godMode = not godMode
         if godMode then
-            humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+            if healthConnection then healthConnection:Disconnect() end
+            healthConnection = humanoid:GetPropertyChangedSignal("Health"):Connect(function()
                 if humanoid.Health <= 0 and godMode then
                     humanoid.Health = 100
                 end
             end)
             NoirUI:Notify("👑 God Mode", "Đã bật bất tử!")
         else
+            if healthConnection then healthConnection:Disconnect() end
+            healthConnection = nil
             NoirUI:Notify("👑 God Mode", "Đã tắt bất tử!")
         end
     end
@@ -435,63 +593,160 @@ end)
 
 -- Lệnh .unload (tắt UI)
 NoirUI:RegisterCommand("unload", function(args)
-    game.CoreGui:FindFirstChild("NoirUI_V3_Ultimate"):Destroy()
+    local gui = game.CoreGui:FindFirstChild("NoirUI_V3_Ultimate")
+    if gui then
+        gui:Destroy()
+        NoirUI:Notify("👋 Goodbye", "UI đã được gỡ!")
+    end
+end)
+
+-- Lệnh .noclip (xuyên tường)
+local noclipActive = false
+local noclipConnection = nil
+
+NoirUI:RegisterCommand("noclip", function(args)
+    noclipActive = not noclipActive
+    
+    if noclipActive then
+        noclipConnection = game:GetService("RunService").Stepped:Connect(function()
+            local char = game.Players.LocalPlayer.Character
+            if char then
+                for _, part in pairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+        NoirUI:Notify("🌀 Noclip", "Đã bật xuyên tường!")
+    else
+        if noclipConnection then noclipConnection:Disconnect() end
+        local char = game.Players.LocalPlayer.Character
+        if char then
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+        NoirUI:Notify("🌀 Noclip", "Đã tắt xuyên tường!")
+    end
+end)
+
+-- Lệnh .clear (clear chat)
+NoirUI:RegisterCommand("clear", function(args)
+    local chatFrame = game:GetService("CoreGui"):FindFirstChild("Chat")
+    if chatFrame then
+        local messageList = chatFrame:FindFirstChild("MessageList")
+        if messageList then
+            for _, child in pairs(messageList:GetChildren()) do
+                if child:IsA("Frame") then
+                    child:Destroy()
+                end
+            end
+        end
+    end
+    NoirUI:Notify("🧹 Clear Chat", "Đã xóa tin nhắn!")
 end)
 ```
 
 ---
 
-8. RUNBOX - THỰC THI LỆNH
+9. RUNBOX - THỰC THI LỆNH ĐA NĂNG (MỚI)
 
-Các loại lệnh được hỗ trợ:
+RunBox là thành phần đặc biệt cho phép người dùng nhập và thực thi nhiều loại lệnh khác nhau mà không cần viết thêm code.
 
-Loại Cú pháp Ví dụ Kết quả
-Custom Command .tên_lệnh .heal Chạy lệnh đã đăng ký
-Custom Command có tham số .tên_lệnh tham số .speed 100 Truyền tham số vào lệnh
-Loadstring loadstring("code") loadstring(game:HttpGet("url"))() Tải và chạy script từ URL
-Required required("TênModule") required("ChatModule") Gọi module client-side
-Lua code Câu lệnh Lua print("Hello") Thực thi trực tiếp
-
-Ví dụ trong RunBox:
-
-```
-.heal                    → Hồi máu
-.speed 100               → Tăng tốc lên 100
-.fly                     → Bật/tắt bay
-.tp 0 100 0              → Bay lên độ cao 100
-.tp Admin                → Teleport đến player Admin
-.god                     → Bật bất tử
-.unload                  → Tắt UI
-loadstring(game:HttpGet("https://example.com/script.lua"))()
-print("Hello World")
-for i = 1, 10 do print(i) end
-```
-
----
-
-9. NOTIFICATIONS
+Thêm RunBox vào UI
 
 ```lua
--- Cú pháp cơ bản
-NoirUI:Notify("Tiêu đề", "Nội dung thông báo")
-
--- Ví dụ
-NoirUI:Notify("✅ Thành công", "Đã thực hiện hành động!")
-NoirUI:Notify("⚠️ Cảnh báo", "Có lỗi xảy ra!")
-NoirUI:Notify("💀 Kill", "Đã tiêu diệt kẻ địch!")
-NoirUI:Notify("🎉 Chúc mừng", "Bạn đã chiến thắng!")
+local ConsoleTab = Window:CreateTab("⌨️ Console")
+ConsoleTab:CreateRunBox({
+    Placeholder = "Nhập lệnh...",
+    ClearOnExecute = true  -- Xóa text sau khi chạy
+})
 ```
 
-Đặc điểm:
+Chi tiết các loại lệnh
 
-· Độ mờ 0.25
-· Tự động xếp chồng lên nhau
-· Tự động biến mất sau 4 giây
-· Có hiệu ứng xuất hiện mượt mà
+1. Custom Commands (đã đăng ký)
+
+```
+.heal          → Gọi lệnh heal
+.speed 200     → Gọi lệnh speed với tham số 200
+.tp 0 100 0    → Gọi lệnh tp với 3 tham số
+```
+
+2. Loadstring
+
+```
+loadstring(game:HttpGet("https://raw.githubusercontent.com/user/script.lua"))()
+```
+
+3. Required (gọi module client-side)
+
+```
+required("ChatModule")
+required("PlayerModule")
+required("CameraModule")
+```
+
+4. Lua code trực tiếp
+
+```
+print("Hello World")
+game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
+for i = 1, 10 do print(i) end
+local players = game:GetService("Players"):GetPlayers()
+```
 
 ---
 
-10. VÍ DỤ HOÀN CHỈNH
+10. NOTIFICATIONS
+
+Cú pháp cơ bản
+
+```lua
+NoirUI:Notify("Tiêu đề", "Nội dung thông báo")
+```
+
+Ví dụ
+
+```lua
+-- Thông báo thành công
+NoirUI:Notify("✅ Thành công", "Đã thực hiện hành động!")
+
+-- Thông báo cảnh báo
+NoirUI:Notify("⚠️ Cảnh báo", "Có lỗi xảy ra!")
+
+-- Thông báo lỗi
+NoirUI:Notify("❌ Lỗi", "Không thể kết nối đến server!")
+
+-- Thông báo thông tin
+NoirUI:Notify("ℹ️ Thông tin", "Đã tải thành công " .. #data .. " mục")
+
+-- Thông báo trong callback
+Tab:CreateButton({
+    Name = "Test Notify",
+    Callback = function()
+        NoirUI:Notify("🎉 Chúc mừng", "Bạn đã click nút thành công!")
+    end
+})
+```
+
+Đặc điểm của Notification
+
+Đặc điểm Mô tả
+Độ mờ 0.25 (có thể tùy chỉnh qua NotificationBackground)
+Xếp chồng Tự động xếp chồng lên nhau, notification mới ở dưới
+Thời gian Tự động biến mất sau 4 giây
+Hiệu ứng Xuất hiện với hiệu ứng Back Easing, biến mất mượt mà
+Vị trí Góc phải màn hình
+
+---
+
+11. VÍ DỤ HOÀN CHỈNH
+
+Ví dụ 1: Admin Hub đầy đủ tính năng
 
 ```lua
 -- ========== LOAD NOIRUI ==========
@@ -502,11 +757,10 @@ local bgID = 1234567890  -- Thay ID ảnh của bạn
 
 -- ========== TẠO CỬA SỔ ==========
 local Window = NoirUI:CreateWindow({
-    Name = "🔥 GOD MODE HUB 🔥",
+    Name = "🔥 ADMIN HUB PRO 🔥",
     Accent = Color3.fromRGB(255, 50, 100),
     Icon = "👑",
     
-    -- Background đẹp
     Background = {
         Image = bgID,
         Transparency = 0.4
@@ -522,19 +776,53 @@ local Window = NoirUI:CreateWindow({
     SidebarTransparency = 0.5,
     ContentTransparency = 0.2,
     
-    KeySystem = false
+    KeySystem = true,
+    KeySettings = {
+        Key = {"free123", "vip456"},
+        SaveKey = true,
+        FileName = "AdminHubKey",
+        Title = "🔐 ADMIN HUB",
+        Subtitle = "Nhập key để tiếp tục",
+        Note = "Mua key VIP tại discord.gg/adminhub"
+    }
 })
 
 -- ========== ĐĂNG KÝ COMMAND ==========
+-- Lệnh heal
 NoirUI:RegisterCommand("heal", function(args)
-    game.Players.LocalPlayer.Character.Humanoid.Health = 100
-    NoirUI:Notify("💚 Heal", "Đã hồi 100 máu!")
+    local char = game.Players.LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.Health = 100
+        NoirUI:Notify("💚 Heal", "Đã hồi 100 máu!")
+    end
 end)
 
+-- Lệnh speed
 NoirUI:RegisterCommand("speed", function(args)
     local speed = tonumber(args[1]) or 16
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
-    NoirUI:Notify("⚡ Speed", "Tốc độ: " .. speed)
+    local char = game.Players.LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.WalkSpeed = speed
+        NoirUI:Notify("⚡ Speed", "Tốc độ: " .. speed)
+    end
+end)
+
+-- Lệnh tp
+NoirUI:RegisterCommand("tp", function(args)
+    local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    if #args >= 3 then
+        local x, y, z = tonumber(args[1]), tonumber(args[2]), tonumber(args[3])
+        hrp.CFrame = CFrame.new(x, y, z)
+        NoirUI:Notify("🌍 Teleport", string.format("Đã dịch đến (%.0f, %.0f, %.0f)", x, y, z))
+    elseif #args == 1 then
+        local target = game:GetService("Players"):FindFirstChild(args[1])
+        if target and target.Character then
+            hrp.CFrame = target.Character.HumanoidRootPart.CFrame
+            NoirUI:Notify("🌍 Teleport", "Đã dịch đến " .. target.Name)
+        end
+    end
 end)
 
 -- Lệnh fly
@@ -558,34 +846,48 @@ NoirUI:RegisterCommand("fly", function(args)
     end
 end)
 
--- Lệnh tp
-NoirUI:RegisterCommand("tp", function(args)
-    local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    
-    if #args >= 3 then
-        hrp.CFrame = CFrame.new(tonumber(args[1]), tonumber(args[2]), tonumber(args[3]))
-        NoirUI:Notify("🌍 Teleport", "Đã dịch chuyển!")
-    elseif #args == 1 then
-        local target = game:GetService("Players"):FindFirstChild(args[1])
-        if target and target.Character then
-            hrp.CFrame = target.Character.HumanoidRootPart.CFrame
-            NoirUI:Notify("🌍 Teleport", "Đã đến " .. target.Name)
+-- Lệnh god
+local godMode = false
+local healthConnection = nil
+
+NoirUI:RegisterCommand("god", function(args)
+    local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+    if humanoid then
+        godMode = not godMode
+        if godMode then
+            if healthConnection then healthConnection:Disconnect() end
+            healthConnection = humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+                if humanoid.Health <= 0 and godMode then
+                    humanoid.Health = 100
+                end
+            end)
+            NoirUI:Notify("👑 God Mode", "Đã bật bất tử!")
+        else
+            if healthConnection then healthConnection:Disconnect() end
+            healthConnection = nil
+            NoirUI:Notify("👑 God Mode", "Đã tắt bất tử!")
         end
     end
 end)
 
+-- Lệnh unload
+NoirUI:RegisterCommand("unload", function(args)
+    local gui = game.CoreGui:FindFirstChild("NoirUI_V3_Ultimate")
+    if gui then gui:Destroy() end
+end)
+
 -- ========== TẠO TAB ==========
-local PlayerTab = Window:CreateTab("👤 Player")
-local CombatTab = Window:CreateTab("⚔️ Combat")
-local VisualTab = Window:CreateTab("👁️ Visual")
-local TeleportTab = Window:CreateTab("🌍 Teleport")
-local ConsoleTab = Window:CreateTab("⌨️ Console")
+local PlayerTab = Window:CreateTab("👤 Player", "user")
+local CombatTab = Window:CreateTab("⚔️ Combat", "sword")
+local VisualTab = Window:CreateTab("👁️ Visual", "eye")
+local TeleportTab = Window:CreateTab("🌍 Teleport", "map-pin")
+local ConsoleTab = Window:CreateTab("⌨️ Console", "terminal")
 
 -- ========== TAB PLAYER ==========
 PlayerTab:CreateSection("🎮 THÔNG TIN")
 PlayerTab:CreateLabel("Username: " .. game.Players.LocalPlayer.Name)
 PlayerTab:CreateLabel("User ID: " .. game.Players.LocalPlayer.UserId)
+PlayerTab:CreateLabel("Ping: " .. game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValueString())
 
 PlayerTab:CreateSection("💪 TÙY CHỈNH")
 PlayerTab:CreateSlider({
@@ -624,6 +926,7 @@ CombatTab:CreateToggle({
 CombatTab:CreateButton({
     Name = "💥 Tấn công",
     Callback = function()
+        -- Code tấn công ở đây
         NoirUI:Notify("Combat", "Đã tấn công!")
     end
 })
@@ -632,16 +935,19 @@ CombatTab:CreateButton({
     Name = "🔄 Reset Character",
     Callback = function()
         game.Players.LocalPlayer.Character.Humanoid.Health = 0
+        NoirUI:Notify("🔄 Reset", "Đã reset nhân vật!")
     end
 })
 
 -- ========== TAB VISUAL ==========
 VisualTab:CreateSection("🎨 ESP SETTINGS")
 
+local espEnabled = false
 VisualTab:CreateToggle({
     Name = "🔴 Bật ESP",
     Default = false,
     Callback = function(state)
+        espEnabled = state
         NoirUI:Notify("ESP", state and "Đã bật" or "Đã tắt")
     end
 })
@@ -650,13 +956,12 @@ VisualTab:CreateColorPicker({
     Name = "🌈 Màu ESP",
     Default = Color3.fromRGB(255, 0, 0),
     Callback = function(color)
-        print("ESP Color changed")
-    end
-})
+        print("ESP Color changed to:", color)
+    end})
 
 VisualTab:CreateDropdown({
     Name = "🎯 Chọn bộ phận",
-    Options = {"Head", "Chest", "Legs"},
+    Options = {"Head", "Chest", "Legs", "Full Body"},
     Default = "Head",
     Callback = function(selected)
         NoirUI:Notify("Target", "Đã chọn: " .. selected)
@@ -677,16 +982,19 @@ TeleportTab:CreateButton({
     end
 })
 
--- Lấy danh sách player
-local players = {}
-for _, v in pairs(game:GetService("Players"):GetPlayers()) do
-    table.insert(players, v.Name)
+-- Dropdown động (tự động cập nhật danh sách player)
+local function getPlayerList()
+    local players = {}
+    for _, v in pairs(game:GetService("Players"):GetPlayers()) do
+        table.insert(players, v.Name)
+    end
+    return players
 end
 
 TeleportTab:CreateDropdown({
     Name = "👥 TP đến player",
-    Options = players,
-    Default = game.Players.LocalPlayer.Name,
+    GetOptions = getPlayerList,
+    RefreshOnOpen = true,
     Callback = function(selected)
         local target = game:GetService("Players"):FindFirstChild(selected)
         if target and target.Character then
@@ -709,90 +1017,86 @@ ConsoleTab:CreateSection("📋 DANH SÁCH LỆNH")
 ConsoleTab:CreateParagraph({
     Title = "Các lệnh có sẵn",
     Content = [[
-.heal      - Hồi 100 máu
-.speed 50  - Đổi tốc độ
-.fly       - Bật/tắt bay
-.tp x y z  - Teleport theo tọa độ
-.tp Tên    - Teleport đến người chơi
-.god       - Bật/tắt bất tử
-.unload    - Tắt UI
+.heal        - Hồi 100 máu
+.speed 50    - Đổi tốc độ
+.fly         - Bật/tắt bay
+.tp x y z    - Teleport theo tọa độ
+.tp Tên      - Teleport đến người chơi
+.god         - Bật/tắt bất tử
+.noclip      - Bật/tắt xuyên tường
+.clear       - Xóa chat
+.unload      - Tắt UI
 ]]
 })
 
--- ========== THÔNG BÁO ==========
+-- ========== THÔNG BÁO KHỞI TẠO ==========
 task.wait(2)
-NoirUI:Notify("🔥 GOD MODE HUB", "Đã tải thành công! Dùng .heal để test lệnh.")
+NoirUI:Notify("🔥 ADMIN HUB PRO", "Đã tải thành công! Dùng .heal để test lệnh.")
 ```
 
 ---
 
-11. MẸO & THỦ THUẬT
+12. MẸO & THỦ THUẬT
 
-11.1 Lưu cài đặt người dùng
+12.1 Lưu cài đặt người dùng
 
 ```lua
+local HttpService = game:GetService("HttpService")
 local settings = {
     walkSpeed = 16,
-    autoFarm = false
+    jumpPower = 50,
+    autoFarm = false,
+    espColor = Color3.fromRGB(255, 0, 0)
 }
 
+-- Hàm lưu settings
+local function saveSettings()
+    if writefile then
+        local data = HttpService:JSONEncode(settings)
+        writefile("hub_settings.json", data)
+    end
+end
+
+-- Hàm tải settings
+local function loadSettings()
+    if isfile and isfile("hub_settings.json") then
+        local data = readfile("hub_settings.json")
+        local loaded = HttpService:JSONDecode(data)
+        for k, v in pairs(loaded) do
+            settings[k] = v
+        end
+    end
+end
+
+-- Gọi load khi khởi tạo
+loadSettings()
+
 -- Lưu khi thay đổi
-PlayerTab:CreateSlider({
+Tab:CreateSlider({
     Name = "WalkSpeed",
     Min = 16, Max = 250, Default = settings.walkSpeed,
     Callback = function(v)
         settings.walkSpeed = v
-        if writefile then
-            writefile("settings.json", HttpService:JSONEncode(settings))
-        end
+        saveSettings()
     end
 })
-
--- Đọc khi khởi động
-if isfile and isfile("settings.json") then
-    settings = HttpService:JSONDecode(readfile("settings.json"))
-end
 ```
 
-11.2 Tạo command có nhiều tham số
+12.2 Thêm animation cho button
 
 ```lua
-NoirUI:RegisterCommand("give", function(args)
-    -- .give weapon AK47
-    local itemType = args[1]  -- "weapon"
-    local itemName = args[2]  -- "AK47"
-    print("Giving", itemName, "of type", itemType)
-end)
-```
-
-11.3 Tạo admin command
-
-```lua
-local admins = {"AdminUser1", "AdminUser2"}
-
-NoirUI:RegisterCommand("ban", function(args)
-    local player = game:GetService("Players"):FindFirstChild(args[1])
-    if player and table.find(admins, game.Players.LocalPlayer.Name) then
-        player:Kick("Banned by admin")
-    end
-end)
-```
-
-11.4 Animation cho button (tự thêm)
-
-```lua
--- Thêm vào sau khi tạo button
-local function addButtonAnimation(button)
-    button.MouseButton1Down:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.1), {Size = UDim2.new(0.95, 0, 0, 33)}):Play()
+-- Thêm effect hover cho button (tự thêm vào code gốc hoặc tạo function riêng)
+local function addButtonHoverEffect(button)
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundTransparency = 0.2}):Play()
     end)
-    button.MouseButton1Up:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.1), {Size = UDim2.new(0.95, 0, 0, 35)}):Play()
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundTransparency = 0.6}):Play()
     end)
 end
 ```
 
-11.5 Keybind để mở UI
+12.3 Toggle UI bằng phím tắt
 
 ```lua
 local UIS = game:GetService("UserInputService")
@@ -800,7 +1104,7 @@ UIS.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and input.KeyCode == Enum.KeyCode.RightShift then
         local mainFrame = game.CoreGui:FindFirstChild("NoirUI_V3_Ultimate")
         if mainFrame then
-            local mainUI = mainFrame:FindFirstChild("Frame")
+            local mainUI = mainFrame:FindFirstChildWhichIsA("Frame")
             if mainUI then
                 mainUI.Visible = not mainUI.Visible
             end
@@ -809,24 +1113,110 @@ UIS.InputBegan:Connect(function(input, gameProcessed)
 end)
 ```
 
+12.4 Tạo nhiều tab với icon từ Lucide
+
+```lua
+-- Sử dụng icon từ thư viện Lucide có sẵn
+local tabs = {
+    {name = "Home", icon = "home"},
+    {name = "Settings", icon = "settings"},
+    {name = "User", icon = "user"},
+    {name = "Game", icon = "gamepad"},
+    {name = "Music", icon = "music"},
+}
+
+for _, tab in pairs(tabs) do
+    local newTab = Window:CreateTab(tab.name, tab.icon)
+    newTab:CreateLabel("This is " .. tab.name .. " tab")
+end
+```
+
+12.5 Xử lý khi UI bị destroy
+
+```lua
+-- Lưu ý: Khi UI bị destroy, các connection vẫn chạy
+-- Nên cleanup khi cần
+
+local function cleanupUI()
+    local gui = game.CoreGui:FindFirstChild("NoirUI_V3_Ultimate")
+    if gui then
+        -- Hủy các connection chạy nền
+        if healthConnection then healthConnection:Disconnect() end
+        if noclipConnection then noclipConnection:Disconnect() end
+        
+        -- Xóa UI
+        gui:Destroy()
+    end
+end
+
+-- Đăng ký lệnh unload
+NoirUI:RegisterCommand("unload", function(args)
+    cleanupUI()
+end)
+```
+
 ---
 
-📌 TỔNG KẾT CÁC THAM SỐ NHANH
+13. BẢNG TỔNG KẾT NHANH
 
-Thành phần Tham số bắt buộc Tham số tùy chọn
-CreateWindow - Name, Accent, Icon, Background, KeySystem...
-CreateTab name icon
-CreateLabel text -
-CreateParagraph Title, Content -
-CreateButton Name, Callback -
-CreateToggle Name, Callback Default
-CreateSlider Name, Min, Max, Default, Callback -
-CreateTextBox Name, Callback -
-CreateDropdown Name, Options, Callback Default
-CreateColorPicker Name, Callback Default
-CreateRunBox - Placeholder, ClearOnExecute
-CreateSection text -
+13.1 Tham số CreateWindow
+
+Tham số Type Required Default
+Name string ✅ -
+Accent Color3 ❌ Color3.fromRGB(170,85,255)
+Icon string/number ❌ nil
+LogoID number ❌ nil
+DefaultPosition UDim2 ❌ UDim2.new(0.5,-210,0.5,-150)
+FloatDefaultPosition UDim2 ❌ UDim2.new(0,15,0.5,-22)
+Background table ❌ nil
+LoadingBackground table ❌ nil
+KeyBackground table ❌ nil
+NotificationBackground table ❌ nil
+FloatBackground table ❌ nil
+MainBgColor Color3 ❌ Color3.fromRGB(10,10,10)
+MainBgTransparency number ❌ 0
+SidebarTransparency number ❌ 0.5
+ContentTransparency number ❌ 0.3
+KeySystem boolean ❌ false
+KeySettings table ❌ nil
+
+13.2 Các thành phần UI
+
+Component Method Parameters
+Label CreateLabel(text) text: string
+Section CreateSection(text) text: string
+Paragraph CreateParagraph({Title, Content}) Title, Content
+Button CreateButton({Name, Callback}) Name, Callback
+Toggle CreateToggle({Name, Default, Callback}) Name, Default, Callback
+Slider CreateSlider({Name, Min, Max, Default, Callback}) Tất cả
+TextBox CreateTextBox({Name, Callback}) Name, Callback
+Dropdown CreateDropdown({Name, Options/GetOptions, Default, Callback, RefreshOnOpen}) Xem trên
+ColorPicker CreateColorPicker({Name, Default, Callback}) Name, Default, Callback
+RunBox CreateRunBox({Placeholder, ClearOnExecute}) Placeholder, ClearOnExecute
+
+13.3 Các loại lệnh RunBox
+
+Loại Cú pháp Ví dụ
+Custom Command .command args .heal, .speed 100
+Loadstring loadstring("code")() loadstring(game:HttpGet("url"))()
+Required required("module") required("ChatModule")
+Lua Code lua code print("Hello")
 
 ---
 
-🎉 CHÚC BẠN THÀNH CÔNG VỚI NOIRUI! 🚀
+🎉 KẾT LUẬN
+
+NoirUI V3 Ultimate là một thư viện UI mạnh mẽ và hiện đại, cung cấp đầy đủ các thành phần cần thiết để tạo ra một giao diện chuyên nghiệp. Với các tính năng mới như:
+
+· ✅ Background tùy chỉnh cho từng thành phần
+· ✅ Key System bảo vệ script
+· ✅ Custom Commands với prefix .
+· ✅ RunBox đa năng
+· ✅ Dropdown động tự cập nhật
+· ✅ 250+ icon Lucide tích hợp sẵn
+
+Bạn có thể dễ dàng tạo ra bất kỳ loại UI nào từ đơn giản đến phức tạp chỉ với vài dòng code.
+
+---
+
+Chúc bạn thành công với NoirUI V3 Ultimate! 🚀
