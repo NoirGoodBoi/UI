@@ -10,181 +10,181 @@ if OldGui then OldGui:Destroy() end
 
 local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {} }
 
--- ========== LUCIDE ICONS TÍCH HỢP SẴN (250+ ICONS) ==========
+-- ========== LUCIDE ICONS TÍCH HỢP SẴN ==========
 local LucideIcons = {
-    ["home"] = "rbxassetid://13060262582",
-    ["user"] = "rbxassetid://76527276016929",
-    ["users"] = "rbxassetid://16485180101",
-    ["user-plus"] = "rbxassetid://11893826158",
-    ["user-minus"] = "rbxassetid://103838034038356",
-    ["settings"] = "rbxassetid://7059346386",
-    ["menu"] = "rbxassetid://8622237918",
-    ["more-horizontal"] = "rbxassetid://94997510374551",
-    ["more-vertical"] = "rbxassetid://78955744061195",
-    ["x"] = "rbxassetid://4458805218",
-    ["check"] = "rbxassetid://5959696895",
-    ["plus"] = "rbxassetid://401613237",
-    ["minus"] = "rbxassetid://136825236896355",
-    ["search"] = "rbxassetid://5107220223",
-    ["arrow-left"] = "rbxassetid://12338896710",
-    ["arrow-right"] = "rbxassetid://12338895342",
-    ["arrow-up"] = "rbxassetid://12338897588",
-    ["arrow-down"] = "rbxassetid://12338898430",
-    ["chevron-left"] = "rbxassetid://127486125287644",
-    ["chevron-right"] = "rbxassetid://134501100267193",
-    ["chevron-up"] = "rbxassetid://121806247498446",
-    ["chevron-down"] = "rbxassetid://82896764709372",
-    ["chevrons-left"] = "rbxassetid://12338396067",
-    ["chevrons-right"] = "rbxassetid://12338394694",
-    ["chevrons-up"] = "rbxassetid://12338397077",
-    ["chevrons-down"] = "rbxassetid://12338397699",
-    ["edit"] = "rbxassetid://5595830746",
-    ["trash"] = "rbxassetid://14002617522",
-    ["copy"] = "rbxassetid://94931642634780",
-    ["clipboard"] = "rbxassetid://120515450196257",
-    ["refresh-cw"] = "rbxassetid://87873470710971",
-    ["save"] = "rbxassetid://4458874653",
-    ["download"] = "rbxassetid://90953125352813",
-    ["upload"] = "rbxassetid://134605885675446",
-    ["log-in"] = "rbxassetid://618861110",
-    ["log-out"] = "rbxassetid://6264845490",
-    ["power"] = "rbxassetid://12557422579",
-    ["folder"] = "rbxassetid://101029391974629",
-    ["folder-open"] = "rbxassetid://4974562741",
-    ["file"] = "rbxassetid://83975687527738",
-    ["archive"] = "rbxassetid://101480379389396",
-    ["play"] = "rbxassetid://114746068457942",
-    ["pause"] = "rbxassetid://4458862495",
-    ["stop"] = "rbxassetid://4458885437",
-    ["skip-back"] = "rbxassetid://18802845108",
-    ["skip-forward"] = "rbxassetid://109624422779492",
-    ["volume"] = "rbxassetid://6824925363",
-    ["volume-1"] = "rbxassetid://6824925224",
-    ["volume-2"] = "rbxassetid://6824925104",
-    ["volume-x"] = "rbxassetid://71516439698375",
-    ["headphones"] = "rbxassetid://14425582292",
-    ["mic"] = "rbxassetid://219092696",
-    ["mic-off"] = "rbxassetid://219092694",
-    ["music"] = "rbxassetid://17387359663",
-    ["video"] = "rbxassetid://12624074103",
-    ["camera"] = "rbxassetid://13085201776",
+    ["home"] = "rbxassetid://13060262529",
+    ["user"] = "rbxassetid://81489458260315",
+    ["users"] = "rbxassetid://16485180075",
+    ["user-plus"] = "rbxassetid://11893826115",
+    ["user-minus"] = "rbxassetid://116226374817056",
+    ["settings"] = "rbxassetid://7059346373",
+    ["menu"] = "rbxassetid://8622237899",
+    ["more-horizontal"] = "rbxassetid://135691518843377",
+    ["more-vertical"] = "rbxassetid://95014688478272",
+    ["x"] = "rbxassetid://4458805208",
+    ["check"] = "rbxassetid://5959696880",
+    ["plus"] = "rbxassetid://401613236",
+    ["minus"] = "rbxassetid://82235228007110",
+    ["search"] = "rbxassetid://5107220207",
+    ["arrow-left"] = "rbxassetid://12338896667",
+    ["arrow-right"] = "rbxassetid://12338895277",
+    ["arrow-up"] = "rbxassetid://12338897538",
+    ["arrow-down"] = "rbxassetid://12338898398",
+    ["chevron-left"] = "rbxassetid://83972042993874",
+    ["chevron-right"] = "rbxassetid://115929304045144",
+    ["chevron-up"] = "rbxassetid://99034290227012",
+    ["chevron-down"] = "rbxassetid://103256317191387",
+    ["chevrons-left"] = "rbxassetid://12338396009",
+    ["chevrons-right"] = "rbxassetid://12338394619",
+    ["chevrons-up"] = "rbxassetid://12338397019",
+    ["chevrons-down"] = "rbxassetid://12338397670",
+    ["edit"] = "rbxassetid://5595830734",
+    ["trash"] = "rbxassetid://14002617467",
+    ["copy"] = "rbxassetid://90434151822042",
+    ["clipboard"] = "rbxassetid://76443890191204",
+    ["refresh-cw"] = "rbxassetid://106091057679781",
+    ["save"] = "rbxassetid://4458874645",
+    ["download"] = "rbxassetid://78813928987436",
+    ["upload"] = "rbxassetid://126456834497191",
+    ["log-in"] = "rbxassetid://618861108",
+    ["log-out"] = "rbxassetid://6264845452",
+    ["power"] = "rbxassetid://12557422528",
+    ["folder"] = "rbxassetid://78388764182737",
+    ["folder-open"] = "rbxassetid://4974562710",
+    ["file"] = "rbxassetid://73677849376635",
+    ["archive"] = "rbxassetid://103382512835696",
+    ["play"] = "rbxassetid://87003065970333",
+    ["pause"] = "rbxassetid://4458862490",
+    ["stop"] = "rbxassetid://4458885421",
+    ["skip-back"] = "rbxassetid://18802845025",
+    ["skip-forward"] = "rbxassetid://88365123525975",
+    ["volume"] = "rbxassetid://6824925333",
+    ["volume-1"] = "rbxassetid://6824925193",
+    ["volume-2"] = "rbxassetid://6824925080",
+    ["volume-x"] = "rbxassetid://115340156116773",
+    ["headphones"] = "rbxassetid://14425582274",
+    ["mic"] = "rbxassetid://219092693",
+    ["mic-off"] = "rbxassetid://219092690",
+    ["music"] = "rbxassetid://17387359605",
+    ["video"] = "rbxassetid://12624074022",
+    ["camera"] = "rbxassetid://13085201731",
     ["image"] = "rbxassetid://4458863833",
-    ["smartphone"] = "rbxassetid://125134688917333",
-    ["phone"] = "rbxassetid://8411963061",
-    ["tablet"] = "rbxassetid://132361591008690",
-    ["monitor"] = "rbxassetid://3120635719",
-    ["tv"] = "rbxassetid://4458888129",
-    ["cpu"] = "rbxassetid://83450759665400",
-    ["hard-drive"] = "rbxassetid://112994903201203",
-    ["server"] = "rbxassetid://15567974338",
-    ["database"] = "rbxassetid://115160174389795",
-    ["mail"] = "rbxassetid://16149098667",
-    ["mail-open"] = "rbxassetid://5673469847",
-    ["inbox"] = "rbxassetid://71880689480407",
-    ["send"] = "rbxassetid://132876386179389",
-    ["message-circle"] = "rbxassetid://80014727562377",
-    ["message-square"] = "rbxassetid://93034566542591",
-    ["at-sign"] = "rbxassetid://104749831452394",
-    ["bell"] = "rbxassetid://11401835408",
-    ["bell-off"] = "rbxassetid://102509579674335",
+    ["smartphone"] = "rbxassetid://98853713657217",
+    ["phone"] = "rbxassetid://8411963035",
+    ["tablet"] = "rbxassetid://134616667923000",
+    ["monitor"] = "rbxassetid://3120635703",
+    ["tv"] = "rbxassetid://4458888115",
+    ["cpu"] = "rbxassetid://88995379969023",
+    ["hard-drive"] = "rbxassetid://77457389504900",
+    ["server"] = "rbxassetid://15567974330",
+    ["database"] = "rbxassetid://139314011663170",
+    ["mail"] = "rbxassetid://16149098638",
+    ["mail-open"] = "rbxassetid://5673469839",
+    ["inbox"] = "rbxassetid://131589926324755",
+    ["send"] = "rbxassetid://98712755979169",
+    ["message-circle"] = "rbxassetid://74481341185839",
+    ["message-square"] = "rbxassetid://111690516755548",
+    ["at-sign"] = "rbxassetid://92559495578198",
+    ["bell"] = "rbxassetid://11401835376",
+    ["bell-off"] = "rbxassetid://81868571746318",
     ["eye"] = "rbxassetid://5219208999",
-    ["eye-off"] = "rbxassetid://6473252655",
-    ["github"] = "rbxassetid://130785772548152",
+    ["eye-off"] = "rbxassetid://6473252651",
+    ["github"] = "rbxassetid://106465383791027",
     ["youtube"] = "rbxassetid://139037997997612",
-    ["twitter"] = "rbxassetid://1324431876",
-    ["facebook"] = "rbxassetid://11163700830",
-    ["instagram"] = "rbxassetid://117964181842594",
-    ["linkedin"] = "rbxassetid://261568406",
-    ["discord"] = "rbxassetid://119731774091515",
-    ["twitch"] = "rbxassetid://7060611821",
-    ["tiktok"] = "rbxassetid://111619424242372",
-    ["reddit"] = "rbxassetid://10586157868",
-    ["whatsapp"] = "rbxassetid://6749672377",
-    ["telegram"] = "rbxassetid://115832009343384",
-    ["spotify"] = "rbxassetid://137318104035971",
+    ["twitter"] = "rbxassetid://1324431872",
+    ["facebook"] = "rbxassetid://11163700816",
+    ["instagram"] = "rbxassetid://88697780906499",
+    ["linkedin"] = "rbxassetid://261568404",
+    ["discord"] = "rbxassetid://135550354937113",
+    ["twitch"] = "rbxassetid://7060611812",
+    ["tiktok"] = "rbxassetid://75638865968068",
+    ["reddit"] = "rbxassetid://10586157838",
+    ["whatsapp"] = "rbxassetid://6749672343",
+    ["telegram"] = "rbxassetid://123718469677217",
+    ["spotify"] = "rbxassetid://136628997625291",
     ["apple"] = "rbxassetid://41715859",
-    ["google"] = "rbxassetid://72784437694619",
-    ["lock"] = "rbxassetid://12060512749",
-    ["unlock"] = "rbxassetid://96121551754691",
-    ["shield"] = "rbxassetid://6031108700",
+    ["google"] = "rbxassetid://77673450508025",
+    ["lock"] = "rbxassetid://12060512624",
+    ["unlock"] = "rbxassetid://115289332203941",
+    ["shield"] = "rbxassetid://98159911363596",
     ["shield-check"] = "rbxassetid://110457125738695",
-    ["shield-alert"] = "rbxassetid://12988744936",
-    ["alert-circle"] = "rbxassetid://11282218732",
-    ["alert-triangle"] = "rbxassetid://87824282931713",
-    ["info"] = "rbxassetid://135453418174430",
-    ["help-circle"] = "rbxassetid://12120704381",
-    ["sun"] = "rbxassetid://73114667772087",
-    ["moon"] = "rbxassetid://8498174624",
-    ["cloud"] = "rbxassetid://4458806382",
-    ["cloud-rain"] = "rbxassetid://72129458427880",
-    ["cloud-snow"] = "rbxassetid://132770120",
-    ["cloud-lightning"] = "rbxassetid://113465542546511",
-    ["droplet"] = "rbxassetid://118482940715549",
-    ["wind"] = "rbxassetid://261307451",
-    ["compass"] = "rbxassetid://126609230986847",
-    ["globe"] = "rbxassetid://80984584737538",
-    ["map"] = "rbxassetid://11345509397",
-    ["map-pin"] = "rbxassetid://9661173952",
-    ["navigation"] = "rbxassetid://119714567896183",
-    ["calendar"] = "rbxassetid://95118673765809",
-    ["clock"] = "rbxassetid://71763290890768",
-    ["alarm-clock"] = "rbxassetid://130573719829571",
-    ["timer"] = "rbxassetid://6761866159",
-    ["heart"] = "rbxassetid://323045991",
-    ["activity"] = "rbxassetid://107228950093824",
-    ["battery"] = "rbxassetid://140385784907577",
-    ["battery-charging"] = "rbxassetid://86784447322014",
-    ["gamepad"] = "rbxassetid://11894535953",
-    ["controller"] = "rbxassetid://12684121195",
-    ["joystick"] = "rbxassetid://114600591384579",
-    ["dice"] = "rbxassetid://88362522676824",
-    ["trophy"] = "rbxassetid://13321838585",
-    ["award"] = "rbxassetid://12941038904",
-    ["medal"] = "rbxassetid://16170504083",
-    ["star"] = "rbxassetid://95134188293701",
-    ["shopping-cart"] = "rbxassetid://11385419687",
-    ["shopping-bag"] = "rbxassetid://106996295869562",
-    ["credit-card"] = "rbxassetid://18759664386",
-    ["wallet"] = "rbxassetid://136666387916066",
-    ["dollar-sign"] = "rbxassetid://113051557984606",
-    ["truck"] = "rbxassetid://126107760238699",
-    ["package"] = "rbxassetid://89528045721909",
-    ["gift"] = "rbxassetid://132398163610877",
-    ["tag"] = "rbxassetid://73181461832934",
-    ["percent"] = "rbxassetid://116610160977931",
-    ["code"] = "rbxassetid://98055120378520",
-    ["terminal"] = "rbxassetid://16149179369",
-    ["command"] = "rbxassetid://8278333385",
-    ["zap"] = "rbxassetid://91850781296464",
-    ["loader"] = "rbxassetid://81934662961263",
-    ["feather"] = "rbxassetid://121746910148552",
-    ["flag"] = "rbxassetid://11379131845",
-    ["bookmark"] = "rbxassetid://140535467858552",
-    ["key"] = "rbxassetid://134372662903913",
-    ["sliders"] = "rbxassetid://109065241613994",
-    ["aperture"] = "rbxassetid://9940311417",
-    ["crop"] = "rbxassetid://100265053983744",
-    ["layers"] = "rbxassetid://13853348374",
-    ["grid"] = "rbxassetid://6953993763",
-    ["list"] = "rbxassetid://15567843411",
-    ["target"] = "rbxassetid://13557340550",
-    ["crosshair"] = "rbxassetid://128754759661663",
-    ["gauge"] = "rbxassetid://101229152211624",
-    ["scale-3d"] = "rbxassetid://94186223589758",
-    ["anime-1"] = "rbxassetid://6421296794",
-    ["anime-2"] = "rbxassetid://6675147490",
-    ["anime-3"] = "rbxassetid://10149736922",
-    ["anime-4"] = "rbxassetid://5248865575",
-    ["anime-5"] = "rbxassetid://7710824618",
-    ["anime-6"] = "rbxassetid://5410949709",
-    ["anime-7"] = "rbxassetid://11696859442",
-    ["anime-8"] = "rbxassetid://11424961500",
-    ["anime-9"] = "rbxassetid://10983517742",
-    ["anime-10"] = "rbxassetid://10899663842",
-    ["anime-11"] = "rbxassetid://8677816496",
-    ["anime-12"] = "rbxassetid://6993174720",
-    ["anime-13"] = "rbxassetid://8680995438",
-    ["anime-14"] = "rbxassetid://6982730549",
+    ["shield-alert"] = "rbxassetid://12988744896",
+    ["alert-circle"] = "rbxassetid://11282218678",
+    ["alert-triangle"] = "rbxassetid://79791826459299",
+    ["info"] = "rbxassetid://76311199408449",
+    ["help-circle"] = "rbxassetid://12120704330",
+    ["sun"] = "rbxassetid://116100059610252",
+    ["moon"] = "rbxassetid://8498174594",
+    ["cloud"] = "rbxassetid://4458806371",
+    ["cloud-rain"] = "rbxassetid://102757193172908",
+    ["cloud-snow"] = "rbxassetid://132770119",
+    ["cloud-lightning"] = "rbxassetid://89963608654043",
+    ["droplet"] = "rbxassetid://124305926523450",
+    ["wind"] = "rbxassetid://261307450",
+    ["compass"] = "rbxassetid://72985075553067",
+    ["globe"] = "rbxassetid://93730749759563",
+    ["map"] = "rbxassetid://11345509329",
+    ["map-pin"] = "rbxassetid://9661173947",
+    ["navigation"] = "rbxassetid://93295279567893",
+    ["calendar"] = "rbxassetid://99559214342519",
+    ["clock"] = "rbxassetid://136442043483061",
+    ["alarm-clock"] = "rbxassetid://129270692859326",
+    ["timer"] = "rbxassetid://6761866149",
+    ["heart"] = "rbxassetid://323045990",
+    ["activity"] = "rbxassetid://100019486107683",
+    ["battery"] = "rbxassetid://99494561409814",
+    ["battery-charging"] = "rbxassetid://99146802308477",
+    ["gamepad"] = "rbxassetid://11894535915",
+    ["controller"] = "rbxassetid://12684121161",
+    ["joystick"] = "rbxassetid://100224786437387",
+    ["dice"] = "rbxassetid://86777156606703",
+    ["trophy"] = "rbxassetid://13321838559",
+    ["award"] = "rbxassetid://12941038883",
+    ["medal"] = "rbxassetid://16170504068",
+    ["star"] = "rbxassetid://138880939782808",
+    ["shopping-cart"] = "rbxassetid://11385419674",
+    ["shopping-bag"] = "rbxassetid://132847573851619",
+    ["credit-card"] = "rbxassetid://18759664352",
+    ["wallet"] = "rbxassetid://75406293336822",
+    ["dollar-sign"] = "rbxassetid://136095164702019",
+    ["truck"] = "rbxassetid://87183998145898",
+    ["package"] = "rbxassetid://126416836022196",
+    ["gift"] = "rbxassetid://132301831611974",
+    ["tag"] = "rbxassetid://128003672551215",
+    ["percent"] = "rbxassetid://140273715292653",
+    ["code"] = "rbxassetid://87667913110964",
+    ["terminal"] = "rbxassetid://16149179345",
+    ["command"] = "rbxassetid://8278333371",
+    ["zap"] = "rbxassetid://126575828309457",
+    ["loader"] = "rbxassetid://82285050019288",
+    ["feather"] = "rbxassetid://93633665863756",
+    ["flag"] = "rbxassetid://11379131842",
+    ["bookmark"] = "rbxassetid://90584338909157",
+    ["key"] = "rbxassetid://117047144730308",
+    ["sliders"] = "rbxassetid://121867517528976",
+    ["aperture"] = "rbxassetid://9940311323",
+    ["crop"] = "rbxassetid://118035809733815",
+    ["layers"] = "rbxassetid://13853348331",
+    ["grid"] = "rbxassetid://6953993752",
+    ["list"] = "rbxassetid://15567843390",
+    ["target"] = "rbxassetid://13557340523",
+    ["crosshair"] = "rbxassetid://114078536525410",
+    ["gauge"] = "rbxassetid://105442920358687",
+    ["scale-3d"] = "rbxassetid://133233077350937",
+    ["cat-1"] = "rbxassetid://6421296789",
+    ["aesthetic-1"] = "rbxassetid://6675147486",
+    ["aesthetic-2"] = "rbxassetid://10149736886",
+    ["chibi-1"] = "rbxassetid://5248865554",
+    ["chibi-2"] = "rbxassetid://7710824597",
+    ["chibi-3"] = "rbxassetid://5410949701",
+    ["aesthetic-3"] = "rbxassetid://11696859404",
+    ["hutao-1"] = "rbxassetid://11424961420",
+    ["yae-1"] = "rbxassetid://10983517729",
+    ["aesthetic-4"] = "rbxassetid://10899663828",
+    ["genshin-1"] = "rbxassetid://8677816475",
+    ["chibi-4"] = "rbxassetid://6993174715",
+    ["miku-1"] = "rbxassetid://8680995431",
+    ["chibi-5"] = "rbxassetid://6982730545",
 }
 
 local function ResolveIcon(iconInput)
@@ -205,6 +205,43 @@ local function ResolveIcon(iconInput)
     return nil
 end
 
+-- // Hàm tạo subtitle
+local function AddSubtitle(parent, subtitleText, yOffset)
+    if not subtitleText or subtitleText == "" then return nil end
+    
+    local subtitle = Instance.new("TextLabel", parent)
+    subtitle.Size = UDim2.new(1, -20, 0, 0)
+    subtitle.Position = UDim2.new(0, 10, 0, yOffset)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Text = subtitleText
+    subtitle.TextColor3 = Color3.fromRGB(140, 140, 140)
+    subtitle.Font = "Gotham"
+    subtitle.TextSize = 10
+    subtitle.TextXAlignment = "Left"
+    subtitle.TextYAlignment = "Top"
+    subtitle.TextWrapped = true
+    subtitle.TextScaled = false
+    subtitle.Name = "Subtitle"
+    
+    -- Auto adjust height
+    local function updateHeight()
+        local textBounds = subtitle.TextBounds
+        local lineCount = math.max(1, math.ceil(textBounds.X / (subtitle.AbsoluteSize.X - 20)))
+        local newHeight = lineCount * 14
+        subtitle.Size = UDim2.new(1, -20, 0, newHeight)
+        if parent:IsA("Frame") then
+            local newTotalHeight = 35 + newHeight + 5
+            parent.Size = UDim2.new(0.95, 0, 0, newTotalHeight)
+        end
+    end
+    
+    task.defer(updateHeight)
+    subtitle:GetPropertyChangedSignal("Text"):Connect(updateHeight)
+    subtitle:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateHeight)
+    
+    return subtitle
+end
+
 -- // Hàm kéo thả
 local function MakeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
@@ -223,7 +260,7 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Hàm tải background với ClipsDescendants
+-- // Hàm tải background
 local function LoadBackground(frame, bgSetting)
     if not bgSetting then return end
     
@@ -283,10 +320,9 @@ function NoirUI:CreateWindow(settings)
     Main.Size = UDim2.new(0, 420, 0, 300)
     Main.Position = mainDefaultPos
     Main.BackgroundColor3 = settings.MainBgColor or Color3.fromRGB(10, 10, 10)
-    Main.BackgroundTransparency = settings.MainBgTransparency or 0
+    Main.BackgroundTransparency = 1
     Main.ClipsDescendants = true
     Main.Visible = false
-    Main.BackgroundTransparency = 1
     Instance.new("UICorner", Main)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
@@ -616,12 +652,11 @@ function NoirUI:CreateWindow(settings)
         end)
     end)
     
-    -- //////////////// SIDEBAR (CHỈ TABS SCROLL, AVATAR CỐ ĐỊNH) ////////////////
+    -- //////////////// SIDEBAR ////////////////
     local Side = Instance.new("Frame", Main)
     Side.Size = UDim2.new(0, 110, 1, -50)
     Side.Position = UDim2.new(0, 5, 0, 40)
     Side.BackgroundTransparency = 1
-    Side.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Side.ClipsDescendants = true
     Instance.new("UICorner", Side).CornerRadius = UDim.new(0, 8)
     
@@ -630,7 +665,6 @@ function NoirUI:CreateWindow(settings)
     SideStroke.Thickness = 1
     SideStroke.Transparency = 0.7
     
-    -- Khung chứa tabs (có scroll)
     local TScroll = Instance.new("ScrollingFrame", Side)
     TScroll.Size = UDim2.new(1, 0, 1, -55)
     TScroll.Position = UDim2.new(0, 0, 0, 0)
@@ -651,7 +685,6 @@ function NoirUI:CreateWindow(settings)
     end
     TLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSidebarCanvas)
     
-    -- Avatar cố định ở cuối sidebar (không bị scroll)
     local UA = Instance.new("Frame", Side)
     UA.Size = UDim2.new(1, 0, 0, 50)
     UA.Position = UDim2.new(0, 0, 1, -45)
@@ -670,7 +703,6 @@ function NoirUI:CreateWindow(settings)
     Cont.Size = UDim2.new(1, -125, 1, -50)
     Cont.Position = UDim2.new(0, 120, 0, 40)
     Cont.BackgroundTransparency = 1
-    Cont.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Cont.ClipsDescendants = true
     Instance.new("UICorner", Cont).CornerRadius = UDim.new(0, 8)
     
@@ -979,7 +1011,7 @@ function NoirUI:CreateWindow(settings)
             if prop == "Text" then filterElements(SearchBox.Text) end
         end)
         
-        -- ========== LABEL (CÓ THỂ UPDATE ĐỘNG) ==========
+        -- ========== LABEL ==========
         function Tab:CreateLabel(text, updateFunction)
             local l = Instance.new("TextLabel", ContentFrame)
             l.Size = UDim2.new(0.95, 0, 0, 20)
@@ -996,7 +1028,6 @@ function NoirUI:CreateWindow(settings)
             function l:Set(newText)
                 self.Text = newText
             end
-            
             function l:Update(newText)
                 self.Text = newText
             end
@@ -1011,11 +1042,10 @@ function NoirUI:CreateWindow(settings)
                 end)
                 table.insert(Tab.Connections, connection)
             end
-            
             return l
         end
         
-        -- ========== SECTION (CÓ ĐƯỜNG KẺ NGĂN CÁCH) ==========
+        -- ========== SECTION ==========
         function Tab:CreateSection(title, noLine)
             local s = Instance.new("Frame", ContentFrame)
             s.Size = UDim2.new(0.95, 0, 0, noLine and 25 or 35)
@@ -1042,7 +1072,6 @@ function NoirUI:CreateWindow(settings)
                 line.BackgroundTransparency = 0.5
                 line.BorderSizePixel = 0
             end
-            
             return s
         end
         
@@ -1078,22 +1107,23 @@ function NoirUI:CreateWindow(settings)
             content.TextWrapped = true
             content.TextXAlignment = "Left"
             content.TextYAlignment = "Top"
-            
             return f
         end
         
-        -- ========== TEXTBOX ==========
+        -- ========== TEXTBOX (CÓ SUBTITLE) ==========
         function Tab:CreateTextBox(opt)
+            local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local f = Instance.new("Frame", ContentFrame)
-            f.Size = UDim2.new(0.95, 0, 0, 35)
+            f.Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)
             f.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
             f.BackgroundTransparency = 0.7
             Instance.new("UICorner", f)
             f.LayoutOrder = GetO()
             f.Name = opt.Name or ""
             table.insert(Tab.Elements, f)
+            
             local i = Instance.new("TextBox", f)
-            i.Size = UDim2.new(1, -20, 1, 0)
+            i.Size = UDim2.new(1, -20, 0, 35)
             i.Position = UDim2.new(0, 10, 0, 0)
             i.BackgroundTransparency = 1
             i.PlaceholderText = opt.Name
@@ -1103,12 +1133,18 @@ function NoirUI:CreateWindow(settings)
             i.TextSize = 12
             i.TextXAlignment = "Left"
             i.FocusLost:Connect(function() if opt.Callback then opt.Callback(i.Text) end end)
+            
+            if hasSubtitle then
+                local sub = AddSubtitle(f, opt.Subtitle, 38)
+                if sub then f.Size = UDim2.new(0.95, 0, 0, 50 + sub.Size.Y.Offset) end
+            end
         end
         
-        -- ========== BUTTON (CÓ ALIGN) ==========
+        -- ========== BUTTON (CÓ SUBTITLE) ==========
         function Tab:CreateButton(opt)
+            local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local b = Instance.new("TextButton", ContentFrame)
-            b.Size = UDim2.new(0.95, 0, 0, 35)
+            b.Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)
             b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
             b.BackgroundTransparency = 0.6
             b.Text = opt.Name
@@ -1123,9 +1159,8 @@ function NoirUI:CreateWindow(settings)
             if opt.Align == false then
                 b.TextXAlignment = "Left"
                 b.Text = "  " .. opt.Name
-                
                 local hint = Instance.new("TextLabel", b)
-                hint.Size = UDim2.new(0, 50, 1, 0)
+                hint.Size = UDim2.new(0, 50, 0, 35)
                 hint.Position = UDim2.new(1, -55, 0, 0)
                 hint.BackgroundTransparency = 1
                 hint.Text = "button"
@@ -1139,14 +1174,20 @@ function NoirUI:CreateWindow(settings)
                 b.TextXAlignment = "Center"
             end
             
+            if hasSubtitle then
+                local sub = AddSubtitle(b, opt.Subtitle, 38)
+                if sub then b.Size = UDim2.new(0.95, 0, 0, 50 + sub.Size.Y.Offset) end
+            end
+            
             b.MouseButton1Click:Connect(opt.Callback)
         end
         
-        -- ========== TOGGLE ==========
+        -- ========== TOGGLE (CÓ SUBTITLE) ==========
         function Tab:CreateToggle(opt)
+            local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local s = opt.Default or false
             local t = Instance.new("TextButton", ContentFrame)
-            t.Size = UDim2.new(0.95, 0, 0, 35)
+            t.Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)
             t.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
             t.BackgroundTransparency = 0.6
             t.Text = "  " .. opt.Name
@@ -1157,12 +1198,22 @@ function NoirUI:CreateWindow(settings)
             t.LayoutOrder = GetO()
             t.Name = opt.Name
             table.insert(Tab.Elements, t)
+            
             local bx = Instance.new("Frame", t)
             bx.Size = UDim2.new(0, 30, 0, 16)
-            bx.Position = UDim2.new(1, -40, 0.5, -8)
+            bx.Position = UDim2.new(1, -40, 0.5, hasSubtitle and -15 or -8)
             bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40, 40, 40)
             bx.BackgroundTransparency = 0.3
             Instance.new("UICorner", bx).CornerRadius = UDim.new(1, 0)
+            
+            if hasSubtitle then
+                local sub = AddSubtitle(t, opt.Subtitle, 38)
+                if sub then
+                    t.Size = UDim2.new(0.95, 0, 0, 50 + sub.Size.Y.Offset)
+                    bx.Position = UDim2.new(1, -40, 0.5, -8)
+                end
+            end
+            
             t.MouseButton1Click:Connect(function()
                 s = not s
                 t.TextColor3 = s and ACCENT or Color3.fromRGB(180, 180, 180)
@@ -1171,8 +1222,9 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- ========== SLIDER (CÓ RANGE, INCREMENT) ==========
+        -- ========== SLIDER (CÓ SUBTITLE) ==========
         function Tab:CreateSlider(opt)
+            local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local range = opt.range or {0, 100}
             local min = range[1]
             local max = range[2]
@@ -1183,7 +1235,7 @@ function NoirUI:CreateWindow(settings)
             defaultValue = math.clamp(defaultValue, min, max)
             
             local f = Instance.new("Frame", ContentFrame)
-            f.Size = UDim2.new(0.95, 0, 0, 50)
+            f.Size = UDim2.new(0.95, 0, 0, hasSubtitle and 70 or 50)
             f.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
             f.BackgroundTransparency = 0.7
             Instance.new("UICorner", f)
@@ -1193,7 +1245,7 @@ function NoirUI:CreateWindow(settings)
             
             local l = Instance.new("TextLabel", f)
             l.Size = UDim2.new(1, 0, 0, 20)
-            l.Position = UDim2.new(0, 12, 0, 5)
+            l.Position = UDim2.new(0, 12, 0, hasSubtitle and 5 or 5)
             l.BackgroundTransparency = 1
             l.Text = opt.Name .. ": " .. defaultValue
             l.TextColor3 = Color3.new(1, 1, 1)
@@ -1202,7 +1254,7 @@ function NoirUI:CreateWindow(settings)
             
             local sbg = Instance.new("Frame", f)
             sbg.Size = UDim2.new(0.9, 0, 0, 8)
-            sbg.Position = UDim2.new(0.05, 0, 0.7, 0)
+            sbg.Position = UDim2.new(0.05, 0, hasSubtitle and 0.5 or 0.7, 0)
             sbg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
             sbg.BackgroundTransparency = 0.5
             Instance.new("UICorner", sbg)
@@ -1213,8 +1265,15 @@ function NoirUI:CreateWindow(settings)
             fill.BackgroundColor3 = ACCENT
             Instance.new("UICorner", fill)
             
-            local isHeld = false
+            if hasSubtitle then
+                local sub = AddSubtitle(f, opt.Subtitle, 48)
+                if sub then
+                    f.Size = UDim2.new(0.95, 0, 0, 65 + sub.Size.Y.Offset)
+                    sbg.Position = UDim2.new(0.05, 0, 0.65, 0)
+                end
+            end
             
+            local isHeld = false
             local function UpdateSlider(input)
                 local p = math.clamp((input.Position.X - sbg.AbsolutePosition.X) / sbg.AbsoluteSize.X, 0, 1)
                 local rawValue = min + (max - min) * p
@@ -1232,13 +1291,11 @@ function NoirUI:CreateWindow(settings)
                     UpdateSlider(i)
                 end
             end)
-            
             UIS.InputEnded:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
                     isHeld = false
                 end
             end)
-            
             UIS.InputChanged:Connect(function(i)
                 if isHeld and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
                     UpdateSlider(i)
@@ -1246,13 +1303,15 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- ========== COLOR PICKER ==========
+        -- ========== COLOR PICKER (CÓ SUBTITLE) ==========
         function Tab:CreateColorPicker(opt)
+            local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local ColorSelected = opt.Default or Color3.fromRGB(170, 85, 255)
             local h, s, v = ColorSelected:ToHSV()
             local open = false
+            
             local f = Instance.new("Frame", ContentFrame)
-            f.Size = UDim2.new(0.95, 0, 0, 35)
+            f.Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)
             f.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
             f.BackgroundTransparency = 0.7
             Instance.new("UICorner", f)
@@ -1260,6 +1319,7 @@ function NoirUI:CreateWindow(settings)
             f.ClipsDescendants = true
             f.Name = opt.Name or ""
             table.insert(Tab.Elements, f)
+            
             local t = Instance.new("TextLabel", f)
             t.Size = UDim2.new(1, 0, 0, 35)
             t.Position = UDim2.new(0, 12, 0, 0)
@@ -1269,39 +1329,54 @@ function NoirUI:CreateWindow(settings)
             t.Font = "GothamMedium"
             t.TextSize = 12
             t.TextXAlignment = "Left"
+            
             local pvw = Instance.new("TextButton", f)
             pvw.Size = UDim2.new(0, 40, 0, 18)
-            pvw.Position = UDim2.new(1, -50, 0, 8.5)
+            pvw.Position = UDim2.new(1, -50, 0, hasSubtitle and 8.5 or 8.5)
             pvw.BackgroundColor3 = ColorSelected
             pvw.Text = ""
             Instance.new("UICorner", pvw)
+            
+            if hasSubtitle then
+                local sub = AddSubtitle(f, opt.Subtitle, 38)
+                if sub then
+                    f.Size = UDim2.new(0.95, 0, 0, 50 + sub.Size.Y.Offset)
+                    pvw.Position = UDim2.new(1, -50, 0, 8.5)
+                end
+            end
+            
             local Holder = Instance.new("Frame", f)
             Holder.Size = UDim2.new(1, 0, 0, 140)
             Holder.Position = UDim2.new(0, 0, 0, 35)
             Holder.BackgroundTransparency = 1
+            
             local satBox = Instance.new("ImageButton", Holder)
             satBox.Size = UDim2.new(0.9, 0, 0, 100)
             satBox.Position = UDim2.new(0.05, 0, 0, 5)
             satBox.Image = "rbxassetid://4155801252"
             satBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
             Instance.new("UICorner", satBox)
+            
             local cursor = Instance.new("Frame", satBox)
             cursor.Size = UDim2.new(0, 8, 0, 8)
             cursor.AnchorPoint = Vector2.new(0.5, 0.5)
             cursor.BackgroundColor3 = Color3.new(1, 1, 1)
             cursor.Position = UDim2.new(s, 0, 1 - v, 0)
             Instance.new("UICorner", cursor).CornerRadius = UDim.new(1, 0)
+            
             local hueSlide = Instance.new("ImageButton", Holder)
             hueSlide.Size = UDim2.new(0.9, 0, 0, 12)
             hueSlide.Position = UDim2.new(0.05, 0, 0, 115)
             hueSlide.Image = "rbxassetid://3641079629"
             Instance.new("UICorner", hueSlide)
+            
             local hCursor = Instance.new("Frame", hueSlide)
             hCursor.Size = UDim2.new(0, 4, 1, 4)
             hCursor.Position = UDim2.new(1 - h, 0, 0.5, 0)
             hCursor.AnchorPoint = Vector2.new(0.5, 0.5)
             hCursor.BackgroundColor3 = Color3.new(1, 1, 1)
             Instance.new("UICorner", hCursor)
+            
             local function UpdateColor()
                 local finalCol = Color3.fromHSV(h, s, v)
                 pvw.BackgroundColor3 = finalCol
@@ -1310,6 +1385,7 @@ function NoirUI:CreateWindow(settings)
                 hCursor.Position = UDim2.new(1 - h, 0, 0.5, 0)
                 if opt.Callback then opt.Callback(finalCol) end
             end
+            
             local hS, hH = false, false
             satBox.InputBegan:Connect(function(i)
                 if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then hS = true end
@@ -1332,16 +1408,18 @@ function NoirUI:CreateWindow(settings)
                     end
                 end
             end)
+            
             pvw.MouseButton1Click:Connect(function()
                 open = not open
-                TweenService:Create(f, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95, 0, 0, 180) or UDim2.new(0.95, 0, 0, 35)}):Play()
+                TweenService:Create(f, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95, 0, 0, 180) or UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)}):Play()
             end)
         end
         
-        -- ========== DROPDOWN ==========
+        -- ========== DROPDOWN (CÓ SUBTITLE) ==========
         function Tab:CreateDropdown(opt)
+            local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local d = Instance.new("Frame", ContentFrame)
-            d.Size = UDim2.new(0.95, 0, 0, 35)
+            d.Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)
             d.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
             d.BackgroundTransparency = 0.7
             Instance.new("UICorner", d)
@@ -1370,6 +1448,11 @@ function NoirUI:CreateWindow(settings)
             Arrow.Font = "GothamMedium"
             Arrow.TextSize = 14
             Arrow.TextXAlignment = "Center"
+            
+            if hasSubtitle then
+                local sub = AddSubtitle(d, opt.Subtitle, 38)
+                if sub then d.Size = UDim2.new(0.95, 0, 0, 50 + sub.Size.Y.Offset) end
+            end
             
             local il = Instance.new("ScrollingFrame", d)
             il.Name = "OptionsList"
@@ -1406,7 +1489,7 @@ function NoirUI:CreateWindow(settings)
                         il.Visible = false
                         Arrow.Text = "▼"
                         t.Text = "  " .. opt.Name .. " : " .. option
-                        TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95, 0, 0, 35)}):Play()
+                        TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)}):Play()
                         if opt.Callback then opt.Callback(option) end
                     end)
                 end
@@ -1430,7 +1513,7 @@ function NoirUI:CreateWindow(settings)
                 if open and opt.RefreshOnOpen then
                     refreshOptions()
                 end
-                TweenService:Create(d, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95, 0, 0, 35 + il.Size.Y.Offset) or UDim2.new(0.95, 0, 0, 35)}):Play()
+                TweenService:Create(d, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95, 0, 0, 35 + il.Size.Y.Offset + (hasSubtitle and 20 or 0)) or UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)}):Play()
             end)
             
             if opt.GetOptions then
@@ -1450,7 +1533,7 @@ function NoirUI:CreateWindow(settings)
                         il.Visible = false
                         Arrow.Text = "▼"
                         t.Text = "  " .. opt.Name .. " : " .. v
-                        TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95, 0, 0, 35)}):Play()
+                        TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)}):Play()
                         opt.Callback(v)
                     end)
                 end
