@@ -315,16 +315,13 @@ end
 
 -- // Hàm setup background (CHO TẤT CẢ UI)
 local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
-    -- Xóa background cũ nếu có
     local existingBg = frame:FindFirstChild("_BackgroundImage")
     if existingBg then existingBg:Destroy() end
     
     if bgSetting and bgSetting.Image then
-        -- Lấy corner radius từ frame cha (hoặc tạo mới)
         local frameCorner = frame:FindFirstChild("UICorner")
         local cornerRadius = frameCorner and frameCorner.CornerRadius or UDim.new(0, 12)
         
-        -- Tạo ImageLabel làm background
         local bgImage = Instance.new("ImageLabel")
         bgImage.Name = "_BackgroundImage"
         bgImage.Size = UDim2.new(1, 0, 1, 0)
@@ -335,12 +332,10 @@ local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
         bgImage.ZIndex = 0
         bgImage.Parent = frame
         
-        -- Thêm corner cho background image (để bo góc ảnh)
         local bgCorner = Instance.new("UICorner")
         bgCorner.CornerRadius = cornerRadius
         bgCorner.Parent = bgImage
         
-        -- Set image
         local imgValue = bgSetting.Image
         if type(imgValue) == "number" or (type(imgValue) == "string" and imgValue:match("^%d+$")) then
             bgImage.Image = "rbxassetid://" .. tostring(imgValue)
@@ -348,7 +343,6 @@ local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
             bgImage.Image = imgValue
         end
         
-        -- Đưa background xuống dưới cùng
         bgImage.ZIndex = 0
         for _, child in pairs(frame:GetChildren()) do
             if child ~= bgImage and child:IsA("GuiObject") then
@@ -356,13 +350,11 @@ local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
             end
         end
         
-        -- BẬT CLIP để cắt theo frame cha
         frame.ClipsDescendants = true
         frame.BackgroundTransparency = 1
         
         return true
     else
-        -- KHÔNG ẢNH: set transparency theo setting
         frame.BackgroundTransparency = defaultTransparency or 0
         frame.BackgroundColor3 = bgColor or Color3.fromRGB(10, 10, 10)
         frame.ClipsDescendants = false
@@ -395,7 +387,6 @@ function NoirUI:CreateWindow(settings)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
     
-    -- Setup background cho MAIN
     SetupBackground(Main, settings.Background, settings.MainBgColor, settings.MainBgTransparency or 0)
     
     -- //////////////// BẢNG LOADING ////////////////
@@ -542,7 +533,6 @@ function NoirUI:CreateWindow(settings)
             kstr.Color = ACCENT
             MakeDraggable(KUI)
             
-            -- Setup background cho KEY UI
             SetupBackground(KUI, settings.KeyBackground, Color3.fromRGB(12, 12, 12), 0)
             
             local KT = Instance.new("TextLabel", KUI)
@@ -736,7 +726,7 @@ function NoirUI:CreateWindow(settings)
     TScroll.BackgroundTransparency = 1
     TScroll.ScrollBarThickness = 3
     TScroll.ScrollBarImageColor3 = ACCENT
-    TScroll.ScrollBarImageTransparency = 1
+    TScroll.ScrollBarImageTransparency = 0.5
     TScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
     TScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
     
@@ -777,26 +767,24 @@ function NoirUI:CreateWindow(settings)
     ContStroke.Thickness = 1
     ContStroke.Transparency = 0.7
     
-    -- //////////////// FLOAT BUTTON (ĐÃ SỬA - CẮT ĐÚNG GÓC TRÒN) ////////////////
+    -- //////////////// FLOAT BUTTON (FINAL - CẮT ĐÚNG THEO STROKE) ////////////////
     local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
     TBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     TBtn.Image = ""
     TBtn.ZIndex = 10
-    TBtn.ClipsDescendants = true  -- BẬT CLIP
+    TBtn.ClipsDescendants = true
     local btnCorner = Instance.new("UICorner", TBtn)
-    btnCorner.CornerRadius = UDim.new(1, 0)  -- Hình tròn hoàn hảo
+    btnCorner.CornerRadius = UDim.new(1, 0)
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
     
     if settings.FloatBackground and settings.FloatBackground.Image then
-        -- Xóa background cũ nếu có
         local oldBg = TBtn:FindFirstChild("_FloatBackground")
         if oldBg then oldBg:Destroy() end
         
-        -- Tạo ảnh nền cho float button
         local bgImage = Instance.new("ImageLabel")
         bgImage.Name = "_FloatBackground"
         bgImage.Size = UDim2.new(1, 0, 1, 0)
@@ -804,7 +792,6 @@ function NoirUI:CreateWindow(settings)
         bgImage.BackgroundTransparency = 1
         bgImage.ZIndex = TBtn.ZIndex + 1
         
-        -- Set image
         local bgImgVal = settings.FloatBackground.Image
         if type(bgImgVal) == "number" or (type(bgImgVal) == "string" and bgImgVal:match("^%d+$")) then
             bgImage.Image = "rbxassetid://" .. tostring(bgImgVal)
@@ -814,35 +801,22 @@ function NoirUI:CreateWindow(settings)
         bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0
         bgImage.ScaleType = Enum.ScaleType.Crop
         bgImage.ClipsDescendants = true
-        
-        -- Thêm corner cho ảnh nền (bo tròn)
-        local bgCorner = Instance.new("UICorner")
-        bgCorner.CornerRadius = UDim.new(1, 0)  -- Hình tròn 100%
-        bgCorner.Parent = bgImage
-        
         bgImage.Parent = TBtn
         
-        -- Ẩn background gốc, hiển thị ảnh
         TBtn.BackgroundTransparency = 1
         
-        -- Thêm lớp phủ tối (nếu cần)
         local overlay = Instance.new("Frame", TBtn)
         overlay.Name = "_Overlay"
         overlay.Size = UDim2.new(1, 0, 1, 0)
+        overlay.Position = UDim2.new(0, 0, 0, 0)
         overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         overlay.BackgroundTransparency = 0.4
         overlay.ZIndex = TBtn.ZIndex + 2
         overlay.ClipsDescendants = true
-        
-        -- Corner cho overlay
-        local overlayCorner = Instance.new("UICorner")
-        overlayCorner.CornerRadius = UDim.new(1, 0)
-        overlayCorner.Parent = overlay
     else
         TBtn.BackgroundTransparency = 0
     end
     
-    -- Icon cho float button
     local iconValue = settings.Icon
     if iconValue then
         local iconImage = ResolveIcon(iconValue)
@@ -859,6 +833,7 @@ function NoirUI:CreateWindow(settings)
         elseif type(iconValue) == "string" and #iconValue <= 2 then
             local textIcon = Instance.new("TextLabel", TBtn)
             textIcon.Size = UDim2.new(1, 0, 1, 0)
+            textIcon.Position = UDim2.new(0, 0, 0, 0)
             textIcon.BackgroundTransparency = 1
             textIcon.Text = iconValue
             textIcon.TextColor3 = ACCENT
@@ -894,7 +869,6 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- TOGGLE UI: CHỈ ẨN/HIỆN, KHÔNG THAY ĐỔI TRANSPARENCY
     TBtn.MouseButton1Click:Connect(function()
         if not KeySolved and KUI and KUI.Parent then
             KUI.Visible = not KUI.Visible
@@ -917,7 +891,6 @@ function NoirUI:CreateWindow(settings)
         local ns = Instance.new("UIStroke", n)
         ns.Color = ACCENT
         
-        -- Setup background cho NOTIFICATION
         SetupBackground(n, settings.NotificationBackground, Color3.fromRGB(15, 15, 15), 0.25)
         
         if iconName then
@@ -1593,8 +1566,7 @@ function NoirUI:CreateWindow(settings)
                     it.Font = "GothamMedium"
                     it.TextSize = 11
                     it.MouseButton1Click:Connect(function()
-                        open = false
-                        il.Visible = false
+                        open = false                        il.Visible = false
                         Arrow.Text = "▼"
                         t.Text = "  " .. opt.Name .. " : " .. v
                         TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)}):Play()
