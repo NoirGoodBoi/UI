@@ -172,7 +172,6 @@ local LucideIcons = {
     ["scale-3d"] = "rbxassetid://133233077350937",
     ["eye"] = "rbxassetid://15922050695",
     ["eye-off"] = "rbxassetid://6473252651",
--- //
     ["cat-1"] = "rbxassetid://6421296789",
     ["aesthetic-1"] = "rbxassetid://6675147486",
     ["aesthetic-2"] = "rbxassetid://10149736886",
@@ -188,11 +187,8 @@ local LucideIcons = {
     ["miku-1"] = "rbxassetid://8680995431",
     ["chibi-5"] = "rbxassetid://6982730545",
     ["aesthetic-5"] = "rbxassetid://6221611651",
-    ["cat-1"] = "rbxassetid://2015724",
---// meme
     ["cheems-mc"] = "rbxassetid://9676276904",
     ["maxwell-mc"] = "rbxassetid://12181324390",
---// Minecraft
     ["mc-dirt"] = "rbxassetid://9267155972",
     ["mc-log"] = "rbxassetid://3258599312",
     ["mc-command"] = "rbxassetid://129804020",
@@ -235,7 +231,6 @@ local LucideIcons = {
     ["mc-snow"] = "rbxassetid://5612862976",
     ["mc-crafting-table"] = "rbxassetid://14934173224",
     ["mc-2"] = "rbxassetid://4995402103",
---// my love :3
     ["agnes-1"] = "rbxassetid://78611376918762",
     ["agnes-2"] = "rbxassetid://129792834663000",
     ["agnes-3"] = "rbxassetid://72822911823680",
@@ -760,30 +755,34 @@ function NoirUI:CreateWindow(settings)
     ContStroke.Thickness = 1
     ContStroke.Transparency = 0.7
     
-    -- // FLOAT BUTTON (FINAL - ĐÃ SỬA)
+    -- // FLOAT BUTTON (FIXED - FINAL)
     local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
-    TBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    TBtn.Image = ""
+    TBtn.BackgroundTransparency = 1
     TBtn.ZIndex = 10
-    TBtn.ClipsDescendants = true  -- BẮT BUỘC
-    local btnCorner = Instance.new("UICorner", TBtn)
-    btnCorner.CornerRadius = UDim.new(1, 0)  -- HÌNH TRÒN
-    local TS = Instance.new("UIStroke", TBtn)
-    TS.Color = ACCENT
-    TS.Thickness = 2
+    TBtn.ClipsDescendants = true
+    TBtn.AutoButtonColor = false
     
+    -- Container chính để clip nội dung
+    local ClipContainer = Instance.new("Frame", TBtn)
+    ClipContainer.Size = UDim2.new(1, 0, 1, 0)
+    ClipContainer.Position = UDim2.new(0, 0, 0, 0)
+    ClipContainer.BackgroundTransparency = 1
+    ClipContainer.ClipsDescendants = true
+    ClipContainer.ZIndex = TBtn.ZIndex
+    
+    -- Corner cho container (hình tròn)
+    local clipCorner = Instance.new("UICorner", ClipContainer)
+    clipCorner.CornerRadius = UDim.new(1, 0)
+    
+    -- Background (image hoặc màu)
     if settings.FloatBackground and settings.FloatBackground.Image then
-        local oldBg = TBtn:FindFirstChild("_FloatBackground")
-        if oldBg then oldBg:Destroy() end
-        
-        local bgImage = Instance.new("ImageLabel")
+        local bgImage = Instance.new("ImageLabel", ClipContainer)
         bgImage.Name = "_FloatBackground"
         bgImage.Size = UDim2.new(1, 0, 1, 0)
         bgImage.Position = UDim2.new(0, 0, 0, 0)
         bgImage.BackgroundTransparency = 1
-        bgImage.ZIndex = TBtn.ZIndex + 1
         
         local bgImgVal = settings.FloatBackground.Image
         if type(bgImgVal) == "number" or (type(bgImgVal) == "string" and bgImgVal:match("^%d+$")) then
@@ -792,59 +791,76 @@ function NoirUI:CreateWindow(settings)
             bgImage.Image = bgImgVal
         end
         bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0
-        bgImage.ScaleType = Enum.ScaleType.Crop
-        bgImage.ClipsDescendants = true
-        
-        local bgCorner = Instance.new("UICorner")
-        bgCorner.CornerRadius = UDim.new(1, 0)
-        bgCorner.Parent = bgImage
-        
-        bgImage.Parent = TBtn
-        TBtn.BackgroundTransparency = 1
-        
-        local overlay = Instance.new("Frame", TBtn)
-        overlay.Name = "_Overlay"
-        overlay.Size = UDim2.new(1, 0, 1, 0)
-        overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        overlay.BackgroundTransparency = 0.4
-        overlay.ZIndex = TBtn.ZIndex + 2
-        overlay.ClipsDescendants = true
-        
-        local overlayCorner = Instance.new("UICorner")
-        overlayCorner.CornerRadius = UDim.new(1, 0)
-        overlayCorner.Parent = overlay
+        bgImage.ScaleType = Enum.ScaleType.Fit
+        bgImage.ZIndex = 1
     else
-        TBtn.BackgroundTransparency = 0
+        local bgColor = Instance.new("Frame", ClipContainer)
+        bgColor.Size = UDim2.new(1, 0, 1, 0)
+        bgColor.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+        bgColor.BackgroundTransparency = 0
+        bgColor.ZIndex = 1
     end
     
-    -- ICON - FULL SIZE, TỰ ĐỘNG CẮT THEO BUTTON
+    -- Overlay (hiệu ứng mờ)
+    local overlay = Instance.new("Frame", ClipContainer)
+    overlay.Name = "_Overlay"
+    overlay.Size = UDim2.new(1, 0, 1, 0)
+    overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    overlay.BackgroundTransparency = 0.25
+    overlay.ZIndex = 2
+    
+    -- Icon
     local iconValue = settings.Icon
     if iconValue then
         local iconImage = ResolveIcon(iconValue)
         if iconImage then
-            local FI = Instance.new("ImageLabel", TBtn)
-            FI.Size = UDim2.new(1, 0, 1, 0)  -- FULL SIZE
-            FI.Position = UDim2.new(0, 0, 0, 0)
+            local FI = Instance.new("ImageLabel", ClipContainer)
+            FI.Size = UDim2.new(0.6, 0, 0.6, 0)
+            FI.Position = UDim2.new(0.2, 0, 0.2, 0)
             FI.BackgroundTransparency = 1
             FI.Image = iconImage
             FI.ImageColor3 = Color3.new(1, 1, 1)
-            FI.ScaleType = Enum.ScaleType.Crop
-            FI.ZIndex = TBtn.ZIndex + 5
-            -- KHÔNG CẦN CORNER, TBtn ĐÃ CLIP
+            FI.ScaleType = Enum.ScaleType.Fit
+            FI.ZIndex = 3
         elseif type(iconValue) == "string" then
-            local textIcon = Instance.new("TextLabel", TBtn)
-            textIcon.Size = UDim2.new(1, 0, 1, 0)
-            textIcon.Position = UDim2.new(0, 0, 0, 0)
+            local textIcon = Instance.new("TextLabel", ClipContainer)
+            textIcon.Size = UDim2.new(0.8, 0, 0.8, 0)
+            textIcon.Position = UDim2.new(0.1, 0, 0.1, 0)
             textIcon.BackgroundTransparency = 1
             textIcon.Text = iconValue
             textIcon.TextColor3 = Color3.new(1, 1, 1)
-            textIcon.TextSize = 28
             textIcon.Font = Enum.Font.GothamBold
             textIcon.TextScaled = true
-            textIcon.ZIndex = TBtn.ZIndex + 5
+            textIcon.ZIndex = 3
         end
     end
-
+    
+    -- Stroke (viền ngoài)
+    local TS = Instance.new("UIStroke", TBtn)
+    TS.Color = ACCENT
+    TS.Thickness = 2
+    TS.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    
+    -- Corner cho TBtn (bo góc stroke)
+    local btnCorner = Instance.new("UICorner", TBtn)
+    btnCorner.CornerRadius = UDim.new(1, 0)
+    
+    -- Hover effect
+    local function PlayHoverAnim(isHover)
+        local targetTrans = isHover and 0.5 or 0.25
+        TweenService:Create(overlay, TweenInfo.new(0.2), {BackgroundTransparency = targetTrans}):Play()
+        TweenService:Create(TBtn, TweenInfo.new(0.2), {Size = isHover and UDim2.new(0, 48, 0, 48) or UDim2.new(0, 45, 0, 45)}):Play()
+        if isHover then
+            TS.Thickness = 2.5
+        else
+            TS.Thickness = 2
+        end
+    end
+    
+    TBtn.MouseEnter:Connect(function() PlayHoverAnim(true) end)
+    TBtn.MouseLeave:Connect(function() PlayHoverAnim(false) end)
+    
+    -- Draggable
     local floatDragging = false
     local floatDragStart, floatStartPos, floatDragInput
     TBtn.InputBegan:Connect(function(input)
