@@ -820,11 +820,13 @@ function NoirUI:CreateWindow(settings)
         local iconImage = ResolveIcon(iconValue)
         if iconImage then
             local FI = Instance.new("ImageLabel", TBtn)
-            FI.Size = UDim2.new(0.5, 0, 0.5, 0)
-            FI.Position = UDim2.new(0.25, 0, 0.25, 0)
+            FI.Size = UDim2.new(1, 0, 1, 0)           -- Phủ kín 100% nút
+            FI.Position = UDim2.new(0, 0, 0, 0)       -- Sát mép
             FI.BackgroundTransparency = 1
             FI.Image = iconImage
-            FI.ImageColor3 = Color3.new(1, 1, 1)
+            FI.ImageColor3 = Color3.new(1, 1, 1)       -- Giữ màu gốc
+            FI.ClipsDescendants = true                 -- Clipping mask
+            FI.ScaleType = Enum.ScaleType.Crop         -- Cắt phần thừa
             FI.ZIndex = TBtn.ZIndex + 5
         elseif type(iconValue) == "string" then
             local textIcon = Instance.new("TextLabel", TBtn)
@@ -1324,7 +1326,7 @@ function NoirUI:CreateWindow(settings)
             
             local sbg = Instance.new("Frame", f)
             sbg.Size = UDim2.new(0.9, 0, 0, 8)
-            sbg.Position = UDim2.new(0.05, 0, hasSubtitle and 0.5 or 0.7, 0)
+            sbg.Position = UDim2.new(0.05, 0, hasSubtitle and 0.55 or 0.7, 0)
             sbg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
             sbg.BackgroundTransparency = 0.5
             Instance.new("UICorner", sbg)
