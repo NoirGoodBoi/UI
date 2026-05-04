@@ -313,48 +313,34 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Hàm setup background (CHO TẤT CẢ UI)
+-- // Hàm setup background (CÁCH 2 - ĐƠN GIẢN, CẮT THEO CORNER + STROKE)
 local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
+    -- Xóa background cũ nếu có
+    local existingBg = frame:FindFirstChild("_BackgroundImage")
+    if existingBg then existingBg:Destroy() end
+    
     if bgSetting and bgSetting.Image then
-        -- CÓ ẢNH: set transparency = 1 để ảnh hiện, tạo CanvasGroup
-        local existingCanvas = frame:FindFirstChild("_BackgroundCanvas")
-        if existingCanvas then existingCanvas:Destroy() end
-        
-        local childrenToMove = {}
-        for _, child in pairs(frame:GetChildren()) do
-            if child:IsA("GuiObject") and child.Name ~= "_BackgroundCanvas" then
-                table.insert(childrenToMove, child)
-            end
-        end
-        
-        local canvasGroup = Instance.new("CanvasGroup")
-        canvasGroup.Name = "_BackgroundCanvas"
-        canvasGroup.Size = UDim2.new(1, 0, 1, 0)
-        canvasGroup.Position = UDim2.new(0, 0, 0, 0)
-        canvasGroup.BackgroundTransparency = 1
-        canvasGroup.GroupTransparency = 0
-        canvasGroup.ClipsDescendants = true
-        canvasGroup.ZIndex = 0
-        canvasGroup.Parent = frame
-        
+        -- Lấy corner radius từ frame cha (hoặc tạo mới)
         local frameCorner = frame:FindFirstChild("UICorner")
-        if frameCorner then
-            local canvasCorner = Instance.new("UICorner")
-            canvasCorner.CornerRadius = frameCorner.CornerRadius
-            canvasCorner.Parent = canvasGroup
-        end
+        local cornerRadius = frameCorner and frameCorner.CornerRadius or UDim.new(0, 12)
         
+        -- Tạo ImageLabel làm background
         local bgImage = Instance.new("ImageLabel")
         bgImage.Name = "_BackgroundImage"
-        bgImage.Parent = canvasGroup
         bgImage.Size = UDim2.new(1, 0, 1, 0)
         bgImage.Position = UDim2.new(0, 0, 0, 0)
         bgImage.BackgroundTransparency = 1
         bgImage.ImageTransparency = bgSetting.Transparency or 0
         bgImage.ScaleType = Enum.ScaleType.Crop
-        bgImage.ClipsDescendants = true
         bgImage.ZIndex = 0
+        bgImage.Parent = frame
         
+        -- Thêm corner cho background image (để bo góc ảnh)
+        local bgCorner = Instance.new("UICorner")
+        bgCorner.CornerRadius = cornerRadius
+        bgCorner.Parent = bgImage
+        
+        -- Set image
         local imgValue = bgSetting.Image
         if type(imgValue) == "number" or (type(imgValue) == "string" and imgValue:match("^%d+$")) then
             bgImage.Image = "rbxassetid://" .. tostring(imgValue)
@@ -362,18 +348,24 @@ local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
             bgImage.Image = imgValue
         end
         
-        for _, child in pairs(childrenToMove) do
-            child.Parent = canvasGroup
-            child.ZIndex = math.max(child.ZIndex, 1)
+        -- Đưa background xuống dưới cùng
+        bgImage.ZIndex = 0
+        for _, child in pairs(frame:GetChildren()) do
+            if child ~= bgImage and child:IsA("GuiObject") then
+                child.ZIndex = math.max(child.ZIndex, 1)
+            end
         end
         
-        frame.BackgroundTransparency = 1
+        -- BẬT CLIP để cắt theo frame cha (quan trọng!)
         frame.ClipsDescendants = true
+        frame.BackgroundTransparency = 1
+        
         return true -- Có ảnh
     else
         -- KHÔNG ẢNH: set transparency theo setting
         frame.BackgroundTransparency = defaultTransparency or 0
         frame.BackgroundColor3 = bgColor or Color3.fromRGB(10, 10, 10)
+        frame.ClipsDescendants = false -- Không cần clip nếu ko có ảnh
         return false -- Không có ảnh
     end
 end
@@ -398,11 +390,12 @@ function NoirUI:CreateWindow(settings)
     Main.Position = mainDefaultPos
     Main.BackgroundColor3 = settings.MainBgColor or Color3.fromRGB(10, 10, 10)
     Main.Visible = false
-    Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
+    local mainCorner = Instance.new("UICorner", Main)
+    mainCorner.CornerRadius = UDim.new(0, 12)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
     
-    -- Setup background cho MAIN (lưu lại trạng thái có ảnh hay ko)
+    -- Setup background cho MAIN
     local hasMainBg = SetupBackground(Main, settings.Background, settings.MainBgColor, settings.MainBgTransparency or 0)
     
     -- //////////////// BẢNG LOADING ////////////////
@@ -411,7 +404,8 @@ function NoirUI:CreateWindow(settings)
     LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
     LoadingFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
     LoadingFrame.ZIndex = 200
-    Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 12)
+    local loadingCorner = Instance.new("UICorner", LoadingFrame)
+    loadingCorner.CornerRadius = UDim.new(0, 12)
     local LoadingStroke = Instance.new("UIStroke", LoadingFrame)
     LoadingStroke.Color = ACCENT
     LoadingStroke.Thickness = 2
@@ -541,7 +535,8 @@ function NoirUI:CreateWindow(settings)
             KUI.Size = UDim2.new(0, 320, 0, 200)
             KUI.Position = UDim2.new(0.5, -160, 0.5, -100)
             KUI.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-            Instance.new("UICorner", KUI).CornerRadius = UDim.new(0, 12)
+            local keyCorner = Instance.new("UICorner", KUI)
+            keyCorner.CornerRadius = UDim.new(0, 12)
             local kstr = Instance.new("UIStroke", KUI)
             kstr.Thickness = 2
             kstr.Color = ACCENT
@@ -681,7 +676,8 @@ function NoirUI:CreateWindow(settings)
         Conf.Position = UDim2.new(0.5, -130, 0.5, -60)
         Conf.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
         Conf.ZIndex = 100
-        Instance.new("UICorner", Conf).CornerRadius = UDim.new(0, 12)
+        local confCorner = Instance.new("UICorner", Conf)
+        confCorner.CornerRadius = UDim.new(0, 12)
         local s = Instance.new("UIStroke", Conf)
         s.Color = ACCENT
         s.Thickness = 2
@@ -726,7 +722,8 @@ function NoirUI:CreateWindow(settings)
     Side.Position = UDim2.new(0, 5, 0, 40)
     Side.BackgroundTransparency = 1
     Side.ClipsDescendants = true
-    Instance.new("UICorner", Side).CornerRadius = UDim.new(0, 8)
+    local sideCorner = Instance.new("UICorner", Side)
+    sideCorner.CornerRadius = UDim.new(0, 8)
     
     local SideStroke = Instance.new("UIStroke", Side)
     SideStroke.Color = ACCENT
@@ -772,7 +769,8 @@ function NoirUI:CreateWindow(settings)
     Cont.Position = UDim2.new(0, 120, 0, 40)
     Cont.BackgroundTransparency = 1
     Cont.ClipsDescendants = true
-    Instance.new("UICorner", Cont).CornerRadius = UDim.new(0, 8)
+    local contCorner = Instance.new("UICorner", Cont)
+    contCorner.CornerRadius = UDim.new(0, 8)
     
     local ContStroke = Instance.new("UIStroke", Cont)
     ContStroke.Color = ACCENT
@@ -788,12 +786,14 @@ function NoirUI:CreateWindow(settings)
     TBtn.ImageTransparency = 0.2
     TBtn.ZIndex = 10
     TBtn.ClipsDescendants = true
-    Instance.new("UICorner", TBtn).CornerRadius = UDim.new(1, 0)
+    local btnCorner = Instance.new("UICorner", TBtn)
+    btnCorner.CornerRadius = UDim.new(1, 0)
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
     
     if settings.FloatBackground and settings.FloatBackground.Image then
+        -- Setup background cho float button bằng cách thêm ảnh trực tiếp
         local bgImage = Instance.new("ImageLabel", TBtn)
         bgImage.Size = UDim2.new(1, 0, 1, 0)
         bgImage.Position = UDim2.new(0, 0, 0, 0)
@@ -808,6 +808,12 @@ function NoirUI:CreateWindow(settings)
         bgImage.ScaleType = Enum.ScaleType.Crop
         bgImage.ClipsDescendants = true
         bgImage.ZIndex = TBtn.ZIndex + 1
+        
+        -- Thêm corner cho background ảnh
+        local bgCorner = Instance.new("UICorner")
+        bgCorner.CornerRadius = UDim.new(1, 0)
+        bgCorner.Parent = bgImage
+        
         TBtn.BackgroundTransparency = 1
         TBtn.ClipsDescendants = true
         
@@ -816,6 +822,9 @@ function NoirUI:CreateWindow(settings)
         overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         overlay.BackgroundTransparency = 0.4
         overlay.ZIndex = TBtn.ZIndex + 2
+        local overlayCorner = Instance.new("UICorner")
+        overlayCorner.CornerRadius = UDim.new(1, 0)
+        overlayCorner.Parent = overlay
     else
         TBtn.BackgroundTransparency = 0
     end
@@ -889,7 +898,8 @@ function NoirUI:CreateWindow(settings)
         n.Size = UDim2.new(0, 260, 0, 65)
         n.Position = UDim2.new(1, 20, 0.8, 0)
         n.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-        Instance.new("UICorner", n).CornerRadius = UDim.new(0, 8)
+        local notifCorner = Instance.new("UICorner", n)
+        notifCorner.CornerRadius = UDim.new(0, 8)
         local ns = Instance.new("UIStroke", n)
         ns.Color = ACCENT
         
@@ -949,7 +959,7 @@ function NoirUI:CreateWindow(settings)
         end)
     end
     
-    -- //////////////// TẠO TAB & ELEMENTS ////////////////
+    -- //////////////// TẠO TAB & ELEMENTS (GIỮ NGUYÊN) ////////////////
     local Window = {}
     
     function Window:CreateTab(name, icon)
@@ -1081,7 +1091,7 @@ function NoirUI:CreateWindow(settings)
             if prop == "Text" then filterElements(SearchBox.Text) end
         end)
         
-        -- ========== CÁC ELEMENT (GIỮ NGUYÊN NHƯ CŨ) ==========
+        -- ========== CÁC ELEMENT ==========
         function Tab:CreateLabel(text, updateFunction)
             local l = Instance.new("TextLabel", ContentFrame)
             l.Size = UDim2.new(0.95, 0, 0, 20)
