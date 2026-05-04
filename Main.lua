@@ -172,6 +172,7 @@ local LucideIcons = {
     ["scale-3d"] = "rbxassetid://133233077350937",
     ["eye"] = "rbxassetid://15922050695",
     ["eye-off"] = "rbxassetid://6473252651",
+-- //
     ["cat-1"] = "rbxassetid://6421296789",
     ["aesthetic-1"] = "rbxassetid://6675147486",
     ["aesthetic-2"] = "rbxassetid://10149736886",
@@ -383,19 +384,11 @@ function NoirUI:CreateWindow(settings)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
     
-    -- Tự động xử lý transparency khi có/không có background
-    if settings.Background then
-        if settings.MainBgTransparency == nil then
-            Main.BackgroundTransparency = 1
-        else
-            Main.BackgroundTransparency = settings.MainBgTransparency
-        end
-    else
-        Main.BackgroundTransparency = settings.MainBgTransparency or 0
-    end
-    
     if settings.Background then
         LoadBackground(Main, settings.Background)
+        Main.BackgroundTransparency = 1
+    else
+        Main.BackgroundTransparency = settings.MainBgTransparency or 0
     end
     
     -- //////////////// BẢNG LOADING ////////////////
@@ -403,7 +396,6 @@ function NoirUI:CreateWindow(settings)
     LoadingFrame.Size = UDim2.new(0, 300, 0, 120)
     LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
     LoadingFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-    LoadingFrame.BackgroundTransparency = 1
     LoadingFrame.ZIndex = 200
     Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 12)
     local LoadingStroke = Instance.new("UIStroke", LoadingFrame)
@@ -413,6 +405,9 @@ function NoirUI:CreateWindow(settings)
     
     if settings.LoadingBackground then
         LoadBackground(LoadingFrame, settings.LoadingBackground)
+        LoadingFrame.BackgroundTransparency = 1
+    else
+        LoadingFrame.BackgroundTransparency = 1
     end
     
     local LoadingTitle = Instance.new("TextLabel", LoadingFrame)
@@ -536,7 +531,6 @@ function NoirUI:CreateWindow(settings)
             KUI.Size = UDim2.new(0, 320, 0, 200)
             KUI.Position = UDim2.new(0.5, -160, 0.5, -100)
             KUI.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-            KUI.BackgroundTransparency = 0
             Instance.new("UICorner", KUI)
             local kstr = Instance.new("UIStroke", KUI)
             kstr.Thickness = 2
@@ -545,9 +539,12 @@ function NoirUI:CreateWindow(settings)
             
             if settings.KeyBackground then
                 LoadBackground(KUI, settings.KeyBackground)
+                KUI.BackgroundTransparency = 1
+            else
+                KUI.BackgroundTransparency = 0
             end
             
-            TweenService:Create(KUI, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+            TweenService:Create(KUI, TweenInfo.new(0.3), {BackgroundTransparency = KUI.BackgroundTransparency}):Play()
             
             local KT = Instance.new("TextLabel", KUI)
             KT.Size = UDim2.new(1,0,0,35)
@@ -803,7 +800,7 @@ function NoirUI:CreateWindow(settings)
         elseif type(bgImgVal) == "string" then
             bgImage.Image = bgImgVal
         end
-        bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0.2
+        bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0
         bgImage.ScaleType = Enum.ScaleType.Crop
         bgImage.ZIndex = TBtn.ZIndex + 1
         TBtn.BackgroundTransparency = 1
@@ -813,6 +810,8 @@ function NoirUI:CreateWindow(settings)
         overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         overlay.BackgroundTransparency = 0.4
         overlay.ZIndex = TBtn.ZIndex + 2
+    else
+        TBtn.BackgroundTransparency = 0
     end
     
     local iconValue = settings.Icon
@@ -820,13 +819,13 @@ function NoirUI:CreateWindow(settings)
         local iconImage = ResolveIcon(iconValue)
         if iconImage then
             local FI = Instance.new("ImageLabel", TBtn)
-            FI.Size = UDim2.new(1, 0, 1, 0)           -- Phủ kín 100% nút
-            FI.Position = UDim2.new(0, 0, 0, 0)       -- Sát mép
+            FI.Size = UDim2.new(1, 0, 1, 0)
+            FI.Position = UDim2.new(0, 0, 0, 0)
             FI.BackgroundTransparency = 1
             FI.Image = iconImage
-            FI.ImageColor3 = Color3.new(1, 1, 1)       -- Giữ màu gốc
-            FI.ClipsDescendants = true                 -- Clipping mask
-            FI.ScaleType = Enum.ScaleType.Crop         -- Cắt phần thừa
+            FI.ImageColor3 = Color3.new(1, 1, 1)
+            FI.ClipsDescendants = true
+            FI.ScaleType = Enum.ScaleType.Crop
             FI.ZIndex = TBtn.ZIndex + 5
         elseif type(iconValue) == "string" then
             local textIcon = Instance.new("TextLabel", TBtn)
@@ -894,6 +893,7 @@ function NoirUI:CreateWindow(settings)
         
         if settings.NotificationBackground then
             LoadBackground(n, settings.NotificationBackground)
+            n.BackgroundTransparency = 1
         end
         
         if iconName then
