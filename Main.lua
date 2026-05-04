@@ -87,8 +87,6 @@ local LucideIcons = {
     ["at-sign"] = "rbxassetid://92559495578198",
     ["bell"] = "rbxassetid://11401835376",
     ["bell-off"] = "rbxassetid://81868571746318",
-    ["eye"] = "rbxassetid://5219208999",
-    ["eye-off"] = "rbxassetid://6473252651",
     ["github"] = "rbxassetid://106465383791027",
     ["youtube"] = "rbxassetid://139037997997612",
     ["twitter"] = "rbxassetid://1324431872",
@@ -169,8 +167,11 @@ local LucideIcons = {
     ["list"] = "rbxassetid://15567843390",
     ["target"] = "rbxassetid://13557340523",
     ["crosshair"] = "rbxassetid://114078536525410",
+    ["crosshair-2"] = "rbxassetid://5146843579",
     ["gauge"] = "rbxassetid://105442920358687",
     ["scale-3d"] = "rbxassetid://133233077350937",
+    ["eye"] = "rbxassetid://15922050695",
+    ["eye-off"] = "rbxassetid://6473252651",
     ["cat-1"] = "rbxassetid://6421296789",
     ["aesthetic-1"] = "rbxassetid://6675147486",
     ["aesthetic-2"] = "rbxassetid://10149736886",
@@ -185,6 +186,63 @@ local LucideIcons = {
     ["chibi-4"] = "rbxassetid://6993174715",
     ["miku-1"] = "rbxassetid://8680995431",
     ["chibi-5"] = "rbxassetid://6982730545",
+    ["aesthetic-5"] = "rbxassetid://6221611651",
+    ["cat-1"] = "rbxassetid://2015724",
+--// meme
+    ["cheems-mc"] = "rbxassetid://9676276904",
+    ["maxwell-mc"] = "rbxassetid://12181324390",
+--// Minecraft
+    ["mc-dirt"] = "rbxassetid://9267155972",
+    ["mc-log"] = "rbxassetid://3258599312",
+    ["mc-command"] = "rbxassetid://129804020",
+    ["mc-planks"] = "rbxassetid://8676581022",
+    ["mc-grass"] = "rbxassetid://96094743851836",
+    ["mc-stone"] = "rbxassetid://3162897217",
+    ["mc-heart"] = "rbxassetid://6680686532",
+    ["mc-iron"] = "rbxassetid://3786068469",
+    ["mc-tnt"] = "rbxassetid://5522032314",
+    ["mc-diamond"] = "rbxassetid://5328690050",
+    ["mc-glass"] = "rbxassetid://8676620530",
+    ["mc-diamond-2"] = "rbxassetid://11168800609",
+    ["mc-lava"] = "rbxassetid://11950155460",
+    ["mc-nether-portal"] = "rbxassetid://9228727963",
+    ["mc-water"] = "rbxassetid://7696395981",
+    ["mc-dia-sword"] = "rbxassetid://3631652068",
+    ["mc-stone-2"] = "rbxassetid://8139086777",
+    ["mc-bookshelf"] = "rbxassetid://5901361400",
+    ["mc-diamond-3"] = "rbxassetid://8677289915",
+    ["mc-nertherite] = "rbxassetid://7696392982",
+    ["mc-cobblestone"] = "rbxassetid://5003953441",
+    ["mc-carrot"] = "rbxassetid://9151372514",
+    ["mc"] = "rbxassetid://8209318542",
+    ["mc-book"] = "rbxassetid://7566388691",
+    ["mc-disk"] = "rbxassetid://469714458",
+    ["mc-gold"] = "rbxassetid://3374712254",
+    ["mc-hunger-bar"] = "rbxassetid://4780279873",
+    ["mc-apple"] = "rbxassetid://7892919616",
+    ["mc-bow-1"] = "rbxassetid://147671465",
+    ["mc-bedrock"] = "rbxassetid://12252439624",
+    ["mc-magma"] = "rbxassetid://9065431099",
+    ["mc-steve"] = "rbxassetid://5609138453",
+    ["mc-arrow"] = "rbxassetid://7373742052",
+    ["mc-cake"] = "rbxassetid://5971536621",
+    ["mc-sand"] = "rbxassetid://9277770677",
+    ["mc-stick"] = "rbxassetid://7248264418",
+    ["mc-obsidian"] = "rbxassetid://10480259773",
+    ["mc-barrier"] = "rbxassetid://74983718809653",
+    ["mc-chest"] = "rbxassetid://9228492798",
+    ["mc-snow"] = "rbxassetid://5612862976",
+    ["mc-crafting-table"] = "rbxassetid://14934173224",
+    ["mc-2"] = "rbxassetid://4995402103",
+--// my love :3
+    ["agnes-1"] = "rbxassetid://78611376918762",
+    ["agnes-2"] = "rbxassetid://129792834663000",
+    ["agnes-3"] = "rbxassetid://72822911823680",
+    ["agnes-4"] = "rbxassetid://109514342561798",
+    ["agnes-5"] = "rbxassetid://124076134701198",
+    ["agnes-6"] = "rbxassetid://78920814168054",
+    ["agnes-7"] = "rbxassetid://111964745088904",
+    ["agnes-8"] = "rbxassetid://73819609027269",
 }
 
 local function ResolveIcon(iconInput)
@@ -223,7 +281,6 @@ local function AddSubtitle(parent, subtitleText, yOffset)
     subtitle.TextScaled = false
     subtitle.Name = "Subtitle"
     
-    -- Auto adjust height
     local function updateHeight()
         local textBounds = subtitle.TextBounds
         local lineCount = math.max(1, math.ceil(textBounds.X / (subtitle.AbsoluteSize.X - 20)))
@@ -275,7 +332,7 @@ local function LoadBackground(frame, bgSetting)
     bgImage.Size = UDim2.new(1, 0, 1, 0)
     bgImage.Position = UDim2.new(0, 0, 0, 0)
     bgImage.BackgroundTransparency = 1
-    bgImage.ImageTransparency = bgSetting.Transparency or 0.5
+    bgImage.ImageTransparency = bgSetting.Transparency or 0
     bgImage.ScaleType = Enum.ScaleType.Crop
     
     if type(bgSetting.Image) == "number" or (type(bgSetting.Image) == "string" and bgSetting.Image:match("^%d+$")) then
@@ -320,12 +377,22 @@ function NoirUI:CreateWindow(settings)
     Main.Size = UDim2.new(0, 420, 0, 300)
     Main.Position = mainDefaultPos
     Main.BackgroundColor3 = settings.MainBgColor or Color3.fromRGB(10, 10, 10)
-    Main.BackgroundTransparency = 1
     Main.ClipsDescendants = true
     Main.Visible = false
     Instance.new("UICorner", Main)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
+    
+    -- Tự động xử lý transparency khi có/không có background
+    if settings.Background then
+        if settings.MainBgTransparency == nil then
+            Main.BackgroundTransparency = 1
+        else
+            Main.BackgroundTransparency = settings.MainBgTransparency
+        end
+    else
+        Main.BackgroundTransparency = settings.MainBgTransparency or 0
+    end
     
     if settings.Background then
         LoadBackground(Main, settings.Background)
@@ -439,7 +506,7 @@ function NoirUI:CreateWindow(settings)
     
     local function ShowMainUIAfterLoading()
         task.wait(2)
-        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = settings.MainBgTransparency or 0}):Play()
+        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = Main.BackgroundTransparency}):Play()
         Main.Visible = true
         Main.Position = mainDefaultPos
     end
@@ -757,7 +824,7 @@ function NoirUI:CreateWindow(settings)
             FI.Position = UDim2.new(0.25, 0, 0.25, 0)
             FI.BackgroundTransparency = 1
             FI.Image = iconImage
-            FI.ImageColor3 = ACCENT
+            FI.ImageColor3 = Color3.new(1, 1, 1)
             FI.ZIndex = TBtn.ZIndex + 5
         elseif type(iconValue) == "string" then
             local textIcon = Instance.new("TextLabel", TBtn)
@@ -803,7 +870,7 @@ function NoirUI:CreateWindow(settings)
         else
             if not Main.Visible then
                 Main.Position = mainDefaultPos
-                TweenService:Create(Main, TweenInfo.new(0.2), {BackgroundTransparency = settings.MainBgTransparency or 0}):Play()
+                TweenService:Create(Main, TweenInfo.new(0.2), {BackgroundTransparency = Main.BackgroundTransparency}):Play()
             else
                 TweenService:Create(Main, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
                 task.wait(0.2)
@@ -835,7 +902,7 @@ function NoirUI:CreateWindow(settings)
                 icon.Position = UDim2.new(0, 10, 0.5, -12)
                 icon.BackgroundTransparency = 1
                 icon.Image = iconImg
-                icon.ImageColor3 = ACCENT
+                icon.ImageColor3 = Color3.new(1, 1, 1)
                 icon.ZIndex = 2
             end
         end
@@ -905,14 +972,17 @@ function NoirUI:CreateWindow(settings)
             IC.Size = UDim2.new(0, 18, 0, 18)
             IC.Position = UDim2.new(0, 8, 0.5, -9)
             IC.BackgroundTransparency = 1
+            IC.ClipsDescendants = true
+            IC.ScaleType = Enum.ScaleType.Crop
+            IC.ZIndex = 2
+            
             local iconImage = ResolveIcon(icon)
             if iconImage then
                 IC.Image = iconImage
             else
                 IC.Image = "rbxassetid://6031094700"
             end
-            IC.ImageColor3 = Color3.fromRGB(150, 150, 150)
-            IC.ZIndex = 2
+            IC.ImageColor3 = Color3.new(1, 1, 1)
         end
         
         local TabContainer = Instance.new("ScrollingFrame", Cont)
@@ -981,7 +1051,7 @@ function NoirUI:CreateWindow(settings)
             TabContainer.Visible = true
             BT.TextColor3 = ACCENT
             local tabImg = B:FindFirstChild("ImageLabel")
-            if tabImg then tabImg.ImageColor3 = ACCENT end
+            if tabImg then tabImg.ImageColor3 = Color3.fromRGB(150, 150, 150) end
             updateCanvas()
         end)
         
@@ -989,7 +1059,7 @@ function NoirUI:CreateWindow(settings)
             TabContainer.Visible = true
             BT.TextColor3 = ACCENT
             local tabImg = B:FindFirstChild("ImageLabel")
-            if tabImg then tabImg.ImageColor3 = ACCENT end
+            if tabImg then tabImg.ImageColor3 = Color3.fromRGB(150, 150, 150) end
         end
         
         local Tab = { Count = 0, Elements = {}, Connections = {} }
@@ -1222,7 +1292,7 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- ========== SLIDER (CÓ SUBTITLE) ==========
+        -- ========== SLIDER (CÓ RANGE, INCREMENT, SUBTITLE) ==========
         function Tab:CreateSlider(opt)
             local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local range = opt.range or {0, 100}
