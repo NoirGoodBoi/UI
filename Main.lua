@@ -10,16 +10,24 @@ if OldGui then OldGui:Destroy() end
 
 local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {} }
 
--- ========== CẤU HÌNH ÂM THANH (THAY ID SAU) ==========
-local SoundIds = {
-    ButtonClick = nil,  -- Thay bằng ID sound float button
-    TabClick = nil,     -- Thay bằng ID sound tab
+-- ========== CẤU HÌNH ÂM THANH ==========
+local SoundSettings = {
+    FloatButtonClick = nil,  -- Set ID sound cho nút float: SoundSettings.FloatButtonClick = "rbxassetid://123456"
+    TabClick = nil,          -- Set ID sound cho tab
 }
+
+function NoirUI:SetSound(soundType, soundId)
+    if soundType == "float" then
+        SoundSettings.FloatButtonClick = soundId
+    elseif soundType == "tab" then
+        SoundSettings.TabClick = soundId
+    end
+end
 
 local function PlaySound(soundId)
     if not soundId then return end
     local sound = Instance.new("Sound")
-    sound.SoundId = "rbxassetid://" .. tostring(soundId)
+    sound.SoundId = soundId
     sound.Volume = 0.5
     sound.Parent = game:GetService("CoreGui")
     sound:Play()
@@ -190,6 +198,7 @@ local LucideIcons = {
     ["scale-3d"] = "rbxassetid://133233077350937",
     ["eye"] = "rbxassetid://15922050695",
     ["eye-off"] = "rbxassetid://6473252651",
+-- //
     ["cat-1"] = "rbxassetid://6421296789",
     ["aesthetic-1"] = "rbxassetid://6675147486",
     ["aesthetic-2"] = "rbxassetid://10149736886",
@@ -205,8 +214,11 @@ local LucideIcons = {
     ["miku-1"] = "rbxassetid://8680995431",
     ["chibi-5"] = "rbxassetid://6982730545",
     ["aesthetic-5"] = "rbxassetid://6221611651",
+    ["cat-1"] = "rbxassetid://2015724",
+--// meme
     ["cheems-mc"] = "rbxassetid://9676276904",
     ["maxwell-mc"] = "rbxassetid://12181324390",
+--// Minecraft
     ["mc-dirt"] = "rbxassetid://9267155972",
     ["mc-log"] = "rbxassetid://3258599312",
     ["mc-command"] = "rbxassetid://129804020",
@@ -249,6 +261,7 @@ local LucideIcons = {
     ["mc-snow"] = "rbxassetid://5612862976",
     ["mc-crafting-table"] = "rbxassetid://14934173224",
     ["mc-2"] = "rbxassetid://4995402103",
+--// my love :3
     ["agnes-1"] = "rbxassetid://78611376918762",
     ["agnes-2"] = "rbxassetid://129792834663000",
     ["agnes-3"] = "rbxassetid://72822911823680",
@@ -326,7 +339,7 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Setup background
+-- // Setup background (có bo góc)
 local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
     local existingBg = frame:FindFirstChild("_BackgroundImage")
     if existingBg then existingBg:Destroy() end
@@ -387,16 +400,21 @@ function NoirUI:CreateWindow(settings)
     local mainDefaultPos = settings.DefaultPosition or UDim2.new(0.5, -210, 0.5, -150)
     local floatDefaultPos = settings.FloatDefaultPosition or UDim2.new(0, 15, 0.5, -22)
     
-    -- // MAIN UI
+    -- // MAIN UI (có AspectRatio để tránh bị ấn dẹp)
     local Main = Instance.new("Frame", ScreenGui)
     Main.Size = UDim2.new(0, 420, 0, 300)
     Main.Position = mainDefaultPos
     Main.BackgroundColor3 = settings.MainBgColor or Color3.fromRGB(10, 10, 10)
-    Main.Visible = false
+    Main.Visible = true
+    Main.BackgroundTransparency = 1  -- Start invisible for fade
     local mainCorner = Instance.new("UICorner", Main)
     mainCorner.CornerRadius = UDim.new(0, 12)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
+    
+    -- Thêm AspectRatio để giữ tỉ lệ
+    local aspectRatio = Instance.new("UIAspectRatioConstraint", Main)
+    aspectRatio.AspectRatio = 420 / 300  -- 1.4
     
     local hasMainBg = SetupBackground(Main, settings.Background, settings.MainBgColor, settings.MainBgTransparency or 0)
     
@@ -503,6 +521,7 @@ function NoirUI:CreateWindow(settings)
     
     local function ShowMainUIAfterLoading()
         task.wait(2)
+        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = hasMainBg and 0 or (settings.MainBgTransparency or 0)}):Play()
         Main.Visible = true
         Main.Position = mainDefaultPos
     end
@@ -677,6 +696,8 @@ function NoirUI:CreateWindow(settings)
         local s = Instance.new("UIStroke", Conf)
         s.Color = ACCENT
         s.Thickness = 2
+        -- Đồng bộ background với notification
+        SetupBackground(Conf, settings.NotificationBackground, Color3.fromRGB(15, 15, 15), 0.25)
         local t = Instance.new("TextLabel", Conf)
         t.Size = UDim2.new(1, 0, 0.5, 0)
         t.BackgroundTransparency = 1
@@ -756,7 +777,9 @@ function NoirUI:CreateWindow(settings)
     AI.Size = UDim2.new(0, 38, 0, 38)
     AI.Position = UDim2.new(0.5, -19, 0, 0)
     pcall(function() AI.Image = Players:GetUserThumbnailAsync(Players.LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100) end)
-    Instance.new("UICorner", AI).CornerRadius = UDim.new(1,0)
+    AI.ClipsDescendants = true
+    AI.ScaleType = Enum.ScaleType.Crop
+    Instance.new("UICorner", AI).CornerRadius = UDim.new(1,0)  -- Tròn hoàn toàn
     Instance.new("UIStroke", AI).Color = ACCENT
     
     -- // CONTENT
@@ -773,9 +796,9 @@ function NoirUI:CreateWindow(settings)
     ContStroke.Thickness = 1
     ContStroke.Transparency = 0.7
     
-    -- //////////////// FLOAT BUTTON (HÌNH TRÒN + HIỆU ỨNG ẤN DẸP) ////////////////
+    -- //////////////// FLOAT BUTTON (có CanvasGroup để clip) ////////////////
     local TBtn = Instance.new("ImageButton", ScreenGui)
-    TBtn.Size = UDim2.new(0, 50, 0, 50)
+    TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
     TBtn.BackgroundTransparency = 1
     TBtn.Image = ""
@@ -793,11 +816,11 @@ function NoirUI:CreateWindow(settings)
     ClipGroup.ZIndex = TBtn.ZIndex
     ClipGroup.Parent = TBtn
     
-    -- Bo tròn hình tròn
+    -- Bo tròn CanvasGroup (Squircle - bo góc 30%)
     local clipCorner = Instance.new("UICorner", ClipGroup)
-    clipCorner.CornerRadius = UDim.new(1, 0)
+    clipCorner.CornerRadius = UDim.new(0.3, 0)  -- Squircle effect
     
-    -- Background
+    -- Background (ảnh hoặc màu)
     if settings.FloatBackground and settings.FloatBackground.Image then
         local bgImage = Instance.new("ImageLabel", ClipGroup)
         bgImage.Name = "BackgroundImage"
@@ -823,19 +846,19 @@ function NoirUI:CreateWindow(settings)
     else
         local bgColor = Instance.new("Frame", ClipGroup)
         bgColor.Size = UDim2.new(1, 0, 1, 0)
-        bgColor.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        bgColor.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
         bgColor.BackgroundTransparency = 0
         bgColor.ZIndex = 1
     end
     
-    -- Icon
+    -- Icon (đặt trong ClipGroup để bị cắt theo Squircle)
     local iconValue = settings.Icon
     if iconValue then
         local iconImage = ResolveIcon(iconValue)
         if iconImage then
             local FI = Instance.new("ImageLabel", ClipGroup)
-            FI.Size = UDim2.new(0.6, 0, 0.6, 0)
-            FI.Position = UDim2.new(0.2, 0, 0.2, 0)
+            FI.Size = UDim2.new(1, 0, 1, 0)
+            FI.Position = UDim2.new(0, 0, 0, 0)
             FI.BackgroundTransparency = 1
             FI.Image = iconImage
             FI.ImageColor3 = Color3.new(1, 1, 1)
@@ -855,65 +878,11 @@ function NoirUI:CreateWindow(settings)
         end
     end
     
-    -- Stroke
+    -- Stroke (đặt trên TBtn)
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
-    
-    -- Hiệu ứng ấn dẹp + fade UI
-    local pressTween = nil
-    local releaseTween = nil
-    
-    TBtn.MouseButton1Click:Connect(function()
-        PlaySound(SoundIds.ButtonClick)
-        
-        -- Hiệu ứng bị ấn dẹp
-        if pressTween then pressTween:Cancel() end
-        if releaseTween then releaseTween:Cancel() end
-        
-        pressTween = TweenService:Create(TBtn, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 52, 0, 46)
-        })
-        pressTween:Play()
-        
-        pressTween.Completed:Connect(function()
-            releaseTween = TweenService:Create(TBtn, TweenInfo.new(0.1, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 50, 0, 50)
-            })
-            releaseTween:Play()
-        end)
-        
-        -- Bật/tắt UI với fade
-        if not KeySolved and KUI and KUI.Parent then
-            KUI.Visible = not KUI.Visible
-        else
-            if Main.Visible then
-                -- Fade out
-                TweenService:Create(Main, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
-                if hasMainBg then
-                    local bgImg = Main:FindFirstChild("_BackgroundImage")
-                    if bgImg then
-                        TweenService:Create(bgImg, TweenInfo.new(0.2), {ImageTransparency = 1}):Play()
-                    end
-                end
-                task.wait(0.2)
-                Main.Visible = false
-            else
-                Main.Visible = true
-                Main.Position = mainDefaultPos
-                Main.BackgroundTransparency = 1
-                if hasMainBg then
-                    local bgImg = Main:FindFirstChild("_BackgroundImage")
-                    if bgImg then
-                        bgImg.ImageTransparency = 1
-                        TweenService:Create(bgImg, TweenInfo.new(0.2), {ImageTransparency = 0}):Play()
-                    end
-                end
-                TweenService:Create(Main, TweenInfo.new(0.2), {BackgroundTransparency = settings.MainBgTransparency or 0}):Play()
-            end
-        end
-    end)
-    
+
     -- Kéo thả
     local floatDragging = false
     local floatDragStart, floatStartPos, floatDragInput
@@ -941,6 +910,26 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
+    -- Toggle UI với fade in/out
+    TBtn.MouseButton1Click:Connect(function()
+        PlaySound(SoundSettings.FloatButtonClick)
+        if not KeySolved and KUI and KUI.Parent then
+            KUI.Visible = not KUI.Visible
+        else
+            if Main.Visible then
+                -- Fade out
+                TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+                task.wait(0.2)
+                Main.Visible = false
+            else
+                Main.Visible = true
+                Main.Position = mainDefaultPos
+                -- Fade in
+                TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = hasMainBg and 0 or (settings.MainBgTransparency or 0)}):Play()
+            end
+        end
+    end)
+    
     -- // NOTIFICATIONS
     function NoirUI:Notify(title, message, iconName)
         local n = Instance.new("Frame", ScreenGui)
@@ -963,6 +952,8 @@ function NoirUI:CreateWindow(settings)
                 icon.BackgroundTransparency = 1
                 icon.Image = iconImg
                 icon.ImageColor3 = Color3.new(1, 1, 1)
+                icon.ClipsDescendants = true
+                icon.ScaleType = Enum.ScaleType.Crop
                 icon.ZIndex = 2
             end
         end
@@ -1016,7 +1007,7 @@ function NoirUI:CreateWindow(settings)
         B.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
         B.BackgroundTransparency = 0.7
         B.Text = ""
-        Instance.new("UICorner", B).CornerRadius = UDim.new(0, 6)
+        Instance.new("UICorner", B).CornerRadius = UDim.new(0, 8)
         local BT = Instance.new("TextLabel", B)
         BT.Size = UDim2.new(1, -10, 1, 0)
         BT.Position = UDim2.new(0, icon and 35 or 8, 0, 0)
@@ -1029,16 +1020,15 @@ function NoirUI:CreateWindow(settings)
         
         if icon then
             local IC = Instance.new("ImageLabel", B)
-            IC.Size = UDim2.new(0, 20, 0, 20)
-            IC.Position = UDim2.new(0, 7, 0.5, -10)
+            IC.Size = UDim2.new(0, 18, 0, 18)
+            IC.Position = UDim2.new(0, 8, 0.5, -9)
             IC.BackgroundTransparency = 1
             IC.ClipsDescendants = true
             IC.ScaleType = Enum.ScaleType.Crop
+            -- Squircle: corner radius 4 (khoảng 22% của 18)
+            local ICcorner = Instance.new("UICorner", IC)
+            ICcorner.CornerRadius = UDim.new(0, 4)
             IC.ZIndex = 2
-            
-            -- Squircle (bo góc 5)
-            local iconCorner = Instance.new("UICorner", IC)
-            iconCorner.CornerRadius = UDim.new(0, 5)
             
             local iconImage = ResolveIcon(icon)
             if iconImage then
@@ -1101,15 +1091,7 @@ function NoirUI:CreateWindow(settings)
         ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvas)
         
         B.MouseButton1Click:Connect(function()
-            -- Phát âm thanh
-            PlaySound(SoundIds.TabClick)
-            
-            -- Hiệu ứng nhấn tab
-            local originalSize = B.Size
-            TweenService:Create(B, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, -5, 0, 28)}):Play()
-            task.wait(0.05)
-            TweenService:Create(B, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = originalSize}):Play()
-            
+            PlaySound(SoundSettings.TabClick)
             for _, v in pairs(Cont:GetChildren()) do
                 if v:IsA("ScrollingFrame") then v.Visible = false end
             end
@@ -1118,13 +1100,21 @@ function NoirUI:CreateWindow(settings)
                     local t = v:FindFirstChild("TextLabel")
                     if t then t.TextColor3 = Color3.fromRGB(150, 150, 150) end
                     local img = v:FindFirstChild("ImageLabel")
-                    if img then img.ImageColor3 = Color3.fromRGB(150, 150, 150) end
+                    if img then 
+                        img.ImageColor3 = Color3.fromRGB(150, 150, 150)
+                        local corner = img:FindFirstChild("UICorner")
+                        if corner then corner.CornerRadius = UDim.new(0, 4) end
+                    end
                 end
             end
             TabContainer.Visible = true
             BT.TextColor3 = ACCENT
             local tabImg = B:FindFirstChild("ImageLabel")
-            if tabImg then tabImg.ImageColor3 = Color3.fromRGB(150, 150, 150) end
+            if tabImg then 
+                tabImg.ImageColor3 = ACCENT
+                local corner = tabImg:FindFirstChild("UICorner")
+                if corner then corner.CornerRadius = UDim.new(0, 4) end
+            end
             updateCanvas()
         end)
         
