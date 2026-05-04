@@ -10,7 +10,7 @@ if OldGui then OldGui:Destroy() end
 
 local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {} }
 
--- ========== LUCIDE ICONS TÍCH HỢP SẴN ==========
+-- ========== LUCIDE ICONS ==========
 local LucideIcons = {
     ["home"] = "rbxassetid://13060262529",
     ["user"] = "rbxassetid://81489458260315",
@@ -264,7 +264,7 @@ local function ResolveIcon(iconInput)
     return nil
 end
 
--- // Hàm tạo subtitle
+-- // Subtitle
 local function AddSubtitle(parent, subtitleText, yOffset)
     if not subtitleText or subtitleText == "" then return nil end
     
@@ -295,7 +295,7 @@ local function AddSubtitle(parent, subtitleText, yOffset)
     return subtitle
 end
 
--- // Hàm kéo thả
+-- // Draggable
 local function MakeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
     frame.InputBegan:Connect(function(input)
@@ -313,7 +313,7 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Hàm setup background (CHO TẤT CẢ UI)
+-- // Setup background (CẮT THEO CORNER)
 local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
     local existingBg = frame:FindFirstChild("_BackgroundImage")
     if existingBg then existingBg:Destroy() end
@@ -352,7 +352,6 @@ local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
         
         frame.ClipsDescendants = true
         frame.BackgroundTransparency = 1
-        
         return true
     else
         frame.BackgroundTransparency = defaultTransparency or 0
@@ -362,7 +361,6 @@ local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
     end
 end
 
--- // Đăng ký custom command
 function NoirUI:RegisterCommand(prefix, callback)
     NoirUI.CustomCommands[prefix:lower()] = callback
 end
@@ -376,7 +374,7 @@ function NoirUI:CreateWindow(settings)
     local mainDefaultPos = settings.DefaultPosition or UDim2.new(0.5, -210, 0.5, -150)
     local floatDefaultPos = settings.FloatDefaultPosition or UDim2.new(0, 15, 0.5, -22)
     
-    -- //////////////// MAIN UI ////////////////
+    -- // MAIN UI
     local Main = Instance.new("Frame", ScreenGui)
     Main.Size = UDim2.new(0, 420, 0, 300)
     Main.Position = mainDefaultPos
@@ -387,9 +385,9 @@ function NoirUI:CreateWindow(settings)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
     
-    SetupBackground(Main, settings.Background, settings.MainBgColor, settings.MainBgTransparency or 0)
+    local hasMainBg = SetupBackground(Main, settings.Background, settings.MainBgColor, settings.MainBgTransparency or 0)
     
-    -- //////////////// BẢNG LOADING ////////////////
+    -- // LOADING
     local LoadingFrame = Instance.new("Frame", ScreenGui)
     LoadingFrame.Size = UDim2.new(0, 300, 0, 120)
     LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
@@ -452,14 +450,11 @@ function NoirUI:CreateWindow(settings)
     
     local function StartLoading()
         LoadingFrame.Visible = true
-        
         if not hasLoadingBg then
             TweenService:Create(LoadingFrame, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
             TweenService:Create(LoadingStroke, TweenInfo.new(0.5), {Transparency = 0}):Play()
         end
-        
         task.wait(0.5)
-        
         local startTime = tick()
         local loadingConnection
         loadingConnection = RunService.RenderStepped:Connect(function()
@@ -467,11 +462,9 @@ function NoirUI:CreateWindow(settings)
             local percent = math.min(1, elapsed / 1)
             LoadingBar.Size = UDim2.new(percent, 0, 1, 0)
             LoadingPercent.Text = math.floor(percent * 100) .. "%"
-            
             if percent >= 1 then
                 loadingConnection:Disconnect()
                 LoadingSub.Text = "Loaded!"
-                
                 TweenService:Create(LoadingFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
                 TweenService:Create(LoadingStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
                 task.wait(0.5)
@@ -480,7 +473,7 @@ function NoirUI:CreateWindow(settings)
         end)
     end
     
-    -- Hiệu ứng cầu vồng viền main
+    -- Rainbow border
     task.spawn(function()
         while Main and Main.Parent do
             for i = 0, 1, 0.01 do
@@ -491,7 +484,7 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- //////////////// HỆ THỐNG KEY ////////////////
+    -- // KEY SYSTEM
     local KeySolved = false
     local KUI = nil
     
@@ -609,7 +602,7 @@ function NoirUI:CreateWindow(settings)
         ShowMainUIAfterLoading()
     end
     
-    -- //////////////// HEADER ////////////////
+    -- // HEADER
     local Header = Instance.new("Frame", Main)
     Header.Size = UDim2.new(1, 0, 0, 40)
     Header.BackgroundTransparency = 1
@@ -706,7 +699,7 @@ function NoirUI:CreateWindow(settings)
         end)
     end)
     
-    -- //////////////// SIDEBAR ////////////////
+    -- // SIDEBAR
     local Side = Instance.new("Frame", Main)
     Side.Size = UDim2.new(0, 110, 1, -50)
     Side.Position = UDim2.new(0, 5, 0, 40)
@@ -753,7 +746,7 @@ function NoirUI:CreateWindow(settings)
     Instance.new("UICorner", AI).CornerRadius = UDim.new(1,0)
     Instance.new("UIStroke", AI).Color = ACCENT
     
-    -- //////////////// CONTENT ////////////////
+    -- // CONTENT
     local Cont = Instance.new("Frame", Main)
     Cont.Size = UDim2.new(1, -125, 1, -50)
     Cont.Position = UDim2.new(0, 120, 0, 40)
@@ -767,16 +760,16 @@ function NoirUI:CreateWindow(settings)
     ContStroke.Thickness = 1
     ContStroke.Transparency = 0.7
     
-    -- //////////////// FLOAT BUTTON (FINAL - CẮT ĐÚNG THEO STROKE) ////////////////
+    -- // FLOAT BUTTON (FINAL - ĐÃ SỬA)
     local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
     TBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     TBtn.Image = ""
     TBtn.ZIndex = 10
-    TBtn.ClipsDescendants = true
+    TBtn.ClipsDescendants = true  -- BẮT BUỘC
     local btnCorner = Instance.new("UICorner", TBtn)
-    btnCorner.CornerRadius = UDim.new(1, 0)
+    btnCorner.CornerRadius = UDim.new(1, 0)  -- HÌNH TRÒN
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
@@ -801,44 +794,53 @@ function NoirUI:CreateWindow(settings)
         bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0
         bgImage.ScaleType = Enum.ScaleType.Crop
         bgImage.ClipsDescendants = true
-        bgImage.Parent = TBtn
         
+        local bgCorner = Instance.new("UICorner")
+        bgCorner.CornerRadius = UDim.new(1, 0)
+        bgCorner.Parent = bgImage
+        
+        bgImage.Parent = TBtn
         TBtn.BackgroundTransparency = 1
         
         local overlay = Instance.new("Frame", TBtn)
         overlay.Name = "_Overlay"
         overlay.Size = UDim2.new(1, 0, 1, 0)
-        overlay.Position = UDim2.new(0, 0, 0, 0)
         overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         overlay.BackgroundTransparency = 0.4
         overlay.ZIndex = TBtn.ZIndex + 2
         overlay.ClipsDescendants = true
+        
+        local overlayCorner = Instance.new("UICorner")
+        overlayCorner.CornerRadius = UDim.new(1, 0)
+        overlayCorner.Parent = overlay
     else
         TBtn.BackgroundTransparency = 0
     end
     
+    -- ICON - FULL SIZE, TỰ ĐỘNG CẮT THEO BUTTON
     local iconValue = settings.Icon
     if iconValue then
         local iconImage = ResolveIcon(iconValue)
         if iconImage then
             local FI = Instance.new("ImageLabel", TBtn)
-            FI.Size = UDim2.new(1, 0, 1, 0)
+            FI.Size = UDim2.new(1, 0, 1, 0)  -- FULL SIZE
             FI.Position = UDim2.new(0, 0, 0, 0)
             FI.BackgroundTransparency = 1
             FI.Image = iconImage
             FI.ImageColor3 = Color3.new(1, 1, 1)
-            FI.ClipsDescendants = true
-            FI.ScaleType = Enum.ScaleType.Fit
+            FI.ScaleType = Enum.ScaleType.Crop
             FI.ZIndex = TBtn.ZIndex + 5
-        elseif type(iconValue) == "string" and #iconValue <= 2 then
+            -- KHÔNG CẦN CORNER, TBtn ĐÃ CLIP
+        elseif type(iconValue) == "string" then
             local textIcon = Instance.new("TextLabel", TBtn)
             textIcon.Size = UDim2.new(1, 0, 1, 0)
             textIcon.Position = UDim2.new(0, 0, 0, 0)
             textIcon.BackgroundTransparency = 1
             textIcon.Text = iconValue
-            textIcon.TextColor3 = ACCENT
+            textIcon.TextColor3 = Color3.new(1, 1, 1)
             textIcon.TextSize = 28
             textIcon.Font = Enum.Font.GothamBold
+            textIcon.TextScaled = true
             textIcon.ZIndex = TBtn.ZIndex + 5
         end
     end
@@ -869,6 +871,7 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
+    -- TOGGLE UI
     TBtn.MouseButton1Click:Connect(function()
         if not KeySolved and KUI and KUI.Parent then
             KUI.Visible = not KUI.Visible
@@ -880,7 +883,7 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- //////////////// NOTIFICATIONS ////////////////
+    -- // NOTIFICATIONS
     function NoirUI:Notify(title, message, iconName)
         local n = Instance.new("Frame", ScreenGui)
         n.Size = UDim2.new(0, 260, 0, 65)
@@ -946,7 +949,7 @@ function NoirUI:CreateWindow(settings)
         end)
     end
     
-    -- //////////////// TẠO TAB & ELEMENTS ////////////////
+    -- // TABS & ELEMENTS
     local Window = {}
     
     function Window:CreateTab(name, icon)
@@ -1078,7 +1081,7 @@ function NoirUI:CreateWindow(settings)
             if prop == "Text" then filterElements(SearchBox.Text) end
         end)
         
-        -- ========== CÁC ELEMENT ==========
+        -- === ELEMENTS ===
         function Tab:CreateLabel(text, updateFunction)
             local l = Instance.new("TextLabel", ContentFrame)
             l.Size = UDim2.new(0.95, 0, 0, 20)
@@ -1566,7 +1569,8 @@ function NoirUI:CreateWindow(settings)
                     it.Font = "GothamMedium"
                     it.TextSize = 11
                     it.MouseButton1Click:Connect(function()
-                        open = false                        il.Visible = false
+                        open = false
+                        il.Visible = false
                         Arrow.Text = "▼"
                         t.Text = "  " .. opt.Name .. " : " .. v
                         TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)}):Play()
