@@ -335,6 +335,7 @@ local function LoadBackground(frame, bgSetting)
     bgImage.BackgroundTransparency = 1
     bgImage.ImageTransparency = bgSetting.Transparency or 0
     bgImage.ScaleType = Enum.ScaleType.Crop
+    bgImage.ClipsDescendants = true
     
     if type(bgSetting.Image) == "number" or (type(bgSetting.Image) == "string" and bgSetting.Image:match("^%d+$")) then
         bgImage.Image = "rbxassetid://" .. tostring(bgSetting.Image)
@@ -378,7 +379,6 @@ function NoirUI:CreateWindow(settings)
     Main.Size = UDim2.new(0, 420, 0, 300)
     Main.Position = mainDefaultPos
     Main.BackgroundColor3 = settings.MainBgColor or Color3.fromRGB(10, 10, 10)
-    Main.ClipsDescendants = true
     Main.Visible = false
     Instance.new("UICorner", Main)
     local MainStroke = Instance.new("UIStroke", Main)
@@ -387,6 +387,7 @@ function NoirUI:CreateWindow(settings)
     if settings.Background then
         LoadBackground(Main, settings.Background)
         Main.BackgroundTransparency = 1
+        Main.ClipsDescendants = true
     else
         Main.BackgroundTransparency = settings.MainBgTransparency or 0
     end
@@ -406,6 +407,7 @@ function NoirUI:CreateWindow(settings)
     if settings.LoadingBackground then
         LoadBackground(LoadingFrame, settings.LoadingBackground)
         LoadingFrame.BackgroundTransparency = 1
+        LoadingFrame.ClipsDescendants = true
     else
         LoadingFrame.BackgroundTransparency = 1
     end
@@ -540,6 +542,7 @@ function NoirUI:CreateWindow(settings)
             if settings.KeyBackground then
                 LoadBackground(KUI, settings.KeyBackground)
                 KUI.BackgroundTransparency = 1
+                KUI.ClipsDescendants = true
             else
                 KUI.BackgroundTransparency = 0
             end
@@ -802,8 +805,10 @@ function NoirUI:CreateWindow(settings)
         end
         bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0
         bgImage.ScaleType = Enum.ScaleType.Crop
+        bgImage.ClipsDescendants = true
         bgImage.ZIndex = TBtn.ZIndex + 1
         TBtn.BackgroundTransparency = 1
+        TBtn.ClipsDescendants = true
         
         local overlay = Instance.new("Frame", TBtn)
         overlay.Size = UDim2.new(1, 0, 1, 0)
@@ -894,6 +899,7 @@ function NoirUI:CreateWindow(settings)
         if settings.NotificationBackground then
             LoadBackground(n, settings.NotificationBackground)
             n.BackgroundTransparency = 1
+            n.ClipsDescendants = true
         end
         
         if iconName then
