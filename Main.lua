@@ -313,7 +313,7 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Setup background
+-- // Setup background (CẮT THEO CORNER)
 local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
     local existingBg = frame:FindFirstChild("_BackgroundImage")
     if existingBg then existingBg:Destroy() end
@@ -760,27 +760,38 @@ function NoirUI:CreateWindow(settings)
     ContStroke.Thickness = 1
     ContStroke.Transparency = 0.7
     
-    -- //////////////// FLOAT BUTTON (FINAL - DÙNG FRAME) ////////////////
-    local TBtn = Instance.new("Frame", ScreenGui)
+    -- //////////////// FLOAT BUTTON (FINAL - DÙNG CANVASGROUP) ////////////////
+    local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
-    TBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    TBtn.BackgroundTransparency = 1
+    TBtn.Image = ""
     TBtn.ZIndex = 10
-    TBtn.ClipsDescendants = true
+    TBtn.ClipsDescendants = false
     
-    -- Bo tròn
-    local btnCorner = Instance.new("UICorner", TBtn)
-    btnCorner.CornerRadius = UDim.new(1, 0)
+    -- CanvasGroup để clip hình tròn
+    local ClipGroup = Instance.new("CanvasGroup")
+    ClipGroup.Name = "ClipGroup"
+    ClipGroup.Size = UDim2.new(1, 0, 1, 0)
+    ClipGroup.Position = UDim2.new(0, 0, 0, 0)
+    ClipGroup.BackgroundTransparency = 1
+    ClipGroup.GroupTransparency = 0
+    ClipGroup.ClipsDescendants = true
+    ClipGroup.ZIndex = TBtn.ZIndex
+    ClipGroup.Parent = TBtn
     
-    -- Background ảnh
+    -- Bo tròn CanvasGroup
+    local clipCorner = Instance.new("UICorner", ClipGroup)
+    clipCorner.CornerRadius = UDim.new(1, 0)
+    
+    -- Background (ảnh hoặc màu)
     if settings.FloatBackground and settings.FloatBackground.Image then
-        local bgImage = Instance.new("ImageLabel", TBtn)
+        local bgImage = Instance.new("ImageLabel", ClipGroup)
         bgImage.Name = "BackgroundImage"
         bgImage.Size = UDim2.new(1, 0, 1, 0)
         bgImage.Position = UDim2.new(0, 0, 0, 0)
         bgImage.BackgroundTransparency = 1
         bgImage.ZIndex = 1
-        bgImage.ClipsDescendants = true
         
         local bgImgVal = settings.FloatBackground.Image
         if type(bgImgVal) == "number" or (type(bgImgVal) == "string" and bgImgVal:match("^%d+$")) then
@@ -792,34 +803,34 @@ function NoirUI:CreateWindow(settings)
         bgImage.ScaleType = Enum.ScaleType.Crop
         
         -- Lớp phủ tối
-        local overlay = Instance.new("Frame", TBtn)
+        local overlay = Instance.new("Frame", ClipGroup)
         overlay.Size = UDim2.new(1, 0, 1, 0)
         overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         overlay.BackgroundTransparency = 0.4
         overlay.ZIndex = 2
-        overlay.ClipsDescendants = true
-        
-        local overlayCorner = Instance.new("UICorner")
-        overlayCorner.CornerRadius = UDim.new(1, 0)
-        overlayCorner.Parent = overlay
+    else
+        local bgColor = Instance.new("Frame", ClipGroup)
+        bgColor.Size = UDim2.new(1, 0, 1, 0)
+        bgColor.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+        bgColor.BackgroundTransparency = 0
+        bgColor.ZIndex = 1
     end
     
-    -- Icon
+    -- Icon (đặt trong ClipGroup để bị cắt)
     local iconValue = settings.Icon
     if iconValue then
         local iconImage = ResolveIcon(iconValue)
         if iconImage then
-            local FI = Instance.new("ImageLabel", TBtn)
+            local FI = Instance.new("ImageLabel", ClipGroup)
             FI.Size = UDim2.new(1, 0, 1, 0)
             FI.Position = UDim2.new(0, 0, 0, 0)
             FI.BackgroundTransparency = 1
             FI.Image = iconImage
             FI.ImageColor3 = Color3.new(1, 1, 1)
             FI.ScaleType = Enum.ScaleType.Crop
-            FI.ClipsDescendants = true
             FI.ZIndex = 3
         elseif type(iconValue) == "string" then
-            local textIcon = Instance.new("TextLabel", TBtn)
+            local textIcon = Instance.new("TextLabel", ClipGroup)
             textIcon.Size = UDim2.new(1, 0, 1, 0)
             textIcon.Position = UDim2.new(0, 0, 0, 0)
             textIcon.BackgroundTransparency = 1
@@ -828,28 +839,18 @@ function NoirUI:CreateWindow(settings)
             textIcon.TextSize = 28
             textIcon.Font = Enum.Font.GothamBold
             textIcon.TextScaled = true
-            textIcon.ClipsDescendants = true
             textIcon.ZIndex = 3
         end
     end
     
-    -- Stroke
+    -- Stroke (đặt trên TBtn)
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
-    
-    -- Click detector
-    local clickDetector = Instance.new("ImageButton", TBtn)
-    clickDetector.Size = UDim2.new(1, 0, 1, 0)
-    clickDetector.Position = UDim2.new(0, 0, 0, 0)
-    clickDetector.BackgroundTransparency = 1
-    clickDetector.ImageTransparency = 1
-    clickDetector.ZIndex = 10
-    
+
     -- Kéo thả
     local floatDragging = false
     local floatDragStart, floatStartPos, floatDragInput
-    
     TBtn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             floatDragging = true
@@ -857,28 +858,25 @@ function NoirUI:CreateWindow(settings)
             floatStartPos = TBtn.Position
         end
     end)
-    
     TBtn.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             floatDragInput = input
         end
     end)
-    
     UIS.InputChanged:Connect(function(input)
         if input == floatDragInput and floatDragging then
             local delta = input.Position - floatDragStart
             TBtn.Position = UDim2.new(floatStartPos.X.Scale, floatStartPos.X.Offset + delta.X, floatStartPos.Y.Scale, floatStartPos.Y.Offset + delta.Y)
         end
     end)
-    
     UIS.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             floatDragging = false
         end
     end)
     
-    -- Click
-    clickDetector.MouseButton1Click:Connect(function()
+    -- Toggle UI
+    TBtn.MouseButton1Click:Connect(function()
         if not KeySolved and KUI and KUI.Parent then
             KUI.Visible = not KUI.Visible
         else
