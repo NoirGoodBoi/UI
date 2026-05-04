@@ -848,7 +848,7 @@ function NoirUI:CreateWindow(settings)
         local iconImage = ResolveIcon(iconValue)
         if iconImage then
             local FI = Instance.new("ImageLabel", TBtn)
-            FI.Size = UDim2.new(0.6, 0, 0.6, 0)
+            FI.Size = UDim2.new(1, 0, 1, 0)
             FI.Position = UDim2.new(0.2, 0, 0.2, 0)
             FI.BackgroundTransparency = 1
             FI.Image = iconImage
