@@ -279,7 +279,6 @@ local function AddSubtitle(parent, subtitleText, yOffset)
     subtitle.TextXAlignment = "Left"
     subtitle.TextYAlignment = "Top"
     subtitle.TextWrapped = true
-    subtitle.TextScaled = false
     subtitle.Name = "Subtitle"
     
     local function updateHeight()
@@ -287,10 +286,6 @@ local function AddSubtitle(parent, subtitleText, yOffset)
         local lineCount = math.max(1, math.ceil(textBounds.X / (subtitle.AbsoluteSize.X - 20)))
         local newHeight = lineCount * 14
         subtitle.Size = UDim2.new(1, -20, 0, newHeight)
-        if parent:IsA("Frame") then
-            local newTotalHeight = 35 + newHeight + 5
-            parent.Size = UDim2.new(0.95, 0, 0, newTotalHeight)
-        end
     end
     
     task.defer(updateHeight)
@@ -318,47 +313,69 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Hàm tải background (ĐÃ SỬA - THÊM CLIPPING MASK)
-local function LoadBackground(frame, bgSetting)
-    if not bgSetting then return end
-    
-    local bgImage = frame:FindFirstChild("_BackgroundImage")
-    if bgImage then bgImage:Destroy() end
-    
-    bgImage = Instance.new("ImageLabel")
-    bgImage.Name = "_BackgroundImage"
-    bgImage.Parent = frame
-    bgImage.Size = UDim2.new(1, 0, 1, 0)
-    bgImage.Position = UDim2.new(0, 0, 0, 0)
-    bgImage.BackgroundTransparency = 1
-    bgImage.ImageTransparency = bgSetting.Transparency or 0
-    bgImage.ScaleType = Enum.ScaleType.Crop
-    bgImage.ClipsDescendants = true
-    bgImage.ZIndex = 0
-    
-    if type(bgSetting.Image) == "number" or (type(bgSetting.Image) == "string" and bgSetting.Image:match("^%d+$")) then
-        bgImage.Image = "rbxassetid://" .. tostring(bgSetting.Image)
-    elseif type(bgSetting.Image) == "string" and bgSetting.Image:match("^http") then
-        bgImage.Image = bgSetting.Image
-    elseif type(bgSetting.Image) == "string" then
-        bgImage.Image = bgSetting.Image
-    end
-    
-    -- 👇 QUAN TRỌNG: CLIPPING MASK CHO FRAME CHA
-    frame.BackgroundTransparency = 1
-    frame.ClipsDescendants = true
-    
-    local function SendToBack()
-        bgImage.ZIndex = 0
+-- // Hàm setup background (CHO TẤT CẢ UI)
+local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
+    if bgSetting and bgSetting.Image then
+        -- CÓ ẢNH: set transparency = 1 để ảnh hiện, tạo CanvasGroup
+        local existingCanvas = frame:FindFirstChild("_BackgroundCanvas")
+        if existingCanvas then existingCanvas:Destroy() end
+        
+        local childrenToMove = {}
         for _, child in pairs(frame:GetChildren()) do
-            if child ~= bgImage and child:IsA("GuiObject") then
-                child.ZIndex = math.max(child.ZIndex, 1)
+            if child:IsA("GuiObject") and child.Name ~= "_BackgroundCanvas" then
+                table.insert(childrenToMove, child)
             end
         end
+        
+        local canvasGroup = Instance.new("CanvasGroup")
+        canvasGroup.Name = "_BackgroundCanvas"
+        canvasGroup.Size = UDim2.new(1, 0, 1, 0)
+        canvasGroup.Position = UDim2.new(0, 0, 0, 0)
+        canvasGroup.BackgroundTransparency = 1
+        canvasGroup.GroupTransparency = 0
+        canvasGroup.ClipsDescendants = true
+        canvasGroup.ZIndex = 0
+        canvasGroup.Parent = frame
+        
+        local frameCorner = frame:FindFirstChild("UICorner")
+        if frameCorner then
+            local canvasCorner = Instance.new("UICorner")
+            canvasCorner.CornerRadius = frameCorner.CornerRadius
+            canvasCorner.Parent = canvasGroup
+        end
+        
+        local bgImage = Instance.new("ImageLabel")
+        bgImage.Name = "_BackgroundImage"
+        bgImage.Parent = canvasGroup
+        bgImage.Size = UDim2.new(1, 0, 1, 0)
+        bgImage.Position = UDim2.new(0, 0, 0, 0)
+        bgImage.BackgroundTransparency = 1
+        bgImage.ImageTransparency = bgSetting.Transparency or 0
+        bgImage.ScaleType = Enum.ScaleType.Crop
+        bgImage.ClipsDescendants = true
+        bgImage.ZIndex = 0
+        
+        local imgValue = bgSetting.Image
+        if type(imgValue) == "number" or (type(imgValue) == "string" and imgValue:match("^%d+$")) then
+            bgImage.Image = "rbxassetid://" .. tostring(imgValue)
+        elseif type(imgValue) == "string" then
+            bgImage.Image = imgValue
+        end
+        
+        for _, child in pairs(childrenToMove) do
+            child.Parent = canvasGroup
+            child.ZIndex = math.max(child.ZIndex, 1)
+        end
+        
+        frame.BackgroundTransparency = 1
+        frame.ClipsDescendants = true
+        return true -- Có ảnh
+    else
+        -- KHÔNG ẢNH: set transparency theo setting
+        frame.BackgroundTransparency = defaultTransparency or 0
+        frame.BackgroundColor3 = bgColor or Color3.fromRGB(10, 10, 10)
+        return false -- Không có ảnh
     end
-    
-    SendToBack()
-    frame.ChildAdded:Connect(SendToBack)
 end
 
 -- // Đăng ký custom command
@@ -381,16 +398,12 @@ function NoirUI:CreateWindow(settings)
     Main.Position = mainDefaultPos
     Main.BackgroundColor3 = settings.MainBgColor or Color3.fromRGB(10, 10, 10)
     Main.Visible = false
-    Instance.new("UICorner", Main)
+    Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
     
-    if settings.Background then
-        LoadBackground(Main, settings.Background)
-        Main.ClipsDescendants = true
-    else
-        Main.BackgroundTransparency = settings.MainBgTransparency or 0
-    end
+    -- Setup background cho MAIN (lưu lại trạng thái có ảnh hay ko)
+    local hasMainBg = SetupBackground(Main, settings.Background, settings.MainBgColor, settings.MainBgTransparency or 0)
     
     -- //////////////// BẢNG LOADING ////////////////
     local LoadingFrame = Instance.new("Frame", ScreenGui)
@@ -403,14 +416,8 @@ function NoirUI:CreateWindow(settings)
     LoadingStroke.Color = ACCENT
     LoadingStroke.Thickness = 2
     
-    if settings.LoadingBackground then
-        LoadBackground(LoadingFrame, settings.LoadingBackground)
-        LoadingFrame.ClipsDescendants = true
-        LoadingStroke.Transparency = 0
-    else
-        LoadingFrame.BackgroundTransparency = 1
-        LoadingStroke.Transparency = 1
-    end
+    local hasLoadingBg = SetupBackground(LoadingFrame, settings.LoadingBackground, Color3.fromRGB(12, 12, 12), 0.95)
+    LoadingStroke.Transparency = hasLoadingBg and 0 or 1
     
     local LoadingTitle = Instance.new("TextLabel", LoadingFrame)
     LoadingTitle.Size = UDim2.new(1, -40, 0, 30)
@@ -461,8 +468,10 @@ function NoirUI:CreateWindow(settings)
     local function StartLoading()
         LoadingFrame.Visible = true
         
-        TweenService:Create(LoadingFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
-        TweenService:Create(LoadingStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = 0}):Play()
+        if not hasLoadingBg then
+            TweenService:Create(LoadingFrame, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
+            TweenService:Create(LoadingStroke, TweenInfo.new(0.5), {Transparency = 0}):Play()
+        end
         
         task.wait(0.5)
         
@@ -478,8 +487,8 @@ function NoirUI:CreateWindow(settings)
                 loadingConnection:Disconnect()
                 LoadingSub.Text = "Loaded!"
                 
-                TweenService:Create(LoadingFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
-                TweenService:Create(LoadingStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = 1}):Play()
+                TweenService:Create(LoadingFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+                TweenService:Create(LoadingStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
                 task.wait(0.5)
                 LoadingFrame:Destroy()
             end
@@ -503,7 +512,6 @@ function NoirUI:CreateWindow(settings)
     
     local function ShowMainUIAfterLoading()
         task.wait(2)
-        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = Main.BackgroundTransparency}):Play()
         Main.Visible = true
         Main.Position = mainDefaultPos
     end
@@ -533,20 +541,14 @@ function NoirUI:CreateWindow(settings)
             KUI.Size = UDim2.new(0, 320, 0, 200)
             KUI.Position = UDim2.new(0.5, -160, 0.5, -100)
             KUI.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-            Instance.new("UICorner", KUI)
+            Instance.new("UICorner", KUI).CornerRadius = UDim.new(0, 12)
             local kstr = Instance.new("UIStroke", KUI)
             kstr.Thickness = 2
             kstr.Color = ACCENT
             MakeDraggable(KUI)
             
-            if settings.KeyBackground then
-                LoadBackground(KUI, settings.KeyBackground)
-                KUI.ClipsDescendants = true
-            else
-                KUI.BackgroundTransparency = 0
-            end
-            
-            TweenService:Create(KUI, TweenInfo.new(0.3), {BackgroundTransparency = KUI.BackgroundTransparency}):Play()
+            -- Setup background cho KEY UI
+            SetupBackground(KUI, settings.KeyBackground, Color3.fromRGB(12, 12, 12), 0)
             
             local KT = Instance.new("TextLabel", KUI)
             KT.Size = UDim2.new(1,0,0,35)
@@ -575,7 +577,7 @@ function NoirUI:CreateWindow(settings)
             KI.TextColor3 = Color3.new(1,1,1)
             KI.PlaceholderText = "Nhập Key..."
             KI.Text = ""
-            Instance.new("UICorner", KI)
+            Instance.new("UICorner", KI).CornerRadius = UDim.new(0, 6)
             Instance.new("UIStroke", KI).Color = Color3.fromRGB(40,40,40)
             KI.ZIndex = 2
             
@@ -597,7 +599,7 @@ function NoirUI:CreateWindow(settings)
             KB.Text = "XÁC NHẬN"
             KB.Font = "GothamBold"
             KB.TextColor3 = Color3.new(1,1,1)
-            Instance.new("UICorner", KB)
+            Instance.new("UICorner", KB).CornerRadius = UDim.new(0, 6)
             KB.ZIndex = 2
             
             KB.MouseButton1Click:Connect(function()
@@ -661,7 +663,7 @@ function NoirUI:CreateWindow(settings)
         b.Text = txt
         b.TextColor3 = col
         b.Font = "GothamBold"
-        Instance.new("UICorner", b)
+        Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
         b.MouseButton1Click:Connect(cb)
     end
     
@@ -679,7 +681,7 @@ function NoirUI:CreateWindow(settings)
         Conf.Position = UDim2.new(0.5, -130, 0.5, -60)
         Conf.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
         Conf.ZIndex = 100
-        Instance.new("UICorner", Conf)
+        Instance.new("UICorner", Conf).CornerRadius = UDim.new(0, 12)
         local s = Instance.new("UIStroke", Conf)
         s.Color = ACCENT
         s.Thickness = 2
@@ -698,7 +700,7 @@ function NoirUI:CreateWindow(settings)
         cbtn.Text = "Cancel"
         cbtn.TextColor3 = Color3.new(1,1,1)
         cbtn.ZIndex = 101
-        Instance.new("UICorner", cbtn)
+        Instance.new("UICorner", cbtn).CornerRadius = UDim.new(0, 6)
         local fbtn = Instance.new("TextButton", Conf)
         fbtn.Size = UDim2.new(0.4, 0, 0, 32)
         fbtn.Position = UDim2.new(0.53, 0, 0.6, 0)
@@ -706,7 +708,7 @@ function NoirUI:CreateWindow(settings)
         fbtn.Text = "Confirm"
         fbtn.TextColor3 = Color3.new(1,1,1)
         fbtn.ZIndex = 101
-        Instance.new("UICorner", fbtn)
+        Instance.new("UICorner", fbtn).CornerRadius = UDim.new(0, 6)
         local function destroyConfirm()
             NoirUI.ActiveConfirmFrame = nil
             Conf:Destroy()
@@ -869,18 +871,15 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
+    -- TOGGLE UI: CHỈ ẨN/HIỆN, KHÔNG THAY ĐỔI TRANSPARENCY
     TBtn.MouseButton1Click:Connect(function()
         if not KeySolved and KUI and KUI.Parent then
             KUI.Visible = not KUI.Visible
         else
-            if not Main.Visible then
-                Main.Position = mainDefaultPos
-                TweenService:Create(Main, TweenInfo.new(0.2), {BackgroundTransparency = Main.BackgroundTransparency}):Play()
-            else
-                TweenService:Create(Main, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
-                task.wait(0.2)
-            end
             Main.Visible = not Main.Visible
+            if Main.Visible then
+                Main.Position = mainDefaultPos
+            end
         end
     end)
     
@@ -890,15 +889,12 @@ function NoirUI:CreateWindow(settings)
         n.Size = UDim2.new(0, 260, 0, 65)
         n.Position = UDim2.new(1, 20, 0.8, 0)
         n.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-        n.BackgroundTransparency = 0.25
-        Instance.new("UICorner", n)
+        Instance.new("UICorner", n).CornerRadius = UDim.new(0, 8)
         local ns = Instance.new("UIStroke", n)
         ns.Color = ACCENT
         
-        if settings.NotificationBackground then
-            LoadBackground(n, settings.NotificationBackground)
-            n.ClipsDescendants = true
-        end
+        -- Setup background cho NOTIFICATION
+        SetupBackground(n, settings.NotificationBackground, Color3.fromRGB(15, 15, 15), 0.25)
         
         if iconName then
             local iconImg = ResolveIcon(iconName)
@@ -962,7 +958,7 @@ function NoirUI:CreateWindow(settings)
         B.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
         B.BackgroundTransparency = 0.7
         B.Text = ""
-        Instance.new("UICorner", B)
+        Instance.new("UICorner", B).CornerRadius = UDim.new(0, 6)
         local BT = Instance.new("TextLabel", B)
         BT.Size = UDim2.new(1, -10, 1, 0)
         BT.Position = UDim2.new(0, icon and 35 or 8, 0, 0)
@@ -1064,8 +1060,6 @@ function NoirUI:CreateWindow(settings)
         if #TScroll:GetChildren() == 0 then
             TabContainer.Visible = true
             BT.TextColor3 = ACCENT
-            local tabImg = B:FindFirstChild("ImageLabel")
-            if tabImg then tabImg.ImageColor3 = Color3.fromRGB(150, 150, 150) end
         end
         
         local Tab = { Count = 0, Elements = {}, Connections = {} }
@@ -1087,7 +1081,7 @@ function NoirUI:CreateWindow(settings)
             if prop == "Text" then filterElements(SearchBox.Text) end
         end)
         
-        -- ========== LABEL ==========
+        -- ========== CÁC ELEMENT (GIỮ NGUYÊN NHƯ CŨ) ==========
         function Tab:CreateLabel(text, updateFunction)
             local l = Instance.new("TextLabel", ContentFrame)
             l.Size = UDim2.new(0.95, 0, 0, 20)
@@ -1100,13 +1094,6 @@ function NoirUI:CreateWindow(settings)
             l.LayoutOrder = GetO()
             l.Name = "Label"
             table.insert(Tab.Elements, l)
-            
-            function l:Set(newText)
-                self.Text = newText
-            end
-            function l:Update(newText)
-                self.Text = newText
-            end
             
             if type(text) == "function" then
                 local connection = RunService.RenderStepped:Connect(function()
@@ -1121,7 +1108,6 @@ function NoirUI:CreateWindow(settings)
             return l
         end
         
-        -- ========== SECTION ==========
         function Tab:CreateSection(title, noLine)
             local s = Instance.new("Frame", ContentFrame)
             s.Size = UDim2.new(0.95, 0, 0, noLine and 25 or 35)
@@ -1151,13 +1137,12 @@ function NoirUI:CreateWindow(settings)
             return s
         end
         
-        -- ========== PARAGRAPH ==========
         function Tab:CreateParagraph(opt)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95, 0, 0, 65)
             f.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
             f.BackgroundTransparency = 0.5
-            Instance.new("UICorner", f)
+            Instance.new("UICorner", f).CornerRadius = UDim.new(0, 8)
             f.LayoutOrder = GetO()
             f.Name = opt.Title or ""
             table.insert(Tab.Elements, f)
@@ -1186,14 +1171,13 @@ function NoirUI:CreateWindow(settings)
             return f
         end
         
-        -- ========== TEXTBOX (CÓ SUBTITLE) ==========
         function Tab:CreateTextBox(opt)
             local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)
             f.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
             f.BackgroundTransparency = 0.7
-            Instance.new("UICorner", f)
+            Instance.new("UICorner", f).CornerRadius = UDim.new(0, 8)
             f.LayoutOrder = GetO()
             f.Name = opt.Name or ""
             table.insert(Tab.Elements, f)
@@ -1211,12 +1195,10 @@ function NoirUI:CreateWindow(settings)
             i.FocusLost:Connect(function() if opt.Callback then opt.Callback(i.Text) end end)
             
             if hasSubtitle then
-                local sub = AddSubtitle(f, opt.Subtitle, 38)
-                if sub then f.Size = UDim2.new(0.95, 0, 0, 50 + sub.Size.Y.Offset) end
+                AddSubtitle(f, opt.Subtitle, 38)
             end
         end
         
-        -- ========== BUTTON (CÓ SUBTITLE) ==========
         function Tab:CreateButton(opt)
             local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local b = Instance.new("TextButton", ContentFrame)
@@ -1227,7 +1209,7 @@ function NoirUI:CreateWindow(settings)
             b.TextColor3 = Color3.new(1, 1, 1)
             b.Font = "GothamMedium"
             b.TextSize = 12
-            Instance.new("UICorner", b)
+            Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
             b.LayoutOrder = GetO()
             b.Name = opt.Name
             table.insert(Tab.Elements, b)
@@ -1251,14 +1233,12 @@ function NoirUI:CreateWindow(settings)
             end
             
             if hasSubtitle then
-                local sub = AddSubtitle(b, opt.Subtitle, 38)
-                if sub then b.Size = UDim2.new(0.95, 0, 0, 50 + sub.Size.Y.Offset) end
+                AddSubtitle(b, opt.Subtitle, 38)
             end
             
             b.MouseButton1Click:Connect(opt.Callback)
         end
         
-        -- ========== TOGGLE (CÓ SUBTITLE) ==========
         function Tab:CreateToggle(opt)
             local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local s = opt.Default or false
@@ -1270,7 +1250,7 @@ function NoirUI:CreateWindow(settings)
             t.TextColor3 = s and ACCENT or Color3.fromRGB(180, 180, 180)
             t.TextXAlignment = "Left"
             t.TextSize = 12
-            Instance.new("UICorner", t)
+            Instance.new("UICorner", t).CornerRadius = UDim.new(0, 8)
             t.LayoutOrder = GetO()
             t.Name = opt.Name
             table.insert(Tab.Elements, t)
@@ -1283,11 +1263,7 @@ function NoirUI:CreateWindow(settings)
             Instance.new("UICorner", bx).CornerRadius = UDim.new(1, 0)
             
             if hasSubtitle then
-                local sub = AddSubtitle(t, opt.Subtitle, 38)
-                if sub then
-                    t.Size = UDim2.new(0.95, 0, 0, 50 + sub.Size.Y.Offset)
-                    bx.Position = UDim2.new(1, -40, 0.5, -8)
-                end
+                AddSubtitle(t, opt.Subtitle, 38)
             end
             
             t.MouseButton1Click:Connect(function()
@@ -1298,7 +1274,6 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- ========== SLIDER (CÓ RANGE, INCREMENT, SUBTITLE) ==========
         function Tab:CreateSlider(opt)
             local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local range = opt.range or {0, 100}
@@ -1314,7 +1289,7 @@ function NoirUI:CreateWindow(settings)
             f.Size = UDim2.new(0.95, 0, 0, hasSubtitle and 70 or 50)
             f.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
             f.BackgroundTransparency = 0.7
-            Instance.new("UICorner", f)
+            Instance.new("UICorner", f).CornerRadius = UDim.new(0, 8)
             f.LayoutOrder = GetO()
             f.Name = opt.Name or ""
             table.insert(Tab.Elements, f)
@@ -1342,11 +1317,7 @@ function NoirUI:CreateWindow(settings)
             Instance.new("UICorner", fill)
             
             if hasSubtitle then
-                local sub = AddSubtitle(f, opt.Subtitle, 48)
-                if sub then
-                    f.Size = UDim2.new(0.95, 0, 0, 65 + sub.Size.Y.Offset)
-                    sbg.Position = UDim2.new(0.05, 0, 0.65, 0)
-                end
+                AddSubtitle(f, opt.Subtitle, 48)
             end
             
             local isHeld = false
@@ -1379,7 +1350,6 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- ========== COLOR PICKER (CÓ SUBTITLE) ==========
         function Tab:CreateColorPicker(opt)
             local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local ColorSelected = opt.Default or Color3.fromRGB(170, 85, 255)
@@ -1390,7 +1360,7 @@ function NoirUI:CreateWindow(settings)
             f.Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)
             f.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
             f.BackgroundTransparency = 0.7
-            Instance.new("UICorner", f)
+            Instance.new("UICorner", f).CornerRadius = UDim.new(0, 8)
             f.LayoutOrder = GetO()
             f.ClipsDescendants = true
             f.Name = opt.Name or ""
@@ -1411,14 +1381,10 @@ function NoirUI:CreateWindow(settings)
             pvw.Position = UDim2.new(1, -50, 0, hasSubtitle and 8.5 or 8.5)
             pvw.BackgroundColor3 = ColorSelected
             pvw.Text = ""
-            Instance.new("UICorner", pvw)
+            Instance.new("UICorner", pvw).CornerRadius = UDim.new(0, 4)
             
             if hasSubtitle then
-                local sub = AddSubtitle(f, opt.Subtitle, 38)
-                if sub then
-                    f.Size = UDim2.new(0.95, 0, 0, 50 + sub.Size.Y.Offset)
-                    pvw.Position = UDim2.new(1, -50, 0, 8.5)
-                end
+                AddSubtitle(f, opt.Subtitle, 38)
             end
             
             local Holder = Instance.new("Frame", f)
@@ -1431,7 +1397,7 @@ function NoirUI:CreateWindow(settings)
             satBox.Position = UDim2.new(0.05, 0, 0, 5)
             satBox.Image = "rbxassetid://4155801252"
             satBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
-            Instance.new("UICorner", satBox)
+            Instance.new("UICorner", satBox).CornerRadius = UDim.new(0, 6)
             
             local cursor = Instance.new("Frame", satBox)
             cursor.Size = UDim2.new(0, 8, 0, 8)
@@ -1444,7 +1410,7 @@ function NoirUI:CreateWindow(settings)
             hueSlide.Size = UDim2.new(0.9, 0, 0, 12)
             hueSlide.Position = UDim2.new(0.05, 0, 0, 115)
             hueSlide.Image = "rbxassetid://3641079629"
-            Instance.new("UICorner", hueSlide)
+            Instance.new("UICorner", hueSlide).CornerRadius = UDim.new(0, 6)
             
             local hCursor = Instance.new("Frame", hueSlide)
             hCursor.Size = UDim2.new(0, 4, 1, 4)
@@ -1491,14 +1457,13 @@ function NoirUI:CreateWindow(settings)
             end)
         end
         
-        -- ========== DROPDOWN (CÓ SUBTITLE) ==========
         function Tab:CreateDropdown(opt)
             local hasSubtitle = opt.Subtitle and opt.Subtitle ~= ""
             local d = Instance.new("Frame", ContentFrame)
             d.Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)
             d.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
             d.BackgroundTransparency = 0.7
-            Instance.new("UICorner", d)
+            Instance.new("UICorner", d).CornerRadius = UDim.new(0, 8)
             d.LayoutOrder = GetO()
             d.ClipsDescendants = true
             d.Name = opt.Name or ""
@@ -1526,8 +1491,7 @@ function NoirUI:CreateWindow(settings)
             Arrow.TextXAlignment = "Center"
             
             if hasSubtitle then
-                local sub = AddSubtitle(d, opt.Subtitle, 38)
-                if sub then d.Size = UDim2.new(0.95, 0, 0, 50 + sub.Size.Y.Offset) end
+                AddSubtitle(d, opt.Subtitle, 38)
             end
             
             local il = Instance.new("ScrollingFrame", d)
@@ -1638,13 +1602,12 @@ function NoirUI:CreateWindow(settings)
             end
         end
         
-        -- ========== RUNBOX ==========
         function Tab:CreateRunBox(opt)
             local f = Instance.new("Frame", ContentFrame)
             f.Size = UDim2.new(0.95, 0, 0, 38)
             f.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
             f.BackgroundTransparency = 0.7
-            Instance.new("UICorner", f)
+            Instance.new("UICorner", f).CornerRadius = UDim.new(0, 8)
             f.LayoutOrder = GetO()
             f.Name = "RunBox"
             table.insert(Tab.Elements, f)
@@ -1653,7 +1616,7 @@ function NoirUI:CreateWindow(settings)
             i.Size = UDim2.new(1, -65, 1, 0)
             i.Position = UDim2.new(0, 10, 0, 0)
             i.BackgroundTransparency = 1
-            i.PlaceholderText = opt.Placeholder or "Nhập: .cmd, loadstring('url'), required('Module'), or lua code"
+            i.PlaceholderText = opt.Placeholder or "Nhập: .cmd, loadstring('url'), or lua code"
             i.Text = ""
             i.TextColor3 = Color3.new(1, 1, 1)
             i.Font = "GothamMedium"
@@ -1669,7 +1632,7 @@ function NoirUI:CreateWindow(settings)
             r.TextColor3 = Color3.new(1, 1, 1)
             r.Font = "GothamBold"
             r.TextSize = 10
-            Instance.new("UICorner", r)
+            Instance.new("UICorner", r).CornerRadius = UDim.new(0, 6)
             
             r.MouseButton1Click:Connect(function()
                 local input = i.Text
@@ -1711,22 +1674,6 @@ function NoirUI:CreateWindow(settings)
                         end
                     else
                         NoirUI:Notify("Loadstring Error", "Cú pháp không hợp lệ")
-                    end
-                    
-                elseif input:lower():match("required") then
-                    local module = input:match("required%((.+)%)")
-                    if module then
-                        local cleaned = module:gsub("^[\"'](.*)[\"']$", "%1")
-                        local success, result = pcall(function()
-                            return require(game:GetService("Players").LocalPlayer:FindFirstChild("PlayerScripts"):WaitForChild(cleaned))
-                        end)
-                        if success then
-                            NoirUI:Notify("Required", "Đã require thành công!")
-                        else
-                            NoirUI:Notify("Required Error", "Không tìm thấy module: " .. cleaned)
-                        end
-                    else
-                        NoirUI:Notify("Required Error", "Cú pháp không hợp lệ")
                     end
                     
                 else
