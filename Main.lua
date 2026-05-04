@@ -318,24 +318,23 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Hàm tải background
+-- // Hàm tải background (ĐÃ SỬA - THÊM CLIPPING MASK)
 local function LoadBackground(frame, bgSetting)
     if not bgSetting then return end
     
     local bgImage = frame:FindFirstChild("_BackgroundImage")
-    if not bgImage then
-        bgImage = Instance.new("ImageLabel")
-        bgImage.Name = "_BackgroundImage"
-        bgImage.Parent = frame
-        bgImage.ZIndex = 0
-    end
+    if bgImage then bgImage:Destroy() end
     
+    bgImage = Instance.new("ImageLabel")
+    bgImage.Name = "_BackgroundImage"
+    bgImage.Parent = frame
     bgImage.Size = UDim2.new(1, 0, 1, 0)
     bgImage.Position = UDim2.new(0, 0, 0, 0)
     bgImage.BackgroundTransparency = 1
     bgImage.ImageTransparency = bgSetting.Transparency or 0
     bgImage.ScaleType = Enum.ScaleType.Crop
     bgImage.ClipsDescendants = true
+    bgImage.ZIndex = 0
     
     if type(bgSetting.Image) == "number" or (type(bgSetting.Image) == "string" and bgSetting.Image:match("^%d+$")) then
         bgImage.Image = "rbxassetid://" .. tostring(bgSetting.Image)
@@ -345,6 +344,8 @@ local function LoadBackground(frame, bgSetting)
         bgImage.Image = bgSetting.Image
     end
     
+    -- 👇 QUAN TRỌNG: CLIPPING MASK CHO FRAME CHA
+    frame.BackgroundTransparency = 1
     frame.ClipsDescendants = true
     
     local function SendToBack()
@@ -386,7 +387,6 @@ function NoirUI:CreateWindow(settings)
     
     if settings.Background then
         LoadBackground(Main, settings.Background)
-        Main.BackgroundTransparency = 1
         Main.ClipsDescendants = true
     else
         Main.BackgroundTransparency = settings.MainBgTransparency or 0
@@ -402,14 +402,14 @@ function NoirUI:CreateWindow(settings)
     local LoadingStroke = Instance.new("UIStroke", LoadingFrame)
     LoadingStroke.Color = ACCENT
     LoadingStroke.Thickness = 2
-    LoadingStroke.Transparency = 1
     
     if settings.LoadingBackground then
         LoadBackground(LoadingFrame, settings.LoadingBackground)
-        LoadingFrame.BackgroundTransparency = 1
         LoadingFrame.ClipsDescendants = true
+        LoadingStroke.Transparency = 0
     else
         LoadingFrame.BackgroundTransparency = 1
+        LoadingStroke.Transparency = 1
     end
     
     local LoadingTitle = Instance.new("TextLabel", LoadingFrame)
@@ -541,7 +541,6 @@ function NoirUI:CreateWindow(settings)
             
             if settings.KeyBackground then
                 LoadBackground(KUI, settings.KeyBackground)
-                KUI.BackgroundTransparency = 1
                 KUI.ClipsDescendants = true
             else
                 KUI.BackgroundTransparency = 0
@@ -898,7 +897,6 @@ function NoirUI:CreateWindow(settings)
         
         if settings.NotificationBackground then
             LoadBackground(n, settings.NotificationBackground)
-            n.BackgroundTransparency = 1
             n.ClipsDescendants = true
         end
         
