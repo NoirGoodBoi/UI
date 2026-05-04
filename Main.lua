@@ -849,7 +849,7 @@ function NoirUI:CreateWindow(settings)
         if iconImage then
             local FI = Instance.new("ImageLabel", TBtn)
             FI.Size = UDim2.new(1, 0, 1, 0)
-            FI.Position = UDim2.new(0.2, 0, 0.2, 0)
+            FI.Position = UDim2.new(0, 0, 0, 0)
             FI.BackgroundTransparency = 1
             FI.Image = iconImage
             FI.ImageColor3 = Color3.new(1, 1, 1)
@@ -862,7 +862,7 @@ function NoirUI:CreateWindow(settings)
             textIcon.BackgroundTransparency = 1
             textIcon.Text = iconValue
             textIcon.TextColor3 = ACCENT
-            textIcon.TextSize = 22
+            textIcon.TextSize = 28
             textIcon.Font = Enum.Font.GothamBold
             textIcon.ZIndex = TBtn.ZIndex + 5
         end
