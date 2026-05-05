@@ -172,7 +172,6 @@ local LucideIcons = {
     ["scale-3d"] = "rbxassetid://133233077350937",
     ["eye"] = "rbxassetid://15922050695",
     ["eye-off"] = "rbxassetid://6473252651",
--- //
     ["cat-1"] = "rbxassetid://6421296789",
     ["aesthetic-1"] = "rbxassetid://6675147486",
     ["aesthetic-2"] = "rbxassetid://10149736886",
@@ -188,11 +187,8 @@ local LucideIcons = {
     ["miku-1"] = "rbxassetid://8680995431",
     ["chibi-5"] = "rbxassetid://6982730545",
     ["aesthetic-5"] = "rbxassetid://6221611651",
-    ["cat-1"] = "rbxassetid://2015724",
---// meme
     ["cheems-mc"] = "rbxassetid://9676276904",
     ["maxwell-mc"] = "rbxassetid://12181324390",
---// Minecraft
     ["mc-dirt"] = "rbxassetid://9267155972",
     ["mc-log"] = "rbxassetid://3258599312",
     ["mc-command"] = "rbxassetid://129804020",
@@ -235,7 +231,6 @@ local LucideIcons = {
     ["mc-snow"] = "rbxassetid://5612862976",
     ["mc-crafting-table"] = "rbxassetid://14934173224",
     ["mc-2"] = "rbxassetid://4995402103",
---// my love :3
     ["agnes-1"] = "rbxassetid://78611376918762",
     ["agnes-2"] = "rbxassetid://129792834663000",
     ["agnes-3"] = "rbxassetid://72822911823680",
@@ -264,11 +259,13 @@ local function ResolveIcon(iconInput)
     return nil
 end
 
+-- ========== HỆ THỐNG ÂM THANH ==========
 local SoundSettings = {
     Enabled = true,
     Volume = 0.5,
     ClickSoundId = nil,
     TabSoundId = nil,
+    ElementSoundId = nil,
 }
 
 local function PlaySound(soundId)
@@ -287,6 +284,8 @@ function NoirUI:SetSound(soundType, soundId)
         SoundSettings.ClickSoundId = soundId
     elseif soundType == "tab" then
         SoundSettings.TabSoundId = soundId
+    elseif soundType == "element" then
+        SoundSettings.ElementSoundId = soundId
     end
 end
 
@@ -347,7 +346,7 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Setup background (CẮT THEO CORNER)
+-- // Setup background
 local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
     local existingBg = frame:FindFirstChild("_BackgroundImage")
     if existingBg then existingBg:Destroy() end
@@ -419,7 +418,7 @@ function NoirUI:CreateWindow(settings)
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
     
-    local hasMainBg = SetupBackground(Main, settings.Background, settings.MainBgColor, settings.MainBgTransparency or 0)
+    SetupBackground(Main, settings.Background, settings.MainBgColor, settings.MainBgTransparency or 0)
     
     -- // LOADING
     local LoadingFrame = Instance.new("Frame", ScreenGui)
@@ -794,7 +793,7 @@ function NoirUI:CreateWindow(settings)
     ContStroke.Thickness = 1
     ContStroke.Transparency = 0.7
     
-    -- //////////////// FLOAT BUTTON (FINAL - DÙNG CANVASGROUP) ////////////////
+    -- // FLOAT BUTTON
     local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
@@ -803,7 +802,9 @@ function NoirUI:CreateWindow(settings)
     TBtn.ZIndex = 10
     TBtn.ClipsDescendants = false
     
-    -- CanvasGroup để clip hình tròn
+    local btnCorner = Instance.new("UICorner", TBtn)
+    btnCorner.CornerRadius = UDim.new(0, 12)
+    
     local ClipGroup = Instance.new("CanvasGroup")
     ClipGroup.Name = "ClipGroup"
     ClipGroup.Size = UDim2.new(1, 0, 1, 0)
@@ -814,11 +815,9 @@ function NoirUI:CreateWindow(settings)
     ClipGroup.ZIndex = TBtn.ZIndex
     ClipGroup.Parent = TBtn
     
-    -- Bo tròn CanvasGroup
     local clipCorner = Instance.new("UICorner", ClipGroup)
-    clipCorner.CornerRadius = UDim.new(1, 0)
+    clipCorner.CornerRadius = UDim.new(0, 12)
     
-    -- Background (ảnh hoặc màu)
     if settings.FloatBackground and settings.FloatBackground.Image then
         local bgImage = Instance.new("ImageLabel", ClipGroup)
         bgImage.Name = "BackgroundImage"
@@ -836,7 +835,6 @@ function NoirUI:CreateWindow(settings)
         bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0
         bgImage.ScaleType = Enum.ScaleType.Crop
         
-        -- Lớp phủ tối
         local overlay = Instance.new("Frame", ClipGroup)
         overlay.Size = UDim2.new(1, 0, 1, 0)
         overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -850,7 +848,6 @@ function NoirUI:CreateWindow(settings)
         bgColor.ZIndex = 1
     end
     
-    -- Icon (đặt trong ClipGroup để bị cắt)
     local iconValue = settings.Icon
     if iconValue then
         local iconImage = ResolveIcon(iconValue)
@@ -877,12 +874,10 @@ function NoirUI:CreateWindow(settings)
         end
     end
     
-    -- Stroke (đặt trên TBtn)
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
 
-    -- Kéo thả
     local floatDragging = false
     local floatDragStart, floatStartPos, floatDragInput
     TBtn.InputBegan:Connect(function(input)
@@ -909,8 +904,8 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- Toggle UI
     TBtn.MouseButton1Click:Connect(function()
+        PlaySound(SoundSettings.ClickSoundId)
         if not KeySolved and KUI and KUI.Parent then
             KUI.Visible = not KUI.Visible
         else
@@ -1016,6 +1011,9 @@ function NoirUI:CreateWindow(settings)
             IC.ScaleType = Enum.ScaleType.Crop
             IC.ZIndex = 2
             
+            local iconCorner = Instance.new("UICorner", IC)
+            iconCorner.CornerRadius = UDim.new(0, 4)
+            
             local iconImage = ResolveIcon(icon)
             if iconImage then
                 IC.Image = iconImage
@@ -1077,6 +1075,7 @@ function NoirUI:CreateWindow(settings)
         ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvas)
         
         B.MouseButton1Click:Connect(function()
+            PlaySound(SoundSettings.TabSoundId)
             for _, v in pairs(Cont:GetChildren()) do
                 if v:IsA("ScrollingFrame") then v.Visible = false end
             end
@@ -1274,7 +1273,10 @@ function NoirUI:CreateWindow(settings)
                 AddSubtitle(b, opt.Subtitle, 38)
             end
             
-            b.MouseButton1Click:Connect(opt.Callback)
+            b.MouseButton1Click:Connect(function()
+                PlaySound(SoundSettings.ElementSoundId)
+                opt.Callback()
+            end)
         end
         
         function Tab:CreateToggle(opt)
@@ -1305,6 +1307,7 @@ function NoirUI:CreateWindow(settings)
             end
             
             t.MouseButton1Click:Connect(function()
+                PlaySound(SoundSettings.ElementSoundId)
                 s = not s
                 t.TextColor3 = s and ACCENT or Color3.fromRGB(180, 180, 180)
                 bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40, 40, 40)
@@ -1564,6 +1567,7 @@ function NoirUI:CreateWindow(settings)
                     it.Font = "GothamMedium"
                     it.TextSize = 11
                     it.MouseButton1Click:Connect(function()
+                        PlaySound(SoundSettings.ElementSoundId)
                         il.Visible = false
                         Arrow.Text = "▼"
                         t.Text = "  " .. opt.Name .. " : " .. option
@@ -1607,6 +1611,7 @@ function NoirUI:CreateWindow(settings)
                     it.Font = "GothamMedium"
                     it.TextSize = 11
                     it.MouseButton1Click:Connect(function()
+                        PlaySound(SoundSettings.ElementSoundId)
                         open = false
                         il.Visible = false
                         Arrow.Text = "▼"
