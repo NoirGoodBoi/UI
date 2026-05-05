@@ -10,7 +10,7 @@ if OldGui then OldGui:Destroy() end
 
 local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {} }
 
--- // Lucide Icon
+-- // Lucide Icon (load từ file ngoài)
 local LucideIcons = loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/UI/refs/heads/main/icons.lua"))()
 
 local function ResolveIcon(iconInput)
@@ -142,7 +142,16 @@ local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
         bgCorner.Parent = bgImage
         
         local imgValue = bgSetting.Image
-        if type(imgValue) == "number" or (type(imgValue) == "string" and imgValue:match("^%d+$")) then
+        
+        -- Xử lý Lucide Icon cho background
+        if type(imgValue) == "string" and not imgValue:match("^rbxassetid://") and not imgValue:match("^http") then
+            local iconId = ResolveIcon(imgValue)
+            if iconId then
+                bgImage.Image = iconId
+            else
+                bgImage.Image = imgValue
+            end
+        elseif type(imgValue) == "number" or (type(imgValue) == "string" and imgValue:match("^%d+$")) then
             bgImage.Image = "rbxassetid://" .. tostring(imgValue)
         elseif type(imgValue) == "string" then
             bgImage.Image = imgValue
@@ -565,14 +574,14 @@ function NoirUI:CreateWindow(settings)
     ContStroke.Thickness = 1
     ContStroke.Transparency = 0.7
     
-    -- // FLOAT BUTTON (HÌNH VUÔNG - KHÔNG BO GÓC)
+    -- // FLOAT BUTTON
     local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
     TBtn.BackgroundTransparency = 1
     TBtn.Image = ""
     TBtn.ZIndex = 10
-    TBtn.ClipsDescendants = true 
+    TBtn.ClipsDescendants = true
 
     local ClipGroup = Instance.new("CanvasGroup")
     ClipGroup.Name = "ClipGroup"
@@ -642,7 +651,6 @@ function NoirUI:CreateWindow(settings)
         end
     end
 
--- Viền (nếu muốn)
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
