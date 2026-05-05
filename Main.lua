@@ -835,8 +835,10 @@ function NoirUI:CreateWindow(settings)
         overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         overlay.BackgroundTransparency = 0.4
         overlay.ZIndex = 1
+        overlay.ClipsDescendants = true
     else
         TBtn.BackgroundTransparency = 0
+        TBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     end
     
     local iconValue = settings.Icon
@@ -863,6 +865,7 @@ function NoirUI:CreateWindow(settings)
             textIcon.Font = Enum.Font.GothamBold
             textIcon.TextScaled = true
             textIcon.ZIndex = 2
+            textIcon.ClipsDescendants = true
         end
     end
     
