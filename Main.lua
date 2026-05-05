@@ -826,6 +826,8 @@ function NoirUI:CreateWindow(settings)
         bgImage.Position = UDim2.new(0, 0, 0, 0)
         bgImage.BackgroundTransparency = 1
         bgImage.ZIndex = 1
+        bgImage.ClipsDescendants = true
+        bgImage.ScaleType = Enum.ScaleType.Crop
         
         local bgImgVal = settings.FloatBackground.Image
         if type(bgImgVal) == "number" or (type(bgImgVal) == "string" and bgImgVal:match("^%d+$")) then
@@ -834,7 +836,6 @@ function NoirUI:CreateWindow(settings)
             bgImage.Image = bgImgVal
         end
         bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0
-        bgImage.ScaleType = Enum.ScaleType.Crop
         
         local overlay = Instance.new("Frame", ClipGroup)
         overlay.Size = UDim2.new(1, 0, 1, 0)
@@ -860,6 +861,7 @@ function NoirUI:CreateWindow(settings)
             FI.Image = iconImage
             FI.ImageColor3 = Color3.new(1, 1, 1)
             FI.ScaleType = Enum.ScaleType.Crop
+            FI.ClipsDescendants = true
             FI.ZIndex = 3
         elseif type(iconValue) == "string" then
             local textIcon = Instance.new("TextLabel", ClipGroup)
