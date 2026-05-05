@@ -801,7 +801,7 @@ function NoirUI:CreateWindow(settings)
     TBtn.BackgroundTransparency = 1
     TBtn.Image = ""
     TBtn.ZIndex = 10
-    TBtn.ClipsDescendants = false
+    TBtn.ClipsDescendants = true
     
     local btnCorner = Instance.new("UICorner", TBtn)
     btnCorner.CornerRadius = UDim.new(0, 12)
