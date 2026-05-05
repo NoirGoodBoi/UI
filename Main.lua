@@ -1,4 +1,4 @@
-local TweenService = game:GetService("TweenService")
+llocal TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -10,7 +10,7 @@ if OldGui then OldGui:Destroy() end
 
 local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {} }
 
--- // Lucide Icon
+-- // Lucide Icon (load từ file ngoài)
 local LucideIcons = loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/UI/refs/heads/main/icons.lua"))()
 
 local function ResolveIcon(iconInput)
@@ -572,46 +572,36 @@ function NoirUI:CreateWindow(settings)
     TBtn.BackgroundTransparency = 1
     TBtn.Image = ""
     TBtn.ZIndex = 10
-    TBtn.ClipsDescendants = false
+    TBtn.ClipsDescendants = true 
 
-    -- Bo góc HÌNH TRÒN
-    local btnCorner = Instance.new("UICorner", TBtn)
-    btnCorner.CornerRadius = UDim.new(1, 0)  -- 👈 HÌNH TRÒN
-
-    -- CanvasGroup để clip nội dung theo hình tròn
     local ClipGroup = Instance.new("CanvasGroup")
     ClipGroup.Name = "ClipGroup"
     ClipGroup.Size = UDim2.new(1, 0, 1, 0)
     ClipGroup.Position = UDim2.new(0, 0, 0, 0)
     ClipGroup.BackgroundTransparency = 1
     ClipGroup.GroupTransparency = 0
-    ClipGroup.ClipsDescendants = true  -- 👈 CẮT NỘI DUNG
+    ClipGroup.ClipsDescendants = true
     ClipGroup.ZIndex = TBtn.ZIndex
     ClipGroup.Parent = TBtn
 
-    -- Bo góc HÌNH TRÒN cho ClipGroup (để cắt ảnh theo hình tròn)
-    local clipCorner = Instance.new("UICorner", ClipGroup)
-    clipCorner.CornerRadius = UDim.new(1, 0)  -- 👈 HÌNH TRÒN
-
-    -- Background (ảnh hoặc màu)
     if settings.FloatBackground and settings.FloatBackground.Image then
         local bgImage = Instance.new("ImageLabel", ClipGroup)
         bgImage.Name = "BackgroundImage"
         bgImage.Size = UDim2.new(1, 0, 1, 0)
         bgImage.Position = UDim2.new(0, 0, 0, 0)
         bgImage.BackgroundTransparency = 1
+        bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0
+        bgImage.ScaleType = Enum.ScaleType.Crop
         bgImage.ZIndex = 1
-        bgImage.ScaleType = Enum.ScaleType.Crop  -- 👈 CROP ẢNH
     
-        local bgImgVal = settings.FloatBackground.Image
-        if type(bgImgVal) == "number" or (type(bgImgVal) == "string" and bgImgVal:match("^%d+$")) then
-            bgImage.Image = "rbxassetid://" .. tostring(bgImgVal)
-        elseif type(bgImgVal) == "string" then
-            -- Hỗ trợ Lucide Icon
-            local iconId = ResolveIcon(bgImgVal)
-            bgImage.Image = iconId or bgImgVal
+        local imgValue = settings.FloatBackground.Image
+        if type(imgValue) == "number" or (type(imgValue) == "string" and imgValue:match("^%d+$")) then
+            bgImage.Image = "rbxassetid://" .. tostring(imgValue)
+        elseif type(imgValue) == "string" then
+            bgImage.Image = imgValue
         end
         bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0
+        bgImage.ScaleType = Enum.ScaleType.Crop
     
         local overlay = Instance.new("Frame", ClipGroup)
         overlay.Size = UDim2.new(1, 0, 1, 0)
@@ -626,7 +616,6 @@ function NoirUI:CreateWindow(settings)
         bgColor.ZIndex = 1
     end
 
-    -- ICON CHÍNH (đặt trong ClipGroup để bị cắt hình tròn)
     local iconValue = settings.Icon
     if iconValue then
         local iconImage = ResolveIcon(iconValue)
@@ -637,8 +626,7 @@ function NoirUI:CreateWindow(settings)
             FI.BackgroundTransparency = 1
             FI.Image = iconImage
             FI.ImageColor3 = Color3.new(1, 1, 1)
-            FI.ScaleType = Enum.ScaleType.Crop  -- 👈 CROP ẢNH
-            FI.ClipsDescendants = true
+            FI.ScaleType = Enum.ScaleType.Crop
             FI.ZIndex = 3
         elseif type(iconValue) == "string" then
             local textIcon = Instance.new("TextLabel", ClipGroup)
@@ -650,12 +638,11 @@ function NoirUI:CreateWindow(settings)
             textIcon.TextSize = 28
             textIcon.Font = Enum.Font.GothamBold
             textIcon.TextScaled = true
-            textIcon.ClipsDescendants = true
             textIcon.ZIndex = 3
         end
     end
 
-    -- Viền (đặt trên TBtn, không bị ảnh hưởng bởi clip)
+    -- Viền (nếu muốn)
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
