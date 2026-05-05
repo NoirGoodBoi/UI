@@ -801,25 +801,30 @@ function NoirUI:CreateWindow(settings)
     TBtn.BackgroundTransparency = 1
     TBtn.Image = ""
     TBtn.ZIndex = 10
-    TBtn.ClipsDescendants = true
+    TBtn.ClipsDescendants = false
     
     local btnCorner = Instance.new("UICorner", TBtn)
     btnCorner.CornerRadius = UDim.new(0, 12)
     
-    local oldBg = TBtn:FindFirstChild("_BackgroundImage")
-    if oldBg then oldBg:Destroy() end
+    local ClipGroup = Instance.new("CanvasGroup")
+    ClipGroup.Name = "ClipGroup"
+    ClipGroup.Size = UDim2.new(1, 0, 1, 0)
+    ClipGroup.Position = UDim2.new(0, 0, 0, 0)
+    ClipGroup.BackgroundTransparency = 1
+    ClipGroup.GroupTransparency = 0
+    ClipGroup.ClipsDescendants = true
+    ClipGroup.ZIndex = TBtn.ZIndex + 1
+    ClipGroup.Parent = TBtn
     
     if settings.FloatBackground and settings.FloatBackground.Image then
-        local bgImage = Instance.new("ImageLabel")
-        bgImage.Name = "_BackgroundImage"
-        bgImage.Parent = TBtn
+        local bgImage = Instance.new("ImageLabel", ClipGroup)
+        bgImage.Name = "BackgroundImage"
         bgImage.Size = UDim2.new(1, 0, 1, 0)
         bgImage.Position = UDim2.new(0, 0, 0, 0)
         bgImage.BackgroundTransparency = 1
         bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0
         bgImage.ScaleType = Enum.ScaleType.Crop
-        bgImage.ClipsDescendants = true
-        bgImage.ZIndex = 0
+        bgImage.ZIndex = 1
         
         local imgValue = settings.FloatBackground.Image
         if type(imgValue) == "number" or (type(imgValue) == "string" and imgValue:match("^%d+$")) then
@@ -828,34 +833,33 @@ function NoirUI:CreateWindow(settings)
             bgImage.Image = imgValue
         end
         
-        TBtn.BackgroundTransparency = 1
-        
-        local overlay = Instance.new("Frame", TBtn)
+        local overlay = Instance.new("Frame", ClipGroup)
         overlay.Size = UDim2.new(1, 0, 1, 0)
         overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         overlay.BackgroundTransparency = 0.4
-        overlay.ZIndex = 1
-        overlay.ClipsDescendants = true
+        overlay.ZIndex = 2
     else
-        TBtn.BackgroundTransparency = 0
-        TBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+        local bgColor = Instance.new("Frame", ClipGroup)
+        bgColor.Size = UDim2.new(1, 0, 1, 0)
+        bgColor.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+        bgColor.BackgroundTransparency = 0
+        bgColor.ZIndex = 1
     end
     
     local iconValue = settings.Icon
     if iconValue then
         local iconImage = ResolveIcon(iconValue)
         if iconImage then
-            local FI = Instance.new("ImageLabel", TBtn)
+            local FI = Instance.new("ImageLabel", ClipGroup)
             FI.Size = UDim2.new(1, 0, 1, 0)
             FI.Position = UDim2.new(0, 0, 0, 0)
             FI.BackgroundTransparency = 1
             FI.Image = iconImage
             FI.ImageColor3 = Color3.new(1, 1, 1)
             FI.ScaleType = Enum.ScaleType.Crop
-            FI.ClipsDescendants = true
-            FI.ZIndex = 2
+            FI.ZIndex = 3
         elseif type(iconValue) == "string" then
-            local textIcon = Instance.new("TextLabel", TBtn)
+            local textIcon = Instance.new("TextLabel", ClipGroup)
             textIcon.Size = UDim2.new(1, 0, 1, 0)
             textIcon.Position = UDim2.new(0, 0, 0, 0)
             textIcon.BackgroundTransparency = 1
@@ -864,8 +868,7 @@ function NoirUI:CreateWindow(settings)
             textIcon.TextSize = 28
             textIcon.Font = Enum.Font.GothamBold
             textIcon.TextScaled = true
-            textIcon.ZIndex = 2
-            textIcon.ClipsDescendants = true
+            textIcon.ZIndex = 3
         end
     end
     
