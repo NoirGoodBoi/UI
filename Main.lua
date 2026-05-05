@@ -1,4 +1,4 @@
-llocal TweenService = game:GetService("TweenService")
+local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -10,7 +10,7 @@ if OldGui then OldGui:Destroy() end
 
 local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {} }
 
--- // Lucide Icon (load từ file ngoài)
+-- // Lucide Icon
 local LucideIcons = loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/UI/refs/heads/main/icons.lua"))()
 
 local function ResolveIcon(iconInput)
@@ -642,7 +642,7 @@ function NoirUI:CreateWindow(settings)
         end
     end
 
-    -- Viền (nếu muốn)
+-- Viền (nếu muốn)
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
