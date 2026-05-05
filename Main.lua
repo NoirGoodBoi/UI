@@ -806,55 +806,44 @@ function NoirUI:CreateWindow(settings)
     local btnCorner = Instance.new("UICorner", TBtn)
     btnCorner.CornerRadius = UDim.new(0, 12)
     
-    local ClipGroup = Instance.new("CanvasGroup")
-    ClipGroup.Name = "ClipGroup"
-    ClipGroup.Size = UDim2.new(1, 0, 1, 0)
-    ClipGroup.Position = UDim2.new(0, 0, 0, 0)
-    ClipGroup.BackgroundTransparency = 1
-    ClipGroup.GroupTransparency = 0
-    ClipGroup.ClipsDescendants = true
-    ClipGroup.ZIndex = TBtn.ZIndex
-    ClipGroup.Parent = TBtn
-    
-    local clipCorner = Instance.new("UICorner", ClipGroup)
-    clipCorner.CornerRadius = UDim.new(0, 12)
+    local oldBg = TBtn:FindFirstChild("_BackgroundImage")
+    if oldBg then oldBg:Destroy() end
     
     if settings.FloatBackground and settings.FloatBackground.Image then
-        local bgImage = Instance.new("ImageLabel", ClipGroup)
-        bgImage.Name = "BackgroundImage"
+        local bgImage = Instance.new("ImageLabel")
+        bgImage.Name = "_BackgroundImage"
+        bgImage.Parent = TBtn
         bgImage.Size = UDim2.new(1, 0, 1, 0)
         bgImage.Position = UDim2.new(0, 0, 0, 0)
         bgImage.BackgroundTransparency = 1
-        bgImage.ZIndex = 1
-        bgImage.ClipsDescendants = true
-        bgImage.ScaleType = Enum.ScaleType.Crop
-        
-        local bgImgVal = settings.FloatBackground.Image
-        if type(bgImgVal) == "number" or (type(bgImgVal) == "string" and bgImgVal:match("^%d+$")) then
-            bgImage.Image = "rbxassetid://" .. tostring(bgImgVal)
-        elseif type(bgImgVal) == "string" then
-            bgImage.Image = bgImgVal
-        end
         bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0
+        bgImage.ScaleType = Enum.ScaleType.Crop
+        bgImage.ClipsDescendants = true
+        bgImage.ZIndex = 0
         
-        local overlay = Instance.new("Frame", ClipGroup)
+        local imgValue = settings.FloatBackground.Image
+        if type(imgValue) == "number" or (type(imgValue) == "string" and imgValue:match("^%d+$")) then
+            bgImage.Image = "rbxassetid://" .. tostring(imgValue)
+        elseif type(imgValue) == "string" then
+            bgImage.Image = imgValue
+        end
+        
+        TBtn.BackgroundTransparency = 1
+        
+        local overlay = Instance.new("Frame", TBtn)
         overlay.Size = UDim2.new(1, 0, 1, 0)
         overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
         overlay.BackgroundTransparency = 0.4
-        overlay.ZIndex = 2
+        overlay.ZIndex = 1
     else
-        local bgColor = Instance.new("Frame", ClipGroup)
-        bgColor.Size = UDim2.new(1, 0, 1, 0)
-        bgColor.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-        bgColor.BackgroundTransparency = 0
-        bgColor.ZIndex = 1
+        TBtn.BackgroundTransparency = 0
     end
     
     local iconValue = settings.Icon
     if iconValue then
         local iconImage = ResolveIcon(iconValue)
         if iconImage then
-            local FI = Instance.new("ImageLabel", ClipGroup)
+            local FI = Instance.new("ImageLabel", TBtn)
             FI.Size = UDim2.new(1, 0, 1, 0)
             FI.Position = UDim2.new(0, 0, 0, 0)
             FI.BackgroundTransparency = 1
@@ -862,9 +851,9 @@ function NoirUI:CreateWindow(settings)
             FI.ImageColor3 = Color3.new(1, 1, 1)
             FI.ScaleType = Enum.ScaleType.Crop
             FI.ClipsDescendants = true
-            FI.ZIndex = 3
+            FI.ZIndex = 2
         elseif type(iconValue) == "string" then
-            local textIcon = Instance.new("TextLabel", ClipGroup)
+            local textIcon = Instance.new("TextLabel", TBtn)
             textIcon.Size = UDim2.new(1, 0, 1, 0)
             textIcon.Position = UDim2.new(0, 0, 0, 0)
             textIcon.BackgroundTransparency = 1
@@ -873,7 +862,7 @@ function NoirUI:CreateWindow(settings)
             textIcon.TextSize = 28
             textIcon.Font = Enum.Font.GothamBold
             textIcon.TextScaled = true
-            textIcon.ZIndex = 3
+            textIcon.ZIndex = 2
         end
     end
     
