@@ -803,6 +803,9 @@ function NoirUI:CreateWindow(settings)
     TBtn.ZIndex = 10
     TBtn.ClipsDescendants = false
     
+    local btnCorner = Instance.new("UICorner", TBtn)
+    btnCorner.CornerRadius = UDim.new(0, 12)
+    
     local ClipGroup = Instance.new("CanvasGroup")
     ClipGroup.Name = "ClipGroup"
     ClipGroup.Size = UDim2.new(1, 0, 1, 0)
@@ -814,7 +817,7 @@ function NoirUI:CreateWindow(settings)
     ClipGroup.Parent = TBtn
     
     local clipCorner = Instance.new("UICorner", ClipGroup)
-    clipCorner.CornerRadius = UDim.new(1, 0)
+    clipCorner.CornerRadius = UDim.new(0, 12)
     
     if settings.FloatBackground and settings.FloatBackground.Image then
         local bgImage = Instance.new("ImageLabel", ClipGroup)
