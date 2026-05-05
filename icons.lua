@@ -232,3 +232,5 @@ local LucideIcons = {
     ["agnes-7"] = "rbxassetid://111964745088904",
     ["agnes-8"] = "rbxassetid://73819609027269",
 }
+
+return LucideIcons
