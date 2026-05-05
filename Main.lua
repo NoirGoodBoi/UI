@@ -10,8 +10,8 @@ if OldGui then OldGui:Destroy() end
 
 local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {} }
 
--- ========== LOAD ICONS TỪ FILE NGOÀI ==========
-local LucideIcons = loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/NoirUI/main/icons.lua"))()
+-- // Lucide Icon
+local LucideIcons = loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/UI/refs/heads/main/icons.lua"))()
 
 local function ResolveIcon(iconInput)
     if not iconInput then return nil end
@@ -31,7 +31,7 @@ local function ResolveIcon(iconInput)
     return nil
 end
 
--- ========== HỆ THỐNG ÂM THANH ==========
+-- // Sound System
 local SoundSettings = {
     Enabled = true,
     Volume = 0.5,
@@ -118,7 +118,7 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Setup background (HỖ TRỢ LUCIDE ICON)
+-- // Setup background
 local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
     local existingBg = frame:FindFirstChild("_BackgroundImage")
     if existingBg then existingBg:Destroy() end
@@ -142,16 +142,7 @@ local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
         bgCorner.Parent = bgImage
         
         local imgValue = bgSetting.Image
-        
-        -- Xử lý Lucide Icon
-        if type(imgValue) == "string" and not imgValue:match("^rbxassetid://") and not imgValue:match("^http") then
-            local iconId = ResolveIcon(imgValue)
-            if iconId then
-                bgImage.Image = iconId
-            else
-                bgImage.Image = imgValue
-            end
-        elseif type(imgValue) == "number" or (type(imgValue) == "string" and imgValue:match("^%d+$")) then
+        if type(imgValue) == "number" or (type(imgValue) == "string" and imgValue:match("^%d+$")) then
             bgImage.Image = "rbxassetid://" .. tostring(imgValue)
         elseif type(imgValue) == "string" then
             bgImage.Image = imgValue
@@ -574,7 +565,7 @@ function NoirUI:CreateWindow(settings)
     ContStroke.Thickness = 1
     ContStroke.Transparency = 0.7
     
-    -- // FLOAT BUTTON (HÌNH TRÒN + CLIPPING MASK CHO ICON)
+    -- // FLOAT BUTTON (HÌNH VUÔNG - KHÔNG BO GÓC)
     local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
@@ -582,26 +573,26 @@ function NoirUI:CreateWindow(settings)
     TBtn.Image = ""
     TBtn.ZIndex = 10
     TBtn.ClipsDescendants = false
-    
-    -- Bo góc hình tròn
+
+    -- Bo góc HÌNH TRÒN
     local btnCorner = Instance.new("UICorner", TBtn)
-    btnCorner.CornerRadius = UDim.new(1, 0)
-    
-    -- CanvasGroup để clip nội dung
+    btnCorner.CornerRadius = UDim.new(1, 0)  -- 👈 HÌNH TRÒN
+
+    -- CanvasGroup để clip nội dung theo hình tròn
     local ClipGroup = Instance.new("CanvasGroup")
     ClipGroup.Name = "ClipGroup"
     ClipGroup.Size = UDim2.new(1, 0, 1, 0)
     ClipGroup.Position = UDim2.new(0, 0, 0, 0)
     ClipGroup.BackgroundTransparency = 1
     ClipGroup.GroupTransparency = 0
-    ClipGroup.ClipsDescendants = true
+    ClipGroup.ClipsDescendants = true  -- 👈 CẮT NỘI DUNG
     ClipGroup.ZIndex = TBtn.ZIndex
     ClipGroup.Parent = TBtn
-    
-    -- Bo góc hình tròn cho ClipGroup
+
+    -- Bo góc HÌNH TRÒN cho ClipGroup (để cắt ảnh theo hình tròn)
     local clipCorner = Instance.new("UICorner", ClipGroup)
-    clipCorner.CornerRadius = UDim.new(1, 0)
-    
+    clipCorner.CornerRadius = UDim.new(1, 0)  -- 👈 HÌNH TRÒN
+
     -- Background (ảnh hoặc màu)
     if settings.FloatBackground and settings.FloatBackground.Image then
         local bgImage = Instance.new("ImageLabel", ClipGroup)
@@ -610,17 +601,18 @@ function NoirUI:CreateWindow(settings)
         bgImage.Position = UDim2.new(0, 0, 0, 0)
         bgImage.BackgroundTransparency = 1
         bgImage.ZIndex = 1
-        bgImage.ScaleType = Enum.ScaleType.Crop
-        bgImage.ClipsDescendants = true
-        
+        bgImage.ScaleType = Enum.ScaleType.Crop  -- 👈 CROP ẢNH
+    
         local bgImgVal = settings.FloatBackground.Image
         if type(bgImgVal) == "number" or (type(bgImgVal) == "string" and bgImgVal:match("^%d+$")) then
             bgImage.Image = "rbxassetid://" .. tostring(bgImgVal)
         elseif type(bgImgVal) == "string" then
-            bgImage.Image = bgImgVal
+            -- Hỗ trợ Lucide Icon
+            local iconId = ResolveIcon(bgImgVal)
+            bgImage.Image = iconId or bgImgVal
         end
         bgImage.ImageTransparency = settings.FloatBackground.Transparency or 0
-        
+    
         local overlay = Instance.new("Frame", ClipGroup)
         overlay.Size = UDim2.new(1, 0, 1, 0)
         overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -633,8 +625,8 @@ function NoirUI:CreateWindow(settings)
         bgColor.BackgroundTransparency = 0
         bgColor.ZIndex = 1
     end
-    
-    -- ICON CHÍNH (có clipping mask)
+
+    -- ICON CHÍNH (đặt trong ClipGroup để bị cắt hình tròn)
     local iconValue = settings.Icon
     if iconValue then
         local iconImage = ResolveIcon(iconValue)
@@ -645,7 +637,7 @@ function NoirUI:CreateWindow(settings)
             FI.BackgroundTransparency = 1
             FI.Image = iconImage
             FI.ImageColor3 = Color3.new(1, 1, 1)
-            FI.ScaleType = Enum.ScaleType.Crop
+            FI.ScaleType = Enum.ScaleType.Crop  -- 👈 CROP ẢNH
             FI.ClipsDescendants = true
             FI.ZIndex = 3
         elseif type(iconValue) == "string" then
@@ -658,11 +650,12 @@ function NoirUI:CreateWindow(settings)
             textIcon.TextSize = 28
             textIcon.Font = Enum.Font.GothamBold
             textIcon.TextScaled = true
+            textIcon.ClipsDescendants = true
             textIcon.ZIndex = 3
         end
     end
-    
-    -- Viền
+
+    -- Viền (đặt trên TBtn, không bị ảnh hưởng bởi clip)
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
