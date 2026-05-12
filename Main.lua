@@ -31,42 +31,195 @@ local function ResolveIcon(iconInput)
     return nil
 end
 
--- // Sound System
+-- // Custom Vibe Sound System
+local VibeSounds = {
+    -- Âm thanh mặc định
+    Default = {
+        Click = "rbxassetid://9121544550",
+        Tab = "rbxassetid://9121544550",
+        Element = "rbxassetid://9121544550",
+        Open = "rbxassetid://9121544550",
+        Close = "rbxassetid://9121544550",
+        Notification = "rbxassetid://9121544550",
+        Error = "rbxassetid://9121544550",
+        Success = "rbxassetid://9121544550",
+    },
+    
+    -- Âm thanh Cyber/Electronic
+    Cyber = {
+        Click = "rbxassetid://169653382",
+        Tab = "rbxassetid://169653382",
+        Element = "rbxassetid://169653382",
+        Open = "rbxassetid://169653382",
+        Close = "rbxassetid://169653382",
+        Notification = "rbxassetid://253176819",
+        Error = "rbxassetid://183922415",
+        Success = "rbxassetid://9121544550",
+    },
+    
+    -- Âm thanh Soft/Nhẹ nhàng
+    Soft = {
+        Click = "rbxassetid://415202063",
+        Tab = "rbxassetid://415202063",
+        Element = "rbxassetid://415202063", 
+        Open = "rbxassetid://415202063",
+        Close = "rbxassetid://415202063",
+        Notification = "rbxassetid://6367035006",
+        Error = "rbxassetid://5170587753",
+        Success = "rbxassetid://6367344460",
+    },
+    
+    -- Âm thanh Gaming/Retro
+    Retro = {
+        Click = "rbxassetid://132317637",
+        Tab = "rbxassetid://132317637",
+        Element = "rbxassetid://132317637",
+        Open = "rbxassetid://132317637",
+        Close = "rbxassetid://132317637",
+        Notification = "rbxassetid://282872173",
+        Error = "rbxassetid://144434571",
+        Success = "rbxassetid://280651216",
+    },
+    
+    -- Âm thanh Nature/Thiên nhiên
+    Nature = {
+        Click = "rbxassetid://3628697780",
+        Tab = "rbxassetid://3628697780",
+        Element = "rbxassetid://3628697780",
+        Open = "rbxassetid://3628697780",
+        Close = "rbxassetid://3628697780",
+        Notification = "rbxassetid://2602352041",
+        Error = "rbxassetid://2708694673",
+        Success = "rbxassetid://6246820498",
+    },
+}
+
+-- // Sound System với Vibe
 local SoundSettings = {
     Enabled = true,
     Volume = 0.5,
+    CurrentVibe = "Default", -- Default, Cyber, Soft, Retro, Nature
+    CustomSounds = {},
+    -- Sound IDs
     ClickSoundId = nil,
     TabSoundId = nil,
     ElementSoundId = nil,
+    OpenSoundId = nil,
+    CloseSoundId = nil,
+    NotificationSoundId = nil,
+    ErrorSoundId = nil,
+    SuccessSoundId = nil,
 }
 
-local function PlaySound(soundId)
-    if not SoundSettings.Enabled or not soundId then return end
+-- // Hàm phát âm thanh với Vibe
+local function PlaySound(soundType)
+    if not SoundSettings.Enabled then return end
+    
+    local soundId = nil
+    
+    -- Kiểm tra custom sound trước
+    if SoundSettings.CustomSounds[soundType] then
+        soundId = SoundSettings.CustomSounds[soundType]
+    else
+        -- Lấy sound từ Vibe hiện tại
+        local vibe = VibeSounds[SoundSettings.CurrentVibe]
+        if vibe and vibe[soundType] then
+            soundId = vibe[soundType]
+        else
+            -- Fallback về Default
+            local defaultVibe = VibeSounds.Default
+            if defaultVibe and defaultVibe[soundType] then
+                soundId = defaultVibe[soundType]
+            end
+        end
+    end
+    
+    -- Fallback cho các sound type cụ thể
+    if not soundId then
+        if soundType == "Click" then soundId = SoundSettings.ClickSoundId
+        elseif soundType == "Tab" then soundId = SoundSettings.TabSoundId
+        elseif soundType == "Element" then soundId = SoundSettings.ElementSoundId
+        elseif soundType == "Open" then soundId = SoundSettings.OpenSoundId
+        elseif soundType == "Close" then soundId = SoundSettings.CloseSoundId
+        elseif soundType == "Notification" then soundId = SoundSettings.NotificationSoundId
+        elseif soundType == "Error" then soundId = SoundSettings.ErrorSoundId
+        elseif soundType == "Success" then soundId = SoundSettings.SuccessSoundId
+        end
+    end
+    
+    if not soundId then return end
+    
     local sound = Instance.new("Sound")
     sound.SoundId = soundId
     sound.Volume = SoundSettings.Volume
     sound.Parent = game:GetService("CoreGui")
     sound:Play()
     sound.Ended:Connect(function() sound:Destroy() end)
-    task.delay(2, function() if sound then sound:Destroy() end end)
+    task.delay(3, function() if sound then sound:Destroy() end end)
 end
 
+-- // Hàm để set custom sound riêng
+function NoirUI:SetCustomSound(soundType, soundId)
+    SoundSettings.CustomSounds[soundType] = soundId
+end
+
+-- // Hàm để đổi Vibe
+function NoirUI:SetVibe(vibeName)
+    if VibeSounds[vibeName] then
+        SoundSettings.CurrentVibe = vibeName
+        NoirUI:Notify("🎵 Vibe Changed", "Đã chuyển sang âm thanh " .. vibeName, "music")
+    else
+        warn("Vibe không tồn tại: " .. vibeName)
+    end
+end
+
+-- // Hàm để lấy danh sách Vibe có sẵn
+function NoirUI:GetAvailableVibes()
+    local vibes = {}
+    for name, _ in pairs(VibeSounds) do
+        table.insert(vibes, name)
+    end
+    return vibes
+end
+
+-- // Các hàm set sound cũ (giữ nguyên để tương thích)
 function NoirUI:SetSound(soundType, soundId)
     if soundType == "click" then
         SoundSettings.ClickSoundId = soundId
+        SoundSettings.CustomSounds["Click"] = soundId
     elseif soundType == "tab" then
         SoundSettings.TabSoundId = soundId
+        SoundSettings.CustomSounds["Tab"] = soundId
     elseif soundType == "element" then
         SoundSettings.ElementSoundId = soundId
+        SoundSettings.CustomSounds["Element"] = soundId
+    elseif soundType == "open" then
+        SoundSettings.OpenSoundId = soundId
+        SoundSettings.CustomSounds["Open"] = soundId
+    elseif soundType == "close" then
+        SoundSettings.CloseSoundId = soundId
+        SoundSettings.CustomSounds["Close"] = soundId
+    elseif soundType == "notification" then
+        SoundSettings.NotificationSoundId = soundId
+        SoundSettings.CustomSounds["Notification"] = soundId
+    elseif soundType == "error" then
+        SoundSettings.ErrorSoundId = soundId
+        SoundSettings.CustomSounds["Error"] = soundId
+    elseif soundType == "success" then
+        SoundSettings.SuccessSoundId = soundId
+        SoundSettings.CustomSounds["Success"] = soundId
     end
 end
 
 function NoirUI:ToggleSound(enabled)
     SoundSettings.Enabled = enabled
+    local status = enabled and "Bật" or "Tắt"
+    NoirUI:Notify("🔊 Sound", "Đã " .. status .. " âm thanh", enabled and "volume-2" or "volume-x")
 end
 
 function NoirUI:SetVolume(volume)
     SoundSettings.Volume = math.clamp(volume, 0, 1)
+    NoirUI:Notify("🔊 Volume", "Đã chỉnh âm lượng: " .. math.floor(volume * 100) .. "%", "volume-2")
 end
 
 -- // Subtitle
@@ -105,11 +258,21 @@ local function MakeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
     frame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true; dragStart = input.Position; startPos = frame.Position
-            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
         end
     end)
-    frame.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
     UIS.InputChanged:Connect(function(input)
         if input == dragInput and dragging then
             local delta = input.Position - dragStart
@@ -176,6 +339,7 @@ function NoirUI:CreateWindow(settings)
     ScreenGui.ResetOnSpawn = false
     local ACCENT = settings.Accent or Color3.fromRGB(170, 85, 255)
     
+    -- // Vị trí mặc định cho main UI và float button
     local mainDefaultPos = settings.DefaultPosition or UDim2.new(0.5, -210, 0.5, -150)
     local floatDefaultPos = settings.FloatDefaultPosition or UDim2.new(0, 15, 0.5, -22)
     
@@ -191,6 +355,9 @@ function NoirUI:CreateWindow(settings)
     MainStroke.Thickness = 2
     
     SetupBackground(Main, settings.Background, settings.MainBgColor, settings.MainBgTransparency or 0)
+    
+    -- // Cho phép kéo thả main UI
+    MakeDraggable(Main)
     
     -- // LOADING
     local LoadingFrame = Instance.new("Frame", ScreenGui)
@@ -297,6 +464,7 @@ function NoirUI:CreateWindow(settings)
         task.wait(2)
         Main.Visible = true
         Main.Position = mainDefaultPos
+        PlaySound("Open") -- Phát âm thanh mở UI
     end
     
     if settings.KeySystem then
@@ -395,6 +563,7 @@ function NoirUI:CreateWindow(settings)
                     StartLoading()
                     ShowMainUIAfterLoading()
                 else
+                    PlaySound("Error") -- Phát âm thanh lỗi
                     KI.Text = ""
                     KI.PlaceholderText = "Key không chính xác!"
                     task.wait(1)
@@ -452,11 +621,13 @@ function NoirUI:CreateWindow(settings)
     
     local isM = false
     TopB("-", Color3.fromRGB(255, 200, 50), function()
+        PlaySound("Click")
         isM = not isM
         TweenService:Create(Main, TweenInfo.new(0.4), {Size = isM and UDim2.new(0, 420, 0, 40) or UDim2.new(0, 420, 0, 300)}):Play()
     end)
     
     TopB("X", Color3.fromRGB(255, 100, 100), function()
+        PlaySound("Click")
         if NoirUI.ActiveConfirmFrame then return end
         local Conf = Instance.new("Frame", ScreenGui)
         NoirUI.ActiveConfirmFrame = Conf
@@ -497,10 +668,15 @@ function NoirUI:CreateWindow(settings)
             NoirUI.ActiveConfirmFrame = nil
             Conf:Destroy()
         end
-        cbtn.MouseButton1Click:Connect(destroyConfirm)
+        cbtn.MouseButton1Click:Connect(function()
+            PlaySound("Click")
+            destroyConfirm()
+        end)
         fbtn.MouseButton1Click:Connect(function()
+            PlaySound("Click")
             ScreenGui:Destroy()
             destroyConfirm()
+            PlaySound("Close")
         end)
     end)
     
@@ -565,7 +741,7 @@ function NoirUI:CreateWindow(settings)
     ContStroke.Thickness = 1
     ContStroke.Transparency = 0.7
     
-    -- // FLOAT BUTTON (HÌNH VUÔNG - KHÔNG BO GÓC)
+    -- // FLOAT BUTTON
     local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
@@ -642,7 +818,6 @@ function NoirUI:CreateWindow(settings)
         end
     end
 
--- Viền (nếu muốn)
     local TS = Instance.new("UIStroke", TBtn)
     TS.Color = ACCENT
     TS.Thickness = 2
@@ -674,11 +849,17 @@ function NoirUI:CreateWindow(settings)
     end)
     
     TBtn.MouseButton1Click:Connect(function()
-        PlaySound(SoundSettings.ClickSoundId)
+        PlaySound("Click")
         if not KeySolved and KUI and KUI.Parent then
             KUI.Visible = not KUI.Visible
         else
+            if Main.Visible then
+                PlaySound("Close")
+            else
+                PlaySound("Open")
+            end
             Main.Visible = not Main.Visible
+            -- Khi mở main UI (bật từ float button), reset về vị trí cũ
             if Main.Visible then
                 Main.Position = mainDefaultPos
             end
@@ -686,7 +867,14 @@ function NoirUI:CreateWindow(settings)
     end)
     
     -- // NOTIFICATIONS
-    function NoirUI:Notify(title, message, iconName)
+    function NoirUI:Notify(title, message, iconName, soundType)
+        -- Phát âm thanh nếu có
+        if soundType then
+            PlaySound(soundType)
+        else
+            PlaySound("Notification")
+        end
+        
         local n = Instance.new("Frame", ScreenGui)
         n.Size = UDim2.new(0, 260, 0, 65)
         n.Position = UDim2.new(1, 20, 0.8, 0)
@@ -844,7 +1032,7 @@ function NoirUI:CreateWindow(settings)
         ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvas)
         
         B.MouseButton1Click:Connect(function()
-            PlaySound(SoundSettings.TabSoundId)
+            PlaySound("Tab")
             for _, v in pairs(Cont:GetChildren()) do
                 if v:IsA("ScrollingFrame") then v.Visible = false end
             end
@@ -1043,8 +1231,8 @@ function NoirUI:CreateWindow(settings)
             end
             
             b.MouseButton1Click:Connect(function()
-                PlaySound(SoundSettings.ElementSoundId)
-                opt.Callback()
+                PlaySound("Element")
+                if opt.Callback then opt.Callback() end
             end)
         end
         
@@ -1076,11 +1264,11 @@ function NoirUI:CreateWindow(settings)
             end
             
             t.MouseButton1Click:Connect(function()
-                PlaySound(SoundSettings.ElementSoundId)
+                PlaySound("Element")
                 s = not s
                 t.TextColor3 = s and ACCENT or Color3.fromRGB(180, 180, 180)
                 bx.BackgroundColor3 = s and ACCENT or Color3.fromRGB(40, 40, 40)
-                opt.Callback(s)
+                if opt.Callback then opt.Callback(s) end
             end)
         end
         
@@ -1139,7 +1327,7 @@ function NoirUI:CreateWindow(settings)
                 local newPercent = (v - min) / (max - min)
                 fill.Size = UDim2.new(newPercent, 0, 1, 0)
                 l.Text = opt.Name .. ": " .. v
-                opt.Callback(v)
+                if opt.Callback then opt.Callback(v) end
             end
             
             sbg.InputBegan:Connect(function(i)
@@ -1262,6 +1450,7 @@ function NoirUI:CreateWindow(settings)
             end)
             
             pvw.MouseButton1Click:Connect(function()
+                PlaySound("Element")
                 open = not open
                 TweenService:Create(f, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95, 0, 0, 180) or UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)}):Play()
             end)
@@ -1336,7 +1525,7 @@ function NoirUI:CreateWindow(settings)
                     it.Font = "GothamMedium"
                     it.TextSize = 11
                     it.MouseButton1Click:Connect(function()
-                        PlaySound(SoundSettings.ElementSoundId)
+                        PlaySound("Element")
                         il.Visible = false
                         Arrow.Text = "▼"
                         t.Text = "  " .. opt.Name .. " : " .. option
@@ -1358,6 +1547,7 @@ function NoirUI:CreateWindow(settings)
             
             local open = false
             t.MouseButton1Click:Connect(function()
+                PlaySound("Element")
                 open = not open
                 il.Visible = open
                 Arrow.Text = open and "▲" or "▼"
@@ -1380,13 +1570,13 @@ function NoirUI:CreateWindow(settings)
                     it.Font = "GothamMedium"
                     it.TextSize = 11
                     it.MouseButton1Click:Connect(function()
-                        PlaySound(SoundSettings.ElementSoundId)
+                        PlaySound("Element")
                         open = false
                         il.Visible = false
                         Arrow.Text = "▼"
                         t.Text = "  " .. opt.Name .. " : " .. v
                         TweenService:Create(d, TweenInfo.new(0.3), {Size = UDim2.new(0.95, 0, 0, hasSubtitle and 55 or 35)}):Play()
-                        opt.Callback(v)
+                        if opt.Callback then opt.Callback(v) end
                     end)
                 end
                 local optionCount = math.min(#opt.Options, 4)
@@ -1447,6 +1637,7 @@ function NoirUI:CreateWindow(settings)
             Instance.new("UICorner", r).CornerRadius = UDim.new(0, 6)
             
             r.MouseButton1Click:Connect(function()
+                PlaySound("Element")
                 local input = i.Text
                 if input == "" then return end
                 
@@ -1467,10 +1658,10 @@ function NoirUI:CreateWindow(settings)
                             customCallback(args)
                         end)
                         if not success then
-                            NoirUI:Notify("Command Error", err or "Lỗi không xác định")
+                            NoirUI:Notify("Command Error", err or "Lỗi không xác định", nil, "Error")
                         end
                     else
-                        NoirUI:Notify("❌ Unknown Command", "Không tìm thấy lệnh: ." .. cmd)
+                        NoirUI:Notify("❌ Unknown Command", "Không tìm thấy lệnh: ." .. cmd, nil, "Error")
                     end
                     
                 elseif input:lower():match("loadstring") then
@@ -1480,21 +1671,21 @@ function NoirUI:CreateWindow(settings)
                         local success, err = loadstring(cleaned)
                         if success then
                             success()
-                            NoirUI:Notify("Loadstring", "Đã chạy thành công!")
+                            NoirUI:Notify("Loadstring", "Đã chạy thành công!", nil, "Success")
                         else
-                            NoirUI:Notify("Loadstring Error", err or "Lỗi cú pháp")
+                            NoirUI:Notify("Loadstring Error", err or "Lỗi cú pháp", nil, "Error")
                         end
                     else
-                        NoirUI:Notify("Loadstring Error", "Cú pháp không hợp lệ")
+                        NoirUI:Notify("Loadstring Error", "Cú pháp không hợp lệ", nil, "Error")
                     end
                     
                 else
                     local success, err = loadstring(input)
                     if success then
                         success()
-                        NoirUI:Notify("Execute", "Code đã chạy thành công!")
+                        NoirUI:Notify("Execute", "Code đã chạy thành công!", nil, "Success")
                     else
-                        NoirUI:Notify("Error", err or "Lỗi cú pháp")
+                        NoirUI:Notify("Error", err or "Lỗi cú pháp", nil, "Error")
                     end
                 end
                 
