@@ -8,7 +8,7 @@ local HttpService = game:GetService("HttpService")
 local OldGui = game.CoreGui:FindFirstChild("NoirUI_V3_Ultimate")
 if OldGui then OldGui:Destroy() end
 
-local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {} }
+local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {}, Connections = {} }
 
 -- // Lucide Icon
 local LucideIcons = loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/UI/refs/heads/main/icons.lua"))()
@@ -175,6 +175,13 @@ local function PlayNextTrack()
     end
 end
 
+local function StopAndCleanupMusic()
+    if BackgroundMusic.CurrentSound then
+        BackgroundMusic.CurrentSound:Stop()
+    end
+    BackgroundMusic.IsPlaying = false
+end
+
 local function InitBackgroundMusic(settings)
     if not settings or not settings.Enabled then return end
     
@@ -188,27 +195,95 @@ local function InitBackgroundMusic(settings)
     
     BackgroundMusic.Volume = settings.Volume or 0.3
     
-    BackgroundMusic.CurrentSound = Instance.new("Sound")
-    BackgroundMusic.CurrentSound.Volume = BackgroundMusic.Volume
-    BackgroundMusic.CurrentSound.Looped = false
-    BackgroundMusic.CurrentSound.Parent = game:GetService("CoreGui")
+    if not BackgroundMusic.CurrentSound then
+        BackgroundMusic.CurrentSound = Instance.new("Sound")
+        BackgroundMusic.CurrentSound.Volume = BackgroundMusic.Volume
+        BackgroundMusic.CurrentSound.Looped = false
+        BackgroundMusic.CurrentSound.Parent = game:GetService("CoreGui")
+        
+        BackgroundMusic.CurrentSound.Ended:Connect(function()
+            if BackgroundMusic.IsPlaying and not BackgroundMusic.UIHidden then
+                PlayNextTrack()
+            end
+        end)
+    end
     
-    BackgroundMusic.CurrentSound.Ended:Connect(function()
-        if BackgroundMusic.IsPlaying and not BackgroundMusic.UIHidden then
-            PlayNextTrack()
-        end
-    end)
-    
-    if settings.AutoPlay then
-        if #BackgroundMusic.Playlist > 0 then
-            BackgroundMusic.CurrentIndex = 1
-            PlayTrackById(BackgroundMusic.Playlist[1])
-        end
+    if settings.AutoPlay and #BackgroundMusic.Playlist > 0 then
+        BackgroundMusic.CurrentIndex = 1
+        PlayTrackById(BackgroundMusic.Playlist[1])
     end
 end
 
+-- // Public Music Functions
+function NoirUI:EnableBackgroundMusic(settings)
+    InitBackgroundMusic(settings)
+end
+
+function NoirUI:StartMusic()
+    if BackgroundMusic.CurrentSound and #BackgroundMusic.Playlist > 0 then
+        if BackgroundMusic.CurrentSound.Playing then
+            BackgroundMusic.CurrentSound:Resume()
+        else
+            PlayTrackById(BackgroundMusic.Playlist[BackgroundMusic.CurrentIndex])
+        end
+        BackgroundMusic.IsPlaying = true
+        BackgroundMusic.UIHidden = false
+        BackgroundMusic.CurrentSound.Volume = BackgroundMusic.Volume
+    end
+end
+
+function NoirUI:StopMusic()
+    StopAndCleanupMusic()
+end
+
+function NoirUI:PauseMusic()
+    if BackgroundMusic.CurrentSound and BackgroundMusic.IsPlaying then
+        BackgroundMusic.CurrentSound:Pause()
+        BackgroundMusic.IsPlaying = false
+    end
+end
+
+function NoirUI:ResumeMusic()
+    if BackgroundMusic.CurrentSound and not BackgroundMusic.IsPlaying and not BackgroundMusic.UIHidden then
+        BackgroundMusic.CurrentSound:Resume()
+        BackgroundMusic.IsPlaying = true
+    end
+end
+
+function NoirUI:SetMusicVolume(volume)
+    BackgroundMusic.Volume = math.clamp(volume, 0, 1)
+    if BackgroundMusic.CurrentSound then
+        BackgroundMusic.CurrentSound.Volume = BackgroundMusic.Volume
+    end
+end
+
+function NoirUI:AddMusicTrack(trackId)
+    table.insert(BackgroundMusic.Playlist, trackId)
+    NoirUI:Notify("🎵 Music", "Đã thêm bài hát vào playlist", "plus", "Success")
+end
+
+function NoirUI:RemoveMusicTrack(index)
+    table.remove(BackgroundMusic.Playlist, index)
+    if BackgroundMusic.CurrentIndex > #BackgroundMusic.Playlist then
+        BackgroundMusic.CurrentIndex = 1
+    end
+    NoirUI:Notify("🎵 Music", "Đã xóa bài hát khỏi playlist", "minus", "Success")
+end
+
+function NoirUI:SetMusicLoopMode(mode)
+    if mode == "single" or mode == "playlist" or mode == "off" then
+        BackgroundMusic.LoopMode = mode
+        if mode == "off" then
+            self:StopMusic()
+        end
+        NoirUI:Notify("🔄 Loop Mode", "Chế độ: " .. mode, "repeat", "Success")
+    end
+end
+
+-- // Sound Functions
 function NoirUI:SetCustomSound(soundType, soundId)
-    SoundSettings.CustomSounds[soundType] = soundId
+    local key = soundType:gsub("^%l", string.upper)
+    SoundSettings.CustomSounds[key] = soundId
 end
 
 function NoirUI:SetVibe(vibeName)
@@ -241,70 +316,26 @@ function NoirUI:SetVolume(volume)
     NoirUI:Notify("🔊 Volume", "Âm lượng: " .. math.floor(volume * 100) .. "%", "volume-2")
 end
 
--- // Background Music Controls
-function NoirUI:EnableBackgroundMusic(settings)
-    InitBackgroundMusic(settings)
-end
-
-function NoirUI:StartMusic()
-    if BackgroundMusic.CurrentSound and #BackgroundMusic.Playlist > 0 then
-        if BackgroundMusic.CurrentSound.Playing then
-            BackgroundMusic.CurrentSound.Resume()
-        else
-            PlayTrackById(BackgroundMusic.Playlist[BackgroundMusic.CurrentIndex])
-        end
-        BackgroundMusic.IsPlaying = true
-        BackgroundMusic.UIHidden = false
-        BackgroundMusic.CurrentSound.Volume = BackgroundMusic.Volume
+-- // Destroy UI Function
+function NoirUI:Destroy()
+    StopAndCleanupMusic()
+    
+    for _, connection in pairs(NoirUI.Connections) do
+        pcall(function() connection:Disconnect() end)
     end
-end
-
-function NoirUI:StopMusic()
-    if BackgroundMusic.CurrentSound then
-        BackgroundMusic.CurrentSound:Stop()
-        BackgroundMusic.IsPlaying = false
+    
+    for _, notif in pairs(NoirUI.Notifications) do
+        pcall(function() notif:Destroy() end)
     end
-end
-
-function NoirUI:PauseMusic()
-    if BackgroundMusic.CurrentSound and BackgroundMusic.IsPlaying then
-        BackgroundMusic.CurrentSound:Pause()
-        BackgroundMusic.IsPlaying = false
+    
+    local gui = game.CoreGui:FindFirstChild("NoirUI_V3_Ultimate")
+    if gui then
+        gui:Destroy()
     end
-end
-
-function NoirUI:ResumeMusic()
-    if BackgroundMusic.CurrentSound and not BackgroundMusic.IsPlaying and not BackgroundMusic.UIHidden then
-        BackgroundMusic.CurrentSound:Resume()
-        BackgroundMusic.IsPlaying = true
-    end
-end
-
-function NoirUI:SetMusicVolume(volume)
-    BackgroundMusic.Volume = math.clamp(volume, 0, 1)
-    if BackgroundMusic.CurrentSound then
-        BackgroundMusic.CurrentSound.Volume = BackgroundMusic.Volume
-    end
-end
-
-function NoirUI:AddMusicTrack(trackId)
-    table.insert(BackgroundMusic.Playlist, trackId)
-    NoirUI:Notify("➕ Added", "Đã thêm bài hát vào playlist", "plus")
-end
-
-function NoirUI:RemoveMusicTrack(index)
-    table.remove(BackgroundMusic.Playlist, index)
-    NoirUI:Notify("➖ Removed", "Đã xóa bài hát khỏi playlist", "minus")
-end
-
-function NoirUI:SetMusicLoopMode(mode)
-    if mode == "single" or mode == "playlist" or mode == "off" then
-        BackgroundMusic.LoopMode = mode
-        if mode == "off" then
-            self:StopMusic()
-        end
-        NoirUI:Notify("🔄 Loop Mode", "Chế độ: " .. mode, "repeat")
-    end
+    
+    NoirUI.Notifications = {}
+    NoirUI.ActiveConfirmFrame = nil
+    NoirUI.Connections = {}
 end
 
 -- // Subtitle
@@ -427,7 +458,6 @@ function NoirUI:CreateWindow(settings)
     local mainDefaultPos = settings.DefaultPosition or UDim2.new(0.5, -210, 0.5, -150)
     local floatDefaultPos = settings.FloatDefaultPosition or UDim2.new(0, 15, 0.5, -22)
     
-    -- // Khởi tạo Background Music nếu có settings
     if settings.BackgroundMusic then
         InitBackgroundMusic(settings.BackgroundMusic)
     end
@@ -530,9 +560,11 @@ function NoirUI:CreateWindow(settings)
                 LoadingFrame:Destroy()
             end
         end)
+        table.insert(NoirUI.Connections, loadingConnection)
     end
     
     -- Rainbow border
+    local rainbowConnection
     task.spawn(function()
         while Main and Main.Parent do
             for i = 0, 1, 0.01 do
@@ -552,7 +584,6 @@ function NoirUI:CreateWindow(settings)
         Main.Visible = true
         Main.Position = mainDefaultPos
         PlaySound("Open")
-        -- Tự động bắt đầu nhạc nền nếu có
         if settings.BackgroundMusic and settings.BackgroundMusic.AutoPlay then
             NoirUI:StartMusic()
         end
@@ -765,10 +796,10 @@ function NoirUI:CreateWindow(settings)
         end)
         fbtn.MouseButton1Click:Connect(function()
             PlaySound("Click")
+            StopAndCleanupMusic()
             ScreenGui:Destroy()
             destroyConfirm()
             PlaySound("Close")
-            NoirUI:StopMusic()
         end)
     end)
     
@@ -1198,6 +1229,7 @@ function NoirUI:CreateWindow(settings)
                     end
                 end)
                 table.insert(Tab.Connections, connection)
+                table.insert(NoirUI.Connections, connection)
             end
             return l
         end
@@ -1701,6 +1733,7 @@ function NoirUI:CreateWindow(settings)
                     end
                 end)
                 table.insert(Tab.Connections, refreshConnection)
+                table.insert(NoirUI.Connections, refreshConnection)
             end
         end
         
