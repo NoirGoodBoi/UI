@@ -33,7 +33,6 @@ end
 
 -- // Custom Vibe Sound System
 local VibeSounds = {
-    -- Âm thanh mặc định
     Default = {
         Click = "rbxassetid://9121544550",
         Tab = "rbxassetid://9121544550",
@@ -44,8 +43,6 @@ local VibeSounds = {
         Error = "rbxassetid://9121544550",
         Success = "rbxassetid://9121544550",
     },
-    
-    -- Âm thanh Cyber/Electronic
     Cyber = {
         Click = "rbxassetid://169653382",
         Tab = "rbxassetid://169653382",
@@ -56,8 +53,6 @@ local VibeSounds = {
         Error = "rbxassetid://183922415",
         Success = "rbxassetid://9121544550",
     },
-    
-    -- Âm thanh Soft/Nhẹ nhàng
     Soft = {
         Click = "rbxassetid://415202063",
         Tab = "rbxassetid://415202063",
@@ -68,8 +63,6 @@ local VibeSounds = {
         Error = "rbxassetid://5170587753",
         Success = "rbxassetid://6367344460",
     },
-    
-    -- Âm thanh Gaming/Retro
     Retro = {
         Click = "rbxassetid://132317637",
         Tab = "rbxassetid://132317637",
@@ -80,8 +73,6 @@ local VibeSounds = {
         Error = "rbxassetid://144434571",
         Success = "rbxassetid://280651216",
     },
-    
-    -- Âm thanh Nature/Thiên nhiên
     Nature = {
         Click = "rbxassetid://3628697780",
         Tab = "rbxassetid://3628697780",
@@ -94,13 +85,12 @@ local VibeSounds = {
     },
 }
 
--- // Sound System với Vibe
+-- // Sound System
 local SoundSettings = {
     Enabled = true,
     Volume = 0.5,
-    CurrentVibe = "Default", -- Default, Cyber, Soft, Retro, Nature
+    CurrentVibe = "Default",
     CustomSounds = {},
-    -- Sound IDs
     ClickSoundId = nil,
     TabSoundId = nil,
     ElementSoundId = nil,
@@ -111,22 +101,30 @@ local SoundSettings = {
     SuccessSoundId = nil,
 }
 
--- // Hàm phát âm thanh với Vibe
+-- // Background Music System
+local BackgroundMusic = {
+    CurrentSound = nil,
+    CurrentTrackId = nil,
+    IsPlaying = false,
+    Volume = 0.3,
+    Playlist = {},
+    CurrentIndex = 1,
+    LoopMode = "single",
+    UIHidden = false,
+}
+
 local function PlaySound(soundType)
     if not SoundSettings.Enabled then return end
     
     local soundId = nil
     
-    -- Kiểm tra custom sound trước
     if SoundSettings.CustomSounds[soundType] then
         soundId = SoundSettings.CustomSounds[soundType]
     else
-        -- Lấy sound từ Vibe hiện tại
         local vibe = VibeSounds[SoundSettings.CurrentVibe]
         if vibe and vibe[soundType] then
             soundId = vibe[soundType]
         else
-            -- Fallback về Default
             local defaultVibe = VibeSounds.Default
             if defaultVibe and defaultVibe[soundType] then
                 soundId = defaultVibe[soundType]
@@ -134,7 +132,6 @@ local function PlaySound(soundType)
         end
     end
     
-    -- Fallback cho các sound type cụ thể
     if not soundId then
         if soundType == "Click" then soundId = SoundSettings.ClickSoundId
         elseif soundType == "Tab" then soundId = SoundSettings.TabSoundId
@@ -158,22 +155,69 @@ local function PlaySound(soundType)
     task.delay(3, function() if sound then sound:Destroy() end end)
 end
 
--- // Hàm để set custom sound riêng
+-- // Background Music Functions
+local function PlayTrackById(trackId)
+    if not trackId or not BackgroundMusic.CurrentSound then return end
+    
+    BackgroundMusic.CurrentSound:Stop()
+    BackgroundMusic.CurrentSound.SoundId = "rbxassetid://" .. tostring(trackId)
+    BackgroundMusic.CurrentSound:Play()
+    BackgroundMusic.CurrentTrackId = trackId
+    BackgroundMusic.IsPlaying = true
+end
+
+local function PlayNextTrack()
+    if BackgroundMusic.LoopMode == "single" and BackgroundMusic.CurrentTrackId then
+        PlayTrackById(BackgroundMusic.CurrentTrackId)
+    elseif BackgroundMusic.LoopMode == "playlist" and #BackgroundMusic.Playlist > 0 then
+        BackgroundMusic.CurrentIndex = BackgroundMusic.CurrentIndex % #BackgroundMusic.Playlist + 1
+        PlayTrackById(BackgroundMusic.Playlist[BackgroundMusic.CurrentIndex])
+    end
+end
+
+local function InitBackgroundMusic(settings)
+    if not settings or not settings.Enabled then return end
+    
+    if settings.Playlist and #settings.Playlist > 0 then
+        BackgroundMusic.Playlist = settings.Playlist
+        BackgroundMusic.LoopMode = settings.LoopMode or "single"
+    elseif settings.SingleTrack then
+        BackgroundMusic.Playlist = {settings.SingleTrack}
+        BackgroundMusic.LoopMode = "single"
+    end
+    
+    BackgroundMusic.Volume = settings.Volume or 0.3
+    
+    BackgroundMusic.CurrentSound = Instance.new("Sound")
+    BackgroundMusic.CurrentSound.Volume = BackgroundMusic.Volume
+    BackgroundMusic.CurrentSound.Looped = false
+    BackgroundMusic.CurrentSound.Parent = game:GetService("CoreGui")
+    
+    BackgroundMusic.CurrentSound.Ended:Connect(function()
+        if BackgroundMusic.IsPlaying and not BackgroundMusic.UIHidden then
+            PlayNextTrack()
+        end
+    end)
+    
+    if settings.AutoPlay then
+        if #BackgroundMusic.Playlist > 0 then
+            BackgroundMusic.CurrentIndex = 1
+            PlayTrackById(BackgroundMusic.Playlist[1])
+        end
+    end
+end
+
 function NoirUI:SetCustomSound(soundType, soundId)
     SoundSettings.CustomSounds[soundType] = soundId
 end
 
--- // Hàm để đổi Vibe
 function NoirUI:SetVibe(vibeName)
     if VibeSounds[vibeName] then
         SoundSettings.CurrentVibe = vibeName
         NoirUI:Notify("🎵 Vibe Changed", "Đã chuyển sang âm thanh " .. vibeName, "music")
-    else
-        warn("Vibe không tồn tại: " .. vibeName)
     end
 end
 
--- // Hàm để lấy danh sách Vibe có sẵn
 function NoirUI:GetAvailableVibes()
     local vibes = {}
     for name, _ in pairs(VibeSounds) do
@@ -182,44 +226,85 @@ function NoirUI:GetAvailableVibes()
     return vibes
 end
 
--- // Các hàm set sound cũ (giữ nguyên để tương thích)
 function NoirUI:SetSound(soundType, soundId)
-    if soundType == "click" then
-        SoundSettings.ClickSoundId = soundId
-        SoundSettings.CustomSounds["Click"] = soundId
-    elseif soundType == "tab" then
-        SoundSettings.TabSoundId = soundId
-        SoundSettings.CustomSounds["Tab"] = soundId
-    elseif soundType == "element" then
-        SoundSettings.ElementSoundId = soundId
-        SoundSettings.CustomSounds["Element"] = soundId
-    elseif soundType == "open" then
-        SoundSettings.OpenSoundId = soundId
-        SoundSettings.CustomSounds["Open"] = soundId
-    elseif soundType == "close" then
-        SoundSettings.CloseSoundId = soundId
-        SoundSettings.CustomSounds["Close"] = soundId
-    elseif soundType == "notification" then
-        SoundSettings.NotificationSoundId = soundId
-        SoundSettings.CustomSounds["Notification"] = soundId
-    elseif soundType == "error" then
-        SoundSettings.ErrorSoundId = soundId
-        SoundSettings.CustomSounds["Error"] = soundId
-    elseif soundType == "success" then
-        SoundSettings.SuccessSoundId = soundId
-        SoundSettings.CustomSounds["Success"] = soundId
-    end
+    local key = soundType:gsub("^%l", string.upper)
+    SoundSettings.CustomSounds[key] = soundId
 end
 
 function NoirUI:ToggleSound(enabled)
     SoundSettings.Enabled = enabled
-    local status = enabled and "Bật" or "Tắt"
-    NoirUI:Notify("🔊 Sound", "Đã " .. status .. " âm thanh", enabled and "volume-2" or "volume-x")
+    NoirUI:Notify("🔊 Sound", "Đã " .. (enabled and "bật" or "tắt") .. " âm thanh", enabled and "volume-2" or "volume-x")
 end
 
 function NoirUI:SetVolume(volume)
     SoundSettings.Volume = math.clamp(volume, 0, 1)
-    NoirUI:Notify("🔊 Volume", "Đã chỉnh âm lượng: " .. math.floor(volume * 100) .. "%", "volume-2")
+    NoirUI:Notify("🔊 Volume", "Âm lượng: " .. math.floor(volume * 100) .. "%", "volume-2")
+end
+
+-- // Background Music Controls
+function NoirUI:EnableBackgroundMusic(settings)
+    InitBackgroundMusic(settings)
+end
+
+function NoirUI:StartMusic()
+    if BackgroundMusic.CurrentSound and #BackgroundMusic.Playlist > 0 then
+        if BackgroundMusic.CurrentSound.Playing then
+            BackgroundMusic.CurrentSound.Resume()
+        else
+            PlayTrackById(BackgroundMusic.Playlist[BackgroundMusic.CurrentIndex])
+        end
+        BackgroundMusic.IsPlaying = true
+        BackgroundMusic.UIHidden = false
+        BackgroundMusic.CurrentSound.Volume = BackgroundMusic.Volume
+    end
+end
+
+function NoirUI:StopMusic()
+    if BackgroundMusic.CurrentSound then
+        BackgroundMusic.CurrentSound:Stop()
+        BackgroundMusic.IsPlaying = false
+    end
+end
+
+function NoirUI:PauseMusic()
+    if BackgroundMusic.CurrentSound and BackgroundMusic.IsPlaying then
+        BackgroundMusic.CurrentSound:Pause()
+        BackgroundMusic.IsPlaying = false
+    end
+end
+
+function NoirUI:ResumeMusic()
+    if BackgroundMusic.CurrentSound and not BackgroundMusic.IsPlaying and not BackgroundMusic.UIHidden then
+        BackgroundMusic.CurrentSound:Resume()
+        BackgroundMusic.IsPlaying = true
+    end
+end
+
+function NoirUI:SetMusicVolume(volume)
+    BackgroundMusic.Volume = math.clamp(volume, 0, 1)
+    if BackgroundMusic.CurrentSound then
+        BackgroundMusic.CurrentSound.Volume = BackgroundMusic.Volume
+    end
+end
+
+function NoirUI:AddMusicTrack(trackId)
+    table.insert(BackgroundMusic.Playlist, trackId)
+    NoirUI:Notify("➕ Added", "Đã thêm bài hát vào playlist", "plus")
+end
+
+function NoirUI:RemoveMusicTrack(index)
+    table.remove(BackgroundMusic.Playlist, index)
+    NoirUI:Notify("➖ Removed", "Đã xóa bài hát khỏi playlist", "minus")
+end
+
+function NoirUI:SetMusicLoopMode(mode)
+    if mode == "single" or mode == "playlist" or mode == "off" then
+        BackgroundMusic.LoopMode = mode
+        if mode == "off" then
+            self:StopMusic()
+        end
+        NoirUI:Notify("🔄 Loop Mode", "Chế độ: " .. mode, "repeat")
+    end
 end
 
 -- // Subtitle
@@ -339,9 +424,13 @@ function NoirUI:CreateWindow(settings)
     ScreenGui.ResetOnSpawn = false
     local ACCENT = settings.Accent or Color3.fromRGB(170, 85, 255)
     
-    -- // Vị trí mặc định cho main UI và float button
     local mainDefaultPos = settings.DefaultPosition or UDim2.new(0.5, -210, 0.5, -150)
     local floatDefaultPos = settings.FloatDefaultPosition or UDim2.new(0, 15, 0.5, -22)
+    
+    -- // Khởi tạo Background Music nếu có settings
+    if settings.BackgroundMusic then
+        InitBackgroundMusic(settings.BackgroundMusic)
+    end
     
     -- // MAIN UI
     local Main = Instance.new("Frame", ScreenGui)
@@ -355,8 +444,6 @@ function NoirUI:CreateWindow(settings)
     MainStroke.Thickness = 2
     
     SetupBackground(Main, settings.Background, settings.MainBgColor, settings.MainBgTransparency or 0)
-    
-    -- // Cho phép kéo thả main UI
     MakeDraggable(Main)
     
     -- // LOADING
@@ -464,7 +551,11 @@ function NoirUI:CreateWindow(settings)
         task.wait(2)
         Main.Visible = true
         Main.Position = mainDefaultPos
-        PlaySound("Open") -- Phát âm thanh mở UI
+        PlaySound("Open")
+        -- Tự động bắt đầu nhạc nền nếu có
+        if settings.BackgroundMusic and settings.BackgroundMusic.AutoPlay then
+            NoirUI:StartMusic()
+        end
     end
     
     if settings.KeySystem then
@@ -563,7 +654,7 @@ function NoirUI:CreateWindow(settings)
                     StartLoading()
                     ShowMainUIAfterLoading()
                 else
-                    PlaySound("Error") -- Phát âm thanh lỗi
+                    PlaySound("Error")
                     KI.Text = ""
                     KI.PlaceholderText = "Key không chính xác!"
                     task.wait(1)
@@ -677,6 +768,7 @@ function NoirUI:CreateWindow(settings)
             ScreenGui:Destroy()
             destroyConfirm()
             PlaySound("Close")
+            NoirUI:StopMusic()
         end)
     end)
     
@@ -855,11 +947,20 @@ function NoirUI:CreateWindow(settings)
         else
             if Main.Visible then
                 PlaySound("Close")
+                BackgroundMusic.UIHidden = true
+                if BackgroundMusic.CurrentSound and BackgroundMusic.IsPlaying then
+                    BackgroundMusic.CurrentSound.Volume = 0
+                end
             else
                 PlaySound("Open")
+                BackgroundMusic.UIHidden = false
+                if BackgroundMusic.CurrentSound and BackgroundMusic.IsPlaying then
+                    BackgroundMusic.CurrentSound.Volume = BackgroundMusic.Volume
+                elseif BackgroundMusic.CurrentSound and not BackgroundMusic.IsPlaying and BackgroundMusic.Playlist[1] then
+                    NoirUI:StartMusic()
+                end
             end
             Main.Visible = not Main.Visible
-            -- Khi mở main UI (bật từ float button), reset về vị trí cũ
             if Main.Visible then
                 Main.Position = mainDefaultPos
             end
@@ -868,7 +969,6 @@ function NoirUI:CreateWindow(settings)
     
     -- // NOTIFICATIONS
     function NoirUI:Notify(title, message, iconName, soundType)
-        -- Phát âm thanh nếu có
         if soundType then
             PlaySound(soundType)
         else
