@@ -1,16 +1,24 @@
+--[[
+	Library Owner: NoirNF
+	UI Engineer: NoirNF
+	Lua Scripter: NoirNF, Adono
+	Executor Compatibility Tester: Adono
+	Theme Creator: Adono
+	Animation Engineer: Adono
+]]
+
+--Core
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 
--- // Xóa UI cũ nếu tồn tại
 local OldGui = game.CoreGui:FindFirstChild("NoirUI_V3_Ultimate")
 if OldGui then OldGui:Destroy() end
 
 local NoirUI = { Notifications = {}, ActiveConfirmFrame = nil, CustomCommands = {}, Connections = {} }
 
--- // Lucide Icon
 local LucideIcons = loadstring(game:HttpGet("https://raw.githubusercontent.com/NoirGoodBoi/UI/refs/heads/main/icons.lua"))()
 
 local function ResolveIcon(iconInput)
@@ -31,7 +39,9 @@ local function ResolveIcon(iconInput)
     return nil
 end
 
--- // Custom Vibe Sound System
+--VibeSound Defaut
+--If you prefer, you can also use these pre-made VibeSounds :)
+
 local VibeSounds = {
     Default = {
         Click = "rbxassetid://9121544550",
@@ -85,7 +95,6 @@ local VibeSounds = {
     },
 }
 
--- // Sound System
 local SoundSettings = {
     Enabled = true,
     Volume = 0.5,
@@ -101,7 +110,6 @@ local SoundSettings = {
     SuccessSoundId = nil,
 }
 
--- // Background Music System
 local BackgroundMusic = {
     CurrentSound = nil,
     CurrentTrackId = nil,
@@ -155,7 +163,6 @@ local function PlaySound(soundType)
     task.delay(3, function() if sound then sound:Destroy() end end)
 end
 
--- // Background Music Functions
 local function PlayTrackById(trackId)
     if not trackId or not BackgroundMusic.CurrentSound then return end
     
@@ -214,7 +221,6 @@ local function InitBackgroundMusic(settings)
     end
 end
 
--- // Public Music Functions
 function NoirUI:EnableBackgroundMusic(settings)
     InitBackgroundMusic(settings)
 end
@@ -280,7 +286,6 @@ function NoirUI:SetMusicLoopMode(mode)
     end
 end
 
--- // Sound Functions
 function NoirUI:SetCustomSound(soundType, soundId)
     local key = soundType:gsub("^%l", string.upper)
     SoundSettings.CustomSounds[key] = soundId
@@ -316,7 +321,6 @@ function NoirUI:SetVolume(volume)
     NoirUI:Notify("🔊 Volume", "Âm lượng: " .. math.floor(volume * 100) .. "%", "volume-2")
 end
 
--- // Destroy UI Function
 function NoirUI:Destroy()
     StopAndCleanupMusic()
     
@@ -338,7 +342,6 @@ function NoirUI:Destroy()
     NoirUI.Connections = {}
 end
 
--- // Subtitle
 local function AddSubtitle(parent, subtitleText, yOffset)
     if not subtitleText or subtitleText == "" then return nil end
     
@@ -369,7 +372,6 @@ local function AddSubtitle(parent, subtitleText, yOffset)
     return subtitle
 end
 
--- // Draggable
 local function MakeDraggable(frame)
     local dragging, dragInput, dragStart, startPos
     frame.InputBegan:Connect(function(input)
@@ -397,7 +399,6 @@ local function MakeDraggable(frame)
     end)
 end
 
--- // Setup background
 local function SetupBackground(frame, bgSetting, bgColor, defaultTransparency)
     local existingBg = frame:FindFirstChild("_BackgroundImage")
     if existingBg then existingBg:Destroy() end
@@ -462,7 +463,6 @@ function NoirUI:CreateWindow(settings)
         InitBackgroundMusic(settings.BackgroundMusic)
     end
     
-    -- // MAIN UI
     local Main = Instance.new("Frame", ScreenGui)
     Main.Size = UDim2.new(0, 420, 0, 300)
     Main.Position = mainDefaultPos
@@ -476,7 +476,6 @@ function NoirUI:CreateWindow(settings)
     SetupBackground(Main, settings.Background, settings.MainBgColor, settings.MainBgTransparency or 0)
     MakeDraggable(Main)
     
-    -- // LOADING
     local LoadingFrame = Instance.new("Frame", ScreenGui)
     LoadingFrame.Size = UDim2.new(0, 300, 0, 120)
     LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
@@ -563,7 +562,6 @@ function NoirUI:CreateWindow(settings)
         table.insert(NoirUI.Connections, loadingConnection)
     end
     
-    -- Rainbow border
     local rainbowConnection
     task.spawn(function()
         while Main and Main.Parent do
@@ -575,7 +573,6 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- // KEY SYSTEM
     local KeySolved = false
     local KUI = nil
     
@@ -698,7 +695,6 @@ function NoirUI:CreateWindow(settings)
         ShowMainUIAfterLoading()
     end
     
-    -- // HEADER
     local Header = Instance.new("Frame", Main)
     Header.Size = UDim2.new(1, 0, 0, 40)
     Header.BackgroundTransparency = 1
@@ -742,7 +738,7 @@ function NoirUI:CreateWindow(settings)
     end
     
     local isM = false
-    TopB("-", Color3.fromRGB(255, 200, 50), function()
+    TopB("—", Color3.fromRGB(255, 200, 50), function()
         PlaySound("Click")
         isM = not isM
         TweenService:Create(Main, TweenInfo.new(0.4), {Size = isM and UDim2.new(0, 420, 0, 40) or UDim2.new(0, 420, 0, 300)}):Play()
@@ -803,7 +799,6 @@ function NoirUI:CreateWindow(settings)
         end)
     end)
     
-    -- // SIDEBAR
     local Side = Instance.new("Frame", Main)
     Side.Size = UDim2.new(0, 110, 1, -50)
     Side.Position = UDim2.new(0, 5, 0, 40)
@@ -850,7 +845,6 @@ function NoirUI:CreateWindow(settings)
     Instance.new("UICorner", AI).CornerRadius = UDim.new(1,0)
     Instance.new("UIStroke", AI).Color = ACCENT
     
-    -- // CONTENT
     local Cont = Instance.new("Frame", Main)
     Cont.Size = UDim2.new(1, -125, 1, -50)
     Cont.Position = UDim2.new(0, 120, 0, 40)
@@ -864,7 +858,6 @@ function NoirUI:CreateWindow(settings)
     ContStroke.Thickness = 1
     ContStroke.Transparency = 0.7
     
-    -- // FLOAT BUTTON
     local TBtn = Instance.new("ImageButton", ScreenGui)
     TBtn.Size = UDim2.new(0, 45, 0, 45)
     TBtn.Position = floatDefaultPos
@@ -998,7 +991,6 @@ function NoirUI:CreateWindow(settings)
         end
     end)
     
-    -- // NOTIFICATIONS
     function NoirUI:Notify(title, message, iconName, soundType)
         if soundType then
             PlaySound(soundType)
@@ -1070,7 +1062,6 @@ function NoirUI:CreateWindow(settings)
         end)
     end
     
-    -- // TABS & ELEMENTS
     local Window = {}
     
     function Window:CreateTab(name, icon)
@@ -1206,7 +1197,6 @@ function NoirUI:CreateWindow(settings)
             if prop == "Text" then filterElements(SearchBox.Text) end
         end)
         
-        -- === ELEMENTS ===
         function Tab:CreateLabel(text, updateFunction)
             local l = Instance.new("TextLabel", ContentFrame)
             l.Size = UDim2.new(0.95, 0, 0, 20)
