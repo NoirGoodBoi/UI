@@ -18,9 +18,8 @@ function NoirUI:CreateWindow(settings)
     
     -- Blur effect
     local Blur = Instance.new("BlurEffect", game.Lighting)
-    Blur.Size = 0
-    TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 12}):Play()
-
+    Blur.Size = 12  -- Mặc định là bật
+    
     -- Main Window
     local Main = Instance.new("Frame", ScreenGui)
     Main.Size = UDim2.new(0,300,0,200)
@@ -152,6 +151,9 @@ function NoirUI:CreateWindow(settings)
         if isMinimized then return end
         isMinimized = true
         
+        -- Tắt blur khi minimize
+        TweenService:Create(Blur, TweenInfo.new(0.2), {Size = 0}):Play()
+        
         -- Ẩn container
         TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {
             Size = UDim2.new(1,-10,0,0)
@@ -169,6 +171,9 @@ function NoirUI:CreateWindow(settings)
     local function Maximize()
         if not isMinimized then return end
         isMinimized = false
+        
+        -- Bật lại blur
+        TweenService:Create(Blur, TweenInfo.new(0.2), {Size = 12}):Play()
         
         -- Mở rộng Main
         TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
@@ -442,7 +447,7 @@ function NoirUI:CreateWindow(settings)
             TweenService:Create(b, TweenInfo.new(0.08), {BackgroundColor3 = ACCENT}):Play()
             task.wait(0.08)
             TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30,30,30)}):Play()
-            if options.Callback then options.Callback() end
+            if options.Callback then options.Callback(b) end
         end)
         updateUISize()
         return b
@@ -730,6 +735,7 @@ function NoirUI:CreateWindow(settings)
                 task.wait(0.2)
                 pickerPanel.Visible = false
             end
+            updateUISize()
         end)
         
         updatePickerDisplay()
