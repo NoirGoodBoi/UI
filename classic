@@ -13,7 +13,7 @@ function NoirUI:CreateWindow(settings)
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
     local ACCENT = settings.Accent or Color3.fromRGB(170,85,255)
-    local BACKGROUND_SETTING = settings.Background or "color" -- "color" hoặc "image"
+    local BACKGROUND_SETTING = settings.Background or "color"
     local BACKGROUND_IMAGE = settings.BackgroundImage or ""
     
     -- Blur effect
@@ -21,13 +21,46 @@ function NoirUI:CreateWindow(settings)
     Blur.Size = 0
     TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 12}):Play()
 
-    -- Main Window
+    -- Main Window (nhỏ hơn)
     local Main = Instance.new("Frame", ScreenGui)
-    Main.Size = UDim2.new(0,380,0,400)
-    Main.Position = UDim2.new(0.5,-190,0.5,-200)
+    Main.Size = UDim2.new(0,320,0,360)  -- Từ 380x400 xuống 320x360
+    Main.Position = UDim2.new(0.5,-160,0.5,-180)
     Main.BackgroundColor3 = Color3.fromRGB(10,10,10)
     Main.BackgroundTransparency = 0
+    Main.Active = true  -- Cho phép drag
+    Main.Draggable = true  -- Drag cơ bản
     Instance.new("UICorner", Main)
+    
+    -- Drag system cho Main (nâng cao)
+    local dragMain = false
+    local dragMainStart = nil
+    local dragMainPos = nil
+    
+    Main.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            local mousePos = UIS:GetMouseLocation()
+            local mainPos = Main.AbsolutePosition
+            if mousePos.X >= mainPos.X and mousePos.X <= mainPos.X + Main.AbsoluteSize.X and
+               mousePos.Y >= mainPos.Y and mousePos.Y <= mainPos.Y + 45 then  -- Chỉ drag khi kéo header
+                dragMain = true
+                dragMainStart = input.Position
+                dragMainPos = Main.Position
+            end
+        end
+    end)
+    
+    UIS.InputChanged:Connect(function(input)
+        if dragMain and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragMainStart
+            Main.Position = UDim2.new(dragMainPos.X.Scale, dragMainPos.X.Offset + delta.X, dragMainPos.Y.Scale, dragMainPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragMain = false
+        end
+    end)
     
     -- Background image
     if BACKGROUND_SETTING == "image" and BACKGROUND_IMAGE ~= "" then
@@ -101,17 +134,25 @@ function NoirUI:CreateWindow(settings)
         if floatBtn then floatBtn.Visible = true end
     end)
 
-    -- Container
+    -- Container (ScrollingFrame tự co giãn)
     local Container = Instance.new("ScrollingFrame", Main)
     Container.Size = UDim2.new(1,-10,1,-55)
     Container.Position = UDim2.new(0,5,0,50)
     Container.BackgroundTransparency = 1
-    Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Container.AutomaticCanvasSize = Enum.AutomaticSize.Y  -- TỰ ĐỘNG CO GIÃN
+    Container.CanvasSize = UDim2.new(0,0,0,0)
     Container.ScrollBarThickness = 2
     Container.BorderSizePixel = 0
+    
     local Layout = Instance.new("UIListLayout", Container)
     Layout.Padding = UDim.new(0,8)
     Layout.SortOrder = Enum.SortOrder.LayoutOrder
+    
+    -- Cập nhật CanvasSize mỗi khi có phần tử mới
+    local function updateCanvas()
+        task.wait(0.05)
+        Container.CanvasSize = UDim2.new(0,0,0,Layout.AbsoluteContentSize.Y + 10)
+    end
 
     -- Notify System
     local NotifyHolder = ScreenGui:FindFirstChild("NotifyHolder") or Instance.new("Frame", ScreenGui)
@@ -131,7 +172,6 @@ function NoirUI:CreateWindow(settings)
     function NoirUI:Notify(title, text, duration)
         duration = duration or 4
         
-        -- Create notify frame
         local n = Instance.new("Frame", NotifyHolder)
         n.Size = UDim2.new(1,0,0,70)
         n.BackgroundColor3 = Color3.fromRGB(20,20,20)
@@ -139,13 +179,11 @@ function NoirUI:CreateWindow(settings)
         n.ClipsDescendants = true
         Instance.new("UICorner", n).CornerRadius = UDim.new(0,8)
         
-        -- Stroke
         local ns = Instance.new("UIStroke", n)
         ns.Color = ACCENT
         ns.Thickness = 1.5
         ns.Transparency = 1
         
-        -- Title
         local nt = Instance.new("TextLabel", n)
         nt.Size = UDim2.new(1,-15,0,25)
         nt.Position = UDim2.new(0,15,0,5)
@@ -156,7 +194,6 @@ function NoirUI:CreateWindow(settings)
         nt.BackgroundTransparency = 1
         nt.TextXAlignment = Enum.TextXAlignment.Left
         
-        -- Content
         local nc = Instance.new("TextLabel", n)
         nc.Size = UDim2.new(1,-15,0,30)
         nc.Position = UDim2.new(0,15,0,32)
@@ -169,17 +206,14 @@ function NoirUI:CreateWindow(settings)
         nc.TextWrapped = true
         nc.TextYAlignment = Enum.TextYAlignment.Top
         
-        -- Progress bar
         local progress = Instance.new("Frame", n)
         progress.Size = UDim2.new(1,0,0,2)
         progress.Position = UDim2.new(0,0,1,-2)
         progress.BackgroundColor3 = ACCENT
         progress.BackgroundTransparency = 0.3
         
-        -- Add to list
         table.insert(activeNotifies, n)
         
-        -- Update positions (push up effect)
         local function updatePositions()
             for i, notify in ipairs(activeNotifies) do
                 local targetPos = UDim2.new(0,0,0,(i-1) * 80)
@@ -187,7 +221,6 @@ function NoirUI:CreateWindow(settings)
             end
         end
         
-        -- Animate in
         n.Position = UDim2.new(0,100,0,0)
         n.BackgroundTransparency = 1
         TweenService:Create(n, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
@@ -196,16 +229,13 @@ function NoirUI:CreateWindow(settings)
         }):Play()
         TweenService:Create(ns, TweenInfo.new(0.3), {Transparency = 0}):Play()
         
-        -- Progress bar animation
         local progressTween = TweenService:Create(progress, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
             Size = UDim2.new(0,0,0,2)
         })
         progressTween:Play()
         
-        -- Auto remove
         task.delay(duration, function()
             if n and n.Parent then
-                -- Remove from list
                 for i, v in ipairs(activeNotifies) do
                     if v == n then
                         table.remove(activeNotifies, i)
@@ -213,7 +243,6 @@ function NoirUI:CreateWindow(settings)
                     end
                 end
                 
-                -- Animate out
                 TweenService:Create(n, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {
                     Position = UDim2.new(0,-100,0,0),
                     BackgroundTransparency = 1
@@ -222,8 +251,6 @@ function NoirUI:CreateWindow(settings)
                 
                 task.wait(0.25)
                 if n and n.Parent then n:Destroy() end
-                
-                -- Update remaining positions
                 updatePositions()
             end
         end)
@@ -231,7 +258,7 @@ function NoirUI:CreateWindow(settings)
         return n
     end
 
-    -- Float Button
+    -- Float Button (có stroke giống UI chính + drag)
     local floatBtn = Instance.new("TextButton", ScreenGui)
     floatBtn.Size = UDim2.new(0,50,0,50)
     floatBtn.Position = UDim2.new(0,20,0.5,-25)
@@ -240,11 +267,28 @@ function NoirUI:CreateWindow(settings)
     floatBtn.TextColor3 = Color3.new(1,1,1)
     floatBtn.TextSize = 24
     floatBtn.TextScaled = true
+    floatBtn.Draggable = true
     Instance.new("UICorner", floatBtn).CornerRadius = UDim.new(1,0)
     
+    -- Float Button Stroke (giống UI chính)
     local floatStroke = Instance.new("UIStroke", floatBtn)
-    floatStroke.Color = ACCENT
     floatStroke.Thickness = 2
+    local floatGlow = Instance.new("UIStroke", floatBtn)
+    floatGlow.Thickness = 6
+    floatGlow.Transparency = 0.7
+    
+    -- Rainbow cho float button
+    task.spawn(function()
+        while rainbowActive and floatBtn and floatBtn.Parent do
+            for i = 0,1,0.02 do
+                if not rainbowActive or not floatBtn or not floatBtn.Parent then break end
+                local c = Color3.fromHSV(i,1,1)
+                floatStroke.Color = c
+                floatGlow.Color = c
+                task.wait(0.02)
+            end
+        end
+    end)
     
     if settings.FloatIcon then
         floatBtn.Text = ""
@@ -255,46 +299,41 @@ function NoirUI:CreateWindow(settings)
         fimg.Image = "rbxassetid://" .. tostring(settings.FloatIcon):gsub("%D", "")
     end
     
-    -- Float Button Drag System (FIXED)
-    local dragging = false
-    local dragInput = nil
-    local dragStart = nil
-    local startPos = nil
+    -- Float Button Drag System (nâng cao)
+    local draggingFloat = false
+    local dragFloatStart = nil
+    local startFloatPos = nil
     
     floatBtn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = floatBtn.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
+            draggingFloat = true
+            dragFloatStart = input.Position
+            startFloatPos = floatBtn.Position
         end
     end)
     
-    floatBtn.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            floatBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    UIS.InputChanged:Connect(function(input)
+        if draggingFloat and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragFloatStart
+            floatBtn.Position = UDim2.new(startFloatPos.X.Scale, startFloatPos.X.Offset + delta.X, startFloatPos.Y.Scale, startFloatPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            draggingFloat = false
         end
     end)
     
     local mainVisible = true
     floatBtn.MouseButton1Click:Connect(function()
-        if not dragging then
+        if not draggingFloat then
             mainVisible = not mainVisible
             Main.Visible = mainVisible
             TweenService:Create(Blur, TweenInfo.new(0.2), {Size = mainVisible and 12 or 0}):Play()
         end
     end)
 
-    -- Helper functions for UI elements
-    local windowElements = {}
-    local elementCount = 0
-    
     -- Dropdown class
     local Dropdown = {}
     Dropdown.__index = Dropdown
@@ -334,7 +373,9 @@ function NoirUI:CreateWindow(settings)
         self.dropdown.Visible = false
     end
     
-    -- Create Window Elements
+    -- Create Window Elements (cập nhật canvas)
+    local elementCount = 0
+    
     function NoirUI:CreateSection(text)
         elementCount = elementCount + 1
         local s = Instance.new("TextLabel", Container)
@@ -345,6 +386,7 @@ function NoirUI:CreateWindow(settings)
         s.TextSize = 14
         s.BackgroundTransparency = 1
         s.LayoutOrder = elementCount
+        updateCanvas()
         return s
     end
     
@@ -360,6 +402,7 @@ function NoirUI:CreateWindow(settings)
         l.TextXAlignment = Enum.TextXAlignment.Left
         l.LayoutOrder = elementCount
         Instance.new("UIPadding", l).PaddingLeft = UDim.new(0,8)
+        updateCanvas()
         return l
     end
     
@@ -378,6 +421,7 @@ function NoirUI:CreateWindow(settings)
         p.LayoutOrder = elementCount
         Instance.new("UIPadding", p).PaddingLeft = UDim.new(0,8)
         Instance.new("UIPadding", p).PaddingRight = UDim.new(0,8)
+        updateCanvas()
         return p
     end
     
@@ -399,7 +443,7 @@ function NoirUI:CreateWindow(settings)
             TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30,30,30)}):Play()
             if options.Callback then options.Callback() end
         end)
-        
+        updateCanvas()
         return b
     end
     
@@ -429,7 +473,7 @@ function NoirUI:CreateWindow(settings)
             task.wait()
             b.MouseButton1Click:Fire()
         end
-        
+        updateCanvas()
         return {SetValue = function(s) if s ~= state then b.MouseButton1Click:Fire() end end}
     end
     
@@ -506,7 +550,7 @@ function NoirUI:CreateWindow(settings)
                 dragging = false
             end
         end)
-        
+        updateCanvas()
         return {SetValue = function(v) 
             v = math.clamp(v, min, max)
             local percent = (v - min)/(max - min)
@@ -535,7 +579,7 @@ function NoirUI:CreateWindow(settings)
         box.FocusLost:Connect(function(enterPressed)
             if options.Callback then options.Callback(box.Text) end
         end)
-        
+        updateCanvas()
         return box
     end
     
@@ -567,7 +611,6 @@ function NoirUI:CreateWindow(settings)
         cpBox.Text = ""
         Instance.new("UICorner", cpBox).CornerRadius = UDim.new(0,4)
         
-        -- Color picker expanded panel
         local pickerPanel = Instance.new("Frame", cpFrame)
         pickerPanel.Size = UDim2.new(1,0,0,0)
         pickerPanel.Position = UDim2.new(0,0,0,45)
@@ -576,7 +619,6 @@ function NoirUI:CreateWindow(settings)
         pickerPanel.ClipsDescendants = true
         Instance.new("UICorner", pickerPanel).CornerRadius = UDim.new(0,0,0,6)
         
-        -- Color palette (gradient)
         local palette = Instance.new("ImageLabel", pickerPanel)
         palette.Size = UDim2.new(1,-20,0,120)
         palette.Position = UDim2.new(0,10,0,10)
@@ -584,7 +626,6 @@ function NoirUI:CreateWindow(settings)
         palette.Image = "rbxassetid://4155801252"
         Instance.new("UICorner", palette).CornerRadius = UDim.new(0,4)
         
-        -- Palette picker dot
         local paletteDot = Instance.new("Frame", palette)
         paletteDot.Size = UDim2.new(0,10,0,10)
         paletteDot.BackgroundColor3 = Color3.new(1,1,1)
@@ -592,14 +633,12 @@ function NoirUI:CreateWindow(settings)
         Instance.new("UICorner", paletteDot).CornerRadius = UDim.new(1,0)
         paletteDot.ZIndex = 2
         
-        -- Hue bar
         local hueBar = Instance.new("ImageLabel", pickerPanel)
         hueBar.Size = UDim2.new(1,-20,0,15)
         hueBar.Position = UDim2.new(0,10,0,140)
         hueBar.Image = "rbxassetid://3641079629"
         Instance.new("UICorner", hueBar).CornerRadius = UDim.new(1,0)
         
-        -- Hue picker dot
         local hueDot = Instance.new("Frame", hueBar)
         hueDot.Size = UDim2.new(0,10,0,17)
         hueDot.Position = UDim2.new(0,-5,0,-1)
@@ -614,14 +653,12 @@ function NoirUI:CreateWindow(settings)
             cpBox.BackgroundColor3 = finalColor
             palette.BackgroundColor3 = Color3.fromHSV(currentH, 1, 1)
             
-            -- Update dot positions
             paletteDot.Position = UDim2.new(currentS, -5, 1 - currentV, -5)
             hueDot.Position = UDim2.new(1 - currentH, -5, 0, -1)
             
             if options.Callback then options.Callback(finalColor) end
         end
         
-        -- Palette dragging
         local draggingPalette = false
         palette.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -651,7 +688,6 @@ function NoirUI:CreateWindow(settings)
             end
         end)
         
-        -- Hue dragging
         local draggingHue = false
         hueBar.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -696,7 +732,7 @@ function NoirUI:CreateWindow(settings)
         end)
         
         updatePickerDisplay()
-        
+        updateCanvas()
         return {SetColor = function(color) 
             currentH, currentS, currentV = color:ToHSV()
             updatePickerDisplay()
@@ -790,7 +826,7 @@ function NoirUI:CreateWindow(settings)
                 dropdownFrame.Visible = false
             end
         end)
-        
+        updateCanvas()
         return {SetValue = function(val)
             for _, opt in ipairs(dropdownOptions) do
                 if opt == val then
@@ -802,7 +838,6 @@ function NoirUI:CreateWindow(settings)
         end}
     end
     
-    -- Initial notify
     NoirUI:Notify(settings.Name or "Noir UI", "Loaded Successfully!", 3)
     
     return NoirUI
