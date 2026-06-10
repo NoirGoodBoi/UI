@@ -18,7 +18,7 @@ function NoirUI:CreateWindow(settings)
     
     -- Blur effect
     local Blur = Instance.new("BlurEffect", game.Lighting)
-    Blur.Size = 12  -- Mặc định là bật
+    Blur.Size = 12
     
     -- Main Window
     local Main = Instance.new("Frame", ScreenGui)
@@ -122,9 +122,8 @@ function NoirUI:CreateWindow(settings)
     -- Biến trạng thái minimize
     local isMinimized = false
     local fullHeight = 200
-    local originalPosition = Main.Position
     
-    -- Hàm cập nhật chiều cao UI (tối đa 340)
+    -- Hàm cập nhật chiều cao UI
     local function updateUISize()
         task.wait(0.05)
         if not Main or not Main.Parent then return end
@@ -142,73 +141,40 @@ function NoirUI:CreateWindow(settings)
             
             task.wait(0.1)
             Main.Position = UDim2.new(0.5, -Main.Size.X.Offset/2, 0.5, -Main.Size.Y.Offset/2)
-            originalPosition = Main.Position
         end
     end
     
-    -- Minimize animation
+    -- Minimize/Maximize functions
     local function Minimize()
         if isMinimized then return end
         isMinimized = true
-        
-        -- Tắt blur khi minimize
         TweenService:Create(Blur, TweenInfo.new(0.2), {Size = 0}):Play()
-        
-        -- Ẩn container
-        TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {
-            Size = UDim2.new(1,-10,0,0)
-        }):Play()
-        
-        -- Thu nhỏ Main thành header
-        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0,300,0,45)
-        }):Play()
-        
-        -- Đổi text nút minimize
+        TweenService:Create(Container, TweenInfo.new(0.25), {Size = UDim2.new(1,-10,0,0)}):Play()
+        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = UDim2.new(0,300,0,45)}):Play()
         MinBtn.Text = "□"
     end
     
     local function Maximize()
         if not isMinimized then return end
         isMinimized = false
-        
-        -- Bật lại blur
         TweenService:Create(Blur, TweenInfo.new(0.2), {Size = 12}):Play()
-        
-        -- Mở rộng Main
-        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0,300,0,fullHeight)
-        }):Play()
-        
-        -- Hiện container
-        TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {
-            Size = UDim2.new(1,-10,1,-55)
-        }):Play()
-        
-        -- Đổi text nút minimize
+        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = UDim2.new(0,300,0,fullHeight)}):Play()
+        TweenService:Create(Container, TweenInfo.new(0.25), {Size = UDim2.new(1,-10,1,-55)}):Play()
         MinBtn.Text = "−"
-        
-        -- Cập nhật canvas
         task.wait(0.3)
         Container.CanvasSize = UDim2.new(0,0,0,Layout.AbsoluteContentSize.Y + 10)
     end
     
-    -- Sự kiện cho nút minimize
     MinBtn.MouseButton1Click:Connect(function()
-        if isMinimized then
-            Maximize()
-        else
-            Minimize()
-        end
+        if isMinimized then Maximize() else Minimize() end
     end)
     
-    -- Sự kiện cho nút close
     CloseBtn.MouseButton1Click:Connect(function()
         Main.Visible = false
         TweenService:Create(Blur, TweenInfo.new(0.2), {Size = 0}):Play()
     end)
 
-    -- ============ DRAG SYSTEM CHO MAIN UI ============
+    -- Drag system
     local dragMain = false
     local dragMainStart = nil
     local dragMainPos = nil
@@ -225,7 +191,6 @@ function NoirUI:CreateWindow(settings)
         if dragMain and input.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = input.Position - dragMainStart
             Main.Position = UDim2.new(dragMainPos.X.Scale, dragMainPos.X.Offset + delta.X, dragMainPos.Y.Scale, dragMainPos.Y.Offset + delta.Y)
-            originalPosition = Main.Position
         end
     end)
     
@@ -234,7 +199,6 @@ function NoirUI:CreateWindow(settings)
             dragMain = false
         end
     end)
-    -- ============ KẾT THÚC DRAG MAIN ============
 
     -- Notify System
     local NotifyHolder = ScreenGui:FindFirstChild("NotifyHolder") or Instance.new("Frame", ScreenGui)
@@ -340,46 +304,526 @@ function NoirUI:CreateWindow(settings)
         return n
     end
 
-    -- Dropdown class
-    local Dropdown = {}
-    Dropdown.__index = Dropdown
-    
-    function Dropdown:SetValue(value)
-        self.selected = value
-        self.button.Text = self.options[value] or value
-        if self.callback then self.callback(value) end
-        self:Close()
-    end
-    
-    function Dropdown:Toggle()
-        if self.open then
-            self:Close()
-        else
-            self:Open()
+    -- ============================================
+    -- REMADE SLIDER
+    -- ============================================
+    function NoirUI:CreateSlider(options)
+        elementCount = elementCount + 1
+        local min = options.Min or 0
+        local max = options.Max or 100
+        local value = options.Default or min
+        local decimal = options.Decimal or 0
+        
+        local sliderFrame = Instance.new("Frame", Container)
+        sliderFrame.Size = UDim2.new(1,0,0,70)
+        sliderFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        sliderFrame.LayoutOrder = elementCount
+        Instance.new("UICorner", sliderFrame).CornerRadius = UDim.new(0,8)
+        
+        -- Title
+        local title = Instance.new("TextLabel", sliderFrame)
+        title.Size = UDim2.new(1,-15,0,25)
+        title.Position = UDim2.new(0,10,0,5)
+        title.Text = options.Name or "Slider"
+        title.TextColor3 = Color3.fromRGB(220,220,220)
+        title.Font = Enum.Font.GothamSemibold
+        title.TextSize = 13
+        title.BackgroundTransparency = 1
+        title.TextXAlignment = Enum.TextXAlignment.Left
+        
+        -- Value display
+        local valueDisplay = Instance.new("TextLabel", sliderFrame)
+        valueDisplay.Size = UDim2.new(0,50,0,25)
+        valueDisplay.Position = UDim2.new(1,-60,0,5)
+        valueDisplay.Text = tostring(value)
+        valueDisplay.TextColor3 = ACCENT
+        valueDisplay.Font = Enum.Font.GothamBold
+        valueDisplay.TextSize = 13
+        valueDisplay.BackgroundTransparency = 1
+        valueDisplay.TextXAlignment = Enum.TextXAlignment.Right
+        
+        -- Slider background
+        local sliderBack = Instance.new("Frame", sliderFrame)
+        sliderBack.Size = UDim2.new(1,-20,0,6)
+        sliderBack.Position = UDim2.new(0,10,0,45)
+        sliderBack.BackgroundColor3 = Color3.fromRGB(50,50,50)
+        Instance.new("UICorner", sliderBack).CornerRadius = UDim.new(1,0)
+        
+        -- Slider fill
+        local sliderFill = Instance.new("Frame", sliderBack)
+        sliderFill.Size = UDim2.new((value - min)/(max - min),0,1,0)
+        sliderFill.BackgroundColor3 = ACCENT
+        Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1,0)
+        
+        -- Slider button
+        local sliderBtn = Instance.new("TextButton", sliderBack)
+        sliderBtn.Size = UDim2.new(0,16,0,16)
+        sliderBtn.Position = UDim2.new((value - min)/(max - min), -8, 0.5, -8)
+        sliderBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
+        sliderBtn.Text = ""
+        sliderBtn.AutoButtonColor = false
+        Instance.new("UICorner", sliderBtn).CornerRadius = UDim.new(1,0)
+        
+        -- Shadow for button
+        local shadow = Instance.new("UIStroke", sliderBtn)
+        shadow.Thickness = 2
+        shadow.Color = ACCENT
+        
+        local dragging = false
+        
+        local function updateValue(input)
+            local relativePos = math.clamp((input.Position.X - sliderBack.AbsolutePosition.X) / sliderBack.AbsoluteSize.X, 0, 1)
+            local newValue = min + (max - min) * relativePos
+            if decimal == 0 then
+                newValue = math.floor(newValue)
+            else
+                newValue = math.round(newValue * (10^decimal)) / (10^decimal)
+            end
+            value = newValue
+            
+            sliderFill.Size = UDim2.new(relativePos,0,1,0)
+            sliderBtn.Position = UDim2.new(relativePos, -8, 0.5, -8)
+            valueDisplay.Text = tostring(value)
+            title.Text = (options.Name or "Slider") .. ": " .. value
+            
+            if options.Callback then options.Callback(value) end
         end
+        
+        sliderBtn.MouseButton1Click:Connect(function(input)
+            dragging = true
+        end)
+        
+        sliderBtn.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+            end
+        end)
+        
+        sliderBack.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                updateValue(input)
+            end
+        end)
+        
+        UIS.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                updateValue(input)
+            end
+        end)
+        
+        UIS.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
+        end)
+        
+        updateUISize()
+        
+        return {
+            SetValue = function(v)
+                v = math.clamp(v, min, max)
+                local percent = (v - min)/(max - min)
+                sliderFill.Size = UDim2.new(percent,0,1,0)
+                sliderBtn.Position = UDim2.new(percent, -8, 0.5, -8)
+                valueDisplay.Text = tostring(v)
+                title.Text = (options.Name or "Slider") .. ": " .. v
+                if options.Callback then options.Callback(v) end
+            end,
+            GetValue = function() return value end
+        }
     end
-    
-    function Dropdown:Open()
-        if self.open then return end
-        self.open = true
-        self.dropdown.Visible = true
-        self.dropdown.Size = UDim2.new(1,0,0,0)
-        TweenService:Create(self.dropdown, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-            Size = UDim2.new(1,0,0,math.min(#self.optionList * 30, 150))
-        }):Play()
+
+    -- ============================================
+    -- REMADE TEXTBOX
+    -- ============================================
+    function NoirUI:CreateTextBox(options)
+        elementCount = elementCount + 1
+        
+        local boxFrame = Instance.new("Frame", Container)
+        boxFrame.Size = UDim2.new(1,0,0,55)
+        boxFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        boxFrame.LayoutOrder = elementCount
+        Instance.new("UICorner", boxFrame).CornerRadius = UDim.new(0,8)
+        
+        -- Title
+        local title = Instance.new("TextLabel", boxFrame)
+        title.Size = UDim2.new(1,-15,0,20)
+        title.Position = UDim2.new(0,10,0,5)
+        title.Text = options.Name or "Text Input"
+        title.TextColor3 = Color3.fromRGB(220,220,220)
+        title.Font = Enum.Font.GothamSemibold
+        title.TextSize = 12
+        title.BackgroundTransparency = 1
+        title.TextXAlignment = Enum.TextXAlignment.Left
+        
+        -- TextBox chính
+        local box = Instance.new("TextBox", boxFrame)
+        box.Size = UDim2.new(1,-20,0,30)
+        box.Position = UDim2.new(0,10,0,22)
+        box.BackgroundColor3 = Color3.fromRGB(35,35,35)
+        box.TextColor3 = Color3.fromRGB(255,255,255)
+        box.PlaceholderText = options.Placeholder or "Nhập nội dung..."
+        box.PlaceholderColor3 = Color3.fromRGB(120,120,120)
+        box.Font = Enum.Font.Gotham
+        box.TextSize = 13
+        box.Text = options.Default or ""
+        box.TextXAlignment = Enum.TextXAlignment.Left
+        box.ClearTextOnFocus = false
+        Instance.new("UICorner", box).CornerRadius = UDim.new(0,6)
+        Instance.new("UIPadding", box).PaddingLeft = UDim.new(0,10)
+        
+        -- Border animation
+        local border = Instance.new("UIStroke", box)
+        border.Thickness = 1
+        border.Color = Color3.fromRGB(50,50,50)
+        
+        box.Focused:Connect(function()
+            TweenService:Create(border, TweenInfo.new(0.15), {Color = ACCENT, Thickness = 2}):Play()
+            TweenService:Create(box, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
+        end)
+        
+        box.FocusLost:Connect(function(enterPressed)
+            TweenService:Create(border, TweenInfo.new(0.15), {Color = Color3.fromRGB(50,50,50), Thickness = 1}):Play()
+            TweenService:Create(box, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(35,35,35)}):Play()
+            if options.Callback then options.Callback(box.Text) end
+        end)
+        
+        updateUISize()
+        
+        return {
+            SetText = function(text) box.Text = text end,
+            GetText = function() return box.Text end,
+            Clear = function() box.Text = "" end
+        }
     end
-    
-    function Dropdown:Close()
-        if not self.open then return end
-        self.open = false
-        TweenService:Create(self.dropdown, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
-            Size = UDim2.new(1,0,0,0)
-        }):Play()
-        task.wait(0.15)
-        self.dropdown.Visible = false
+
+    -- ============================================
+    -- REMADE DROPDOWN
+    -- ============================================
+    function NoirUI:CreateDropdown(options)
+        elementCount = elementCount + 1
+        local dropdownOptions = options.Options or {}
+        local default = options.Default or dropdownOptions[1]
+        
+        local dropFrame = Instance.new("Frame", Container)
+        dropFrame.Size = UDim2.new(1,0,0,50)
+        dropFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        dropFrame.LayoutOrder = elementCount
+        dropFrame.ClipsDescendants = true
+        Instance.new("UICorner", dropFrame).CornerRadius = UDim.new(0,8)
+        
+        -- Title
+        local title = Instance.new("TextLabel", dropFrame)
+        title.Size = UDim2.new(1,-15,0,20)
+        title.Position = UDim2.new(0,10,0,5)
+        title.Text = options.Name or "Dropdown"
+        title.TextColor3 = Color3.fromRGB(220,220,220)
+        title.Font = Enum.Font.GothamSemibold
+        title.TextSize = 12
+        title.BackgroundTransparency = 1
+        title.TextXAlignment = Enum.TextXAlignment.Left
+        
+        -- Select button
+        local selectBtn = Instance.new("TextButton", dropFrame)
+        selectBtn.Size = UDim2.new(1,-20,0,30)
+        selectBtn.Position = UDim2.new(0,10,0,22)
+        selectBtn.Text = "  " .. default .. "  ▼"
+        selectBtn.TextColor3 = Color3.fromRGB(255,255,255)
+        selectBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
+        selectBtn.Font = Enum.Font.Gotham
+        selectBtn.TextSize = 13
+        selectBtn.TextXAlignment = Enum.TextXAlignment.Left
+        Instance.new("UICorner", selectBtn).CornerRadius = UDim.new(0,6)
+        
+        -- Dropdown list
+        local dropList = Instance.new("ScrollingFrame", dropFrame)
+        dropList.Size = UDim2.new(1,-20,0,0)
+        dropList.Position = UDim2.new(0,10,0,52)
+        dropList.BackgroundColor3 = Color3.fromRGB(35,35,35)
+        dropList.ScrollBarThickness = 4
+        dropList.Visible = false
+        dropList.CanvasSize = UDim2.new(0,0,0, #dropdownOptions * 32)
+        dropList.BorderSizePixel = 0
+        Instance.new("UICorner", dropList).CornerRadius = UDim.new(0,6)
+        
+        local listLayout = Instance.new("UIListLayout", dropList)
+        listLayout.Padding = UDim.new(0,2)
+        listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        
+        local isOpen = false
+        local selectedValue = default
+        
+        for i, opt in ipairs(dropdownOptions) do
+            local optBtn = Instance.new("TextButton", dropList)
+            optBtn.Size = UDim2.new(1,0,0,30)
+            optBtn.Text = "  " .. opt
+            optBtn.TextColor3 = Color3.fromRGB(200,200,200)
+            optBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+            optBtn.Font = Enum.Font.Gotham
+            optBtn.TextSize = 12
+            optBtn.TextXAlignment = Enum.TextXAlignment.Left
+            optBtn.BackgroundTransparency = 0.5
+            Instance.new("UICorner", optBtn).CornerRadius = UDim.new(0,4)
+            
+            optBtn.MouseButton1Click:Connect(function()
+                selectedValue = opt
+                selectBtn.Text = "  " .. opt .. "  ▼"
+                if options.Callback then options.Callback(opt) end
+                
+                isOpen = false
+                TweenService:Create(dropList, TweenInfo.new(0.15), {Size = UDim2.new(1,-20,0,0)}):Play()
+                TweenService:Create(dropFrame, TweenInfo.new(0.2), {Size = UDim2.new(1,0,0,50)}):Play()
+                task.wait(0.15)
+                dropList.Visible = false
+                updateUISize()
+            end)
+            
+            optBtn.MouseEnter:Connect(function()
+                TweenService:Create(optBtn, TweenInfo.new(0.1), {BackgroundTransparency = 0, BackgroundColor3 = ACCENT}):Play()
+                optBtn.TextColor3 = Color3.fromRGB(255,255,255)
+            end)
+            
+            optBtn.MouseLeave:Connect(function()
+                TweenService:Create(optBtn, TweenInfo.new(0.1), {BackgroundTransparency = 0.5, BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
+                optBtn.TextColor3 = Color3.fromRGB(200,200,200)
+            end)
+        end
+        
+        selectBtn.MouseButton1Click:Connect(function()
+            isOpen = not isOpen
+            if isOpen then
+                dropList.Visible = true
+                local height = math.min(#dropdownOptions * 34, 150)
+                TweenService:Create(dropFrame, TweenInfo.new(0.2), {Size = UDim2.new(1,0,0,50 + height)}):Play()
+                TweenService:Create(dropList, TweenInfo.new(0.15), {Size = UDim2.new(1,-20,0,height)}):Play()
+                updateUISize()
+            else
+                TweenService:Create(dropList, TweenInfo.new(0.15), {Size = UDim2.new(1,-20,0,0)}):Play()
+                TweenService:Create(dropFrame, TweenInfo.new(0.2), {Size = UDim2.new(1,0,0,50)}):Play()
+                task.wait(0.15)
+                dropList.Visible = false
+                updateUISize()
+            end
+        end)
+        
+        updateUISize()
+        
+        return {
+            SetValue = function(val)
+                for _, opt in ipairs(dropdownOptions) do
+                    if opt == val then
+                        selectedValue = val
+                        selectBtn.Text = "  " .. val .. "  ▼"
+                        if options.Callback then options.Callback(val) end
+                        break
+                    end
+                end
+            end,
+            GetValue = function() return selectedValue end
+        }
     end
-    
-    -- Create Window Elements
+
+    -- ============================================
+    -- REMADE COLOR PICKER
+    -- ============================================
+    function NoirUI:CreateColorPicker(options)
+        elementCount = elementCount + 1
+        local defaultColor = options.Default or Color3.fromRGB(170,85,255)
+        
+        local cpFrame = Instance.new("Frame", Container)
+        cpFrame.Size = UDim2.new(1,0,0,50)
+        cpFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+        cpFrame.LayoutOrder = elementCount
+        cpFrame.ClipsDescendants = true
+        Instance.new("UICorner", cpFrame).CornerRadius = UDim.new(0,8)
+        
+        -- Title
+        local title = Instance.new("TextLabel", cpFrame)
+        title.Size = UDim2.new(1,-70,0,20)
+        title.Position = UDim2.new(0,10,0,5)
+        title.Text = options.Name or "Color Picker"
+        title.TextColor3 = Color3.fromRGB(220,220,220)
+        title.Font = Enum.Font.GothamSemibold
+        title.TextSize = 12
+        title.BackgroundTransparency = 1
+        title.TextXAlignment = Enum.TextXAlignment.Left
+        
+        -- Color preview
+        local preview = Instance.new("TextButton", cpFrame)
+        preview.Size = UDim2.new(0,40,0,30)
+        preview.Position = UDim2.new(1,-50,0,22)
+        preview.BackgroundColor3 = defaultColor
+        preview.Text = ""
+        Instance.new("UICorner", preview).CornerRadius = UDim.new(0,6)
+        
+        -- Hex display
+        local hexText = Instance.new("TextLabel", cpFrame)
+        hexText.Size = UDim2.new(0,70,0,20)
+        hexText.Position = UDim2.new(1,-125,0,5)
+        hexText.Text = "#" .. string.format("%02x%02x%02x", defaultColor.R*255, defaultColor.G*255, defaultColor.B*255)
+        hexText.TextColor3 = ACCENT
+        hexText.Font = Enum.Font.Gotham
+        hexText.TextSize = 10
+        hexText.BackgroundTransparency = 1
+        
+        -- Color panel
+        local colorPanel = Instance.new("Frame", cpFrame)
+        colorPanel.Size = UDim2.new(1,0,0,0)
+        colorPanel.Position = UDim2.new(0,0,0,50)
+        colorPanel.BackgroundColor3 = Color3.fromRGB(35,35,35)
+        colorPanel.Visible = false
+        colorPanel.ClipsDescendants = true
+        Instance.new("UICorner", colorPanel).CornerRadius = UDim.new(0,0,0,8)
+        
+        -- Gradient palette
+        local palette = Instance.new("ImageLabel", colorPanel)
+        palette.Size = UDim2.new(1,-20,0,120)
+        palette.Position = UDim2.new(0,10,0,10)
+        palette.BackgroundColor3 = Color3.new(1,1,1)
+        palette.Image = "rbxassetid://4155801252"
+        Instance.new("UICorner", palette).CornerRadius = UDim.new(0,6)
+        
+        -- Palette picker
+        local pickerDot = Instance.new("Frame", palette)
+        pickerDot.Size = UDim2.new(0,12,0,12)
+        pickerDot.BackgroundColor3 = Color3.new(1,1,1)
+        pickerDot.BorderSizePixel = 0
+        Instance.new("UICorner", pickerDot).CornerRadius = UDim.new(1,0)
+        pickerDot.ZIndex = 2
+        
+        -- Hue slider
+        local hueSlider = Instance.new("Frame", colorPanel)
+        hueSlider.Size = UDim2.new(1,-20,0,16)
+        hueSlider.Position = UDim2.new(0,10,0,140)
+        hueSlider.BackgroundColor3 = Color3.fromRGB(255,255,255)
+        Instance.new("UICorner", hueSlider).CornerRadius = UDim.new(1,0)
+        
+        local hueGradient = Instance.new("UIGradient", hueSlider)
+        hueGradient.Rotation = 0
+        hueGradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,0)),
+            ColorSequenceKeypoint.new(0.16, Color3.fromRGB(255,255,0)),
+            ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0,255,0)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,255)),
+            ColorSequenceKeypoint.new(0.66, Color3.fromRGB(0,0,255)),
+            ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255,0,255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
+        }
+        
+        local hueDot = Instance.new("Frame", hueSlider)
+        hueDot.Size = UDim2.new(0,12,0,20)
+        hueDot.Position = UDim2.new(0,-6,0,-2)
+        hueDot.BackgroundColor3 = Color3.new(1,1,1)
+        hueDot.BorderSizePixel = 0
+        Instance.new("UICorner", hueDot).CornerRadius = UDim.new(1,0)
+        
+        local currentH, currentS, currentV = defaultColor:ToHSV()
+        
+        local function updateColorDisplay()
+            local finalColor = Color3.fromHSV(currentH, currentS, currentV)
+            preview.BackgroundColor3 = finalColor
+            palette.BackgroundColor3 = Color3.fromHSV(currentH, 1, 1)
+            
+            pickerDot.Position = UDim2.new(currentS, -6, 1 - currentV, -6)
+            hueDot.Position = UDim2.new(1 - currentH, -6, 0, -2)
+            
+            hexText.Text = "#" .. string.format("%02x%02x%02x", finalColor.R*255, finalColor.G*255, finalColor.B*255)
+            
+            if options.Callback then options.Callback(finalColor) end
+        end
+        
+        -- Palette dragging
+        local draggingPalette = false
+        palette.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                draggingPalette = true
+                local function update()
+                    local mousePos = UIS:GetMouseLocation()
+                    local relativeX = math.clamp((mousePos.X - palette.AbsolutePosition.X) / palette.AbsoluteSize.X, 0, 1)
+                    local relativeY = math.clamp((mousePos.Y - palette.AbsolutePosition.Y) / palette.AbsoluteSize.Y, 0, 1)
+                    currentS = relativeX
+                    currentV = 1 - relativeY
+                    updateColorDisplay()
+                end
+                
+                local conn; conn = UIS.InputChanged:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseMovement and draggingPalette then
+                        update()
+                    end
+                end)
+                
+                UIS.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        draggingPalette = false
+                        conn:Disconnect()
+                    end
+                end)
+                update()
+            end
+        end)
+        
+        -- Hue dragging
+        local draggingHue = false
+        hueSlider.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                draggingHue = true
+                local function update()
+                    local mousePos = UIS:GetMouseLocation()
+                    local relativeX = math.clamp((mousePos.X - hueSlider.AbsolutePosition.X) / hueSlider.AbsoluteSize.X, 0, 1)
+                    currentH = 1 - relativeX
+                    updateColorDisplay()
+                end
+                
+                local conn; conn = UIS.InputChanged:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseMovement and draggingHue then
+                        update()
+                    end
+                end)
+                
+                UIS.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        draggingHue = false
+                        conn:Disconnect()
+                    end
+                end)
+                update()
+            end
+        end)
+        
+        local isOpen = false
+        preview.MouseButton1Click:Connect(function()
+            isOpen = not isOpen
+            colorPanel.Visible = true
+            if isOpen then
+                TweenService:Create(cpFrame, TweenInfo.new(0.25), {Size = UDim2.new(1,0,0,210)}):Play()
+                TweenService:Create(colorPanel, TweenInfo.new(0.2), {Size = UDim2.new(1,0,0,160)}):Play()
+            else
+                TweenService:Create(colorPanel, TweenInfo.new(0.15), {Size = UDim2.new(1,0,0,0)}):Play()
+                TweenService:Create(cpFrame, TweenInfo.new(0.2), {Size = UDim2.new(1,0,0,50)}):Play()
+                task.wait(0.15)
+                colorPanel.Visible = false
+            end
+            updateUISize()
+        end)
+        
+        updateColorDisplay()
+        updateUISize()
+        
+        return {
+            SetColor = function(color)
+                currentH, currentS, currentV = color:ToHSV()
+                updateColorDisplay()
+            end,
+            GetColor = function()
+                return Color3.fromHSV(currentH, currentS, currentV)
+            end
+        }
+    end
+
+    -- ============================================
+    -- CÁC ELEMENT CŨ GIỮ NGUYÊN
+    -- ============================================
     local elementCount = 0
     
     function NoirUI:CreateSection(text)
@@ -483,372 +927,6 @@ function NoirUI:CreateWindow(settings)
         return {SetValue = function(s) if s ~= state then b.MouseButton1Click:Fire() end end}
     end
     
-    function NoirUI:CreateSlider(options)
-        elementCount = elementCount + 1
-        local min = options.Min or 0
-        local max = options.Max or 100
-        local value = options.Default or min
-        
-        local sFrame = Instance.new("Frame", Container)
-        sFrame.Size = UDim2.new(1,0,0,65)
-        sFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-        sFrame.LayoutOrder = elementCount
-        Instance.new("UICorner", sFrame).CornerRadius = UDim.new(0,6)
-        
-        local sTitle = Instance.new("TextLabel", sFrame)
-        sTitle.Size = UDim2.new(1,-12,0,25)
-        sTitle.Position = UDim2.new(0,12,0,5)
-        sTitle.Text = options.Name .. ": " .. value
-        sTitle.TextColor3 = Color3.new(1,1,1)
-        sTitle.Font = Enum.Font.GothamBold
-        sTitle.TextSize = 13
-        sTitle.BackgroundTransparency = 1
-        sTitle.TextXAlignment = Enum.TextXAlignment.Left
-        
-        local valueLabel = Instance.new("TextLabel", sFrame)
-        valueLabel.Size = UDim2.new(0,40,0,25)
-        valueLabel.Position = UDim2.new(1,-52,0,5)
-        valueLabel.Text = tostring(value)
-        valueLabel.TextColor3 = ACCENT
-        valueLabel.Font = Enum.Font.GothamBold
-        valueLabel.TextSize = 13
-        valueLabel.BackgroundTransparency = 1
-        valueLabel.TextXAlignment = Enum.TextXAlignment.Right
-        
-        local sBack = Instance.new("Frame", sFrame)
-        sBack.Size = UDim2.new(1,-24,0,6)
-        sBack.Position = UDim2.new(0,12,0,45)
-        sBack.BackgroundColor3 = Color3.fromRGB(50,50,50)
-        Instance.new("UICorner", sBack).CornerRadius = UDim.new(1,0)
-        
-        local sFill = Instance.new("Frame", sBack)
-        sFill.Size = UDim2.new((value - min)/(max - min),0,1,0)
-        sFill.BackgroundColor3 = ACCENT
-        Instance.new("UICorner", sFill).CornerRadius = UDim.new(1,0)
-        
-        local dragging = false
-        
-        local function updateValue(input)
-            local relativePos = math.clamp((input.Position.X - sBack.AbsolutePosition.X) / sBack.AbsoluteSize.X, 0, 1)
-            local newValue = math.floor(min + (max - min) * relativePos)
-            value = newValue
-            sFill.Size = UDim2.new(relativePos,0,1,0)
-            sTitle.Text = options.Name .. ": " .. value
-            valueLabel.Text = tostring(value)
-            if options.Callback then options.Callback(value) end
-        end
-        
-        sFrame.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = true
-                updateValue(input)
-            end
-        end)
-        
-        UIS.InputChanged:Connect(function(input)
-            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                updateValue(input)
-            end
-        end)
-        
-        UIS.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = false
-            end
-        end)
-        updateUISize()
-        return {SetValue = function(v) 
-            v = math.clamp(v, min, max)
-            local percent = (v - min)/(max - min)
-            sFill.Size = UDim2.new(percent,0,1,0)
-            value = v
-            sTitle.Text = options.Name .. ": " .. v
-            valueLabel.Text = tostring(v)
-            if options.Callback then options.Callback(v) end
-        end}
-    end
-    
-    function NoirUI:CreateTextBox(options)
-        elementCount = elementCount + 1
-        local box = Instance.new("TextBox", Container)
-        box.Size = UDim2.new(1,0,0,38)
-        box.BackgroundColor3 = Color3.fromRGB(30,30,30)
-        box.TextColor3 = Color3.new(1,1,1)
-        box.PlaceholderText = options.Placeholder or "Enter text..."
-        box.PlaceholderColor3 = Color3.fromRGB(120,120,120)
-        box.Font = Enum.Font.Gotham
-        box.TextSize = 14
-        box.LayoutOrder = elementCount
-        Instance.new("UICorner", box).CornerRadius = UDim.new(0,6)
-        Instance.new("UIPadding", box).PaddingLeft = UDim.new(0,10)
-        
-        box.FocusLost:Connect(function(enterPressed)
-            if options.Callback then options.Callback(box.Text) end
-        end)
-        updateUISize()
-        return box
-    end
-    
-    function NoirUI:CreateColorPicker(options)
-        elementCount = elementCount + 1
-        local defaultColor = options.Default or Color3.new(1,1,1)
-        
-        local cpFrame = Instance.new("Frame", Container)
-        cpFrame.Size = UDim2.new(1,0,0,45)
-        cpFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-        cpFrame.LayoutOrder = elementCount
-        cpFrame.ClipsDescendants = true
-        Instance.new("UICorner", cpFrame).CornerRadius = UDim.new(0,6)
-        
-        local cpTitle = Instance.new("TextLabel", cpFrame)
-        cpTitle.Size = UDim2.new(1,-60,0,45)
-        cpTitle.Position = UDim2.new(0,12,0,0)
-        cpTitle.Text = options.Name
-        cpTitle.TextColor3 = Color3.new(1,1,1)
-        cpTitle.Font = Enum.Font.GothamSemibold
-        cpTitle.TextSize = 14
-        cpTitle.BackgroundTransparency = 1
-        cpTitle.TextXAlignment = Enum.TextXAlignment.Left
-        
-        local cpBox = Instance.new("TextButton", cpFrame)
-        cpBox.Size = UDim2.new(0,40,0,25)
-        cpBox.Position = UDim2.new(1,-52,0,10)
-        cpBox.BackgroundColor3 = defaultColor
-        cpBox.Text = ""
-        Instance.new("UICorner", cpBox).CornerRadius = UDim.new(0,4)
-        
-        local pickerPanel = Instance.new("Frame", cpFrame)
-        pickerPanel.Size = UDim2.new(1,0,0,0)
-        pickerPanel.Position = UDim2.new(0,0,0,45)
-        pickerPanel.BackgroundColor3 = Color3.fromRGB(35,35,35)
-        pickerPanel.Visible = false
-        pickerPanel.ClipsDescendants = true
-        Instance.new("UICorner", pickerPanel).CornerRadius = UDim.new(0,0,0,6)
-        
-        local palette = Instance.new("ImageLabel", pickerPanel)
-        palette.Size = UDim2.new(1,-20,0,120)
-        palette.Position = UDim2.new(0,10,0,10)
-        palette.BackgroundColor3 = Color3.new(1,1,1)
-        palette.Image = "rbxassetid://4155801252"
-        Instance.new("UICorner", palette).CornerRadius = UDim.new(0,4)
-        
-        local paletteDot = Instance.new("Frame", palette)
-        paletteDot.Size = UDim2.new(0,10,0,10)
-        paletteDot.BackgroundColor3 = Color3.new(1,1,1)
-        paletteDot.BorderSizePixel = 0
-        Instance.new("UICorner", paletteDot).CornerRadius = UDim.new(1,0)
-        paletteDot.ZIndex = 2
-        
-        local hueBar = Instance.new("ImageLabel", pickerPanel)
-        hueBar.Size = UDim2.new(1,-20,0,15)
-        hueBar.Position = UDim2.new(0,10,0,140)
-        hueBar.Image = "rbxassetid://3641079629"
-        Instance.new("UICorner", hueBar).CornerRadius = UDim.new(1,0)
-        
-        local hueDot = Instance.new("Frame", hueBar)
-        hueDot.Size = UDim2.new(0,10,0,17)
-        hueDot.Position = UDim2.new(0,-5,0,-1)
-        hueDot.BackgroundColor3 = Color3.new(1,1,1)
-        hueDot.BorderSizePixel = 0
-        Instance.new("UICorner", hueDot).CornerRadius = UDim.new(1,0)
-        
-        local currentH, currentS, currentV = defaultColor:ToHSV()
-        
-        local function updatePickerDisplay()
-            local finalColor = Color3.fromHSV(currentH, currentS, currentV)
-            cpBox.BackgroundColor3 = finalColor
-            palette.BackgroundColor3 = Color3.fromHSV(currentH, 1, 1)
-            
-            paletteDot.Position = UDim2.new(currentS, -5, 1 - currentV, -5)
-            hueDot.Position = UDim2.new(1 - currentH, -5, 0, -1)
-            
-            if options.Callback then options.Callback(finalColor) end
-        end
-        
-        local draggingPalette = false
-        palette.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                draggingPalette = true
-                local function update()
-                    local mousePos = UIS:GetMouseLocation()
-                    local relativeX = math.clamp((mousePos.X - palette.AbsolutePosition.X) / palette.AbsoluteSize.X, 0, 1)
-                    local relativeY = math.clamp((mousePos.Y - palette.AbsolutePosition.Y) / palette.AbsoluteSize.Y, 0, 1)
-                    currentS = relativeX
-                    currentV = 1 - relativeY
-                    updatePickerDisplay()
-                end
-                
-                local conn; conn = UIS.InputChanged:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseMovement and draggingPalette then
-                        update()
-                    end
-                end)
-                
-                UIS.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        draggingPalette = false
-                        conn:Disconnect()
-                    end
-                end)
-                update()
-            end
-        end)
-        
-        local draggingHue = false
-        hueBar.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                draggingHue = true
-                local function update()
-                    local mousePos = UIS:GetMouseLocation()
-                    local relativeX = math.clamp((mousePos.X - hueBar.AbsolutePosition.X) / hueBar.AbsoluteSize.X, 0, 1)
-                    currentH = 1 - relativeX
-                    updatePickerDisplay()
-                end
-                
-                local conn; conn = UIS.InputChanged:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseMovement and draggingHue then
-                        update()
-                    end
-                end)
-                
-                UIS.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        draggingHue = false
-                        conn:Disconnect()
-                    end
-                end)
-                update()
-            end
-        end)
-        
-        local open = false
-        cpBox.MouseButton1Click:Connect(function()
-            open = not open
-            pickerPanel.Visible = true
-            TweenService:Create(cpFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {
-                Size = open and UDim2.new(1,0,0,200) or UDim2.new(1,0,0,45)
-            }):Play()
-            TweenService:Create(pickerPanel, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-                Size = open and UDim2.new(1,0,0,155) or UDim2.new(1,0,0,0)
-            }):Play()
-            if not open then
-                task.wait(0.2)
-                pickerPanel.Visible = false
-            end
-            updateUISize()
-        end)
-        
-        updatePickerDisplay()
-        updateUISize()
-        return {SetColor = function(color) 
-            currentH, currentS, currentV = color:ToHSV()
-            updatePickerDisplay()
-        end}
-    end
-    
-    function NoirUI:CreateDropdown(options)
-        elementCount = elementCount + 1
-        local dropdownOptions = options.Options or {}
-        local default = options.Default or dropdownOptions[1]
-        
-        local frame = Instance.new("Frame", Container)
-        frame.Size = UDim2.new(1,0,0,45)
-        frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-        frame.LayoutOrder = elementCount
-        frame.ClipsDescendants = true
-        Instance.new("UICorner", frame).CornerRadius = UDim.new(0,6)
-        
-        local title = Instance.new("TextLabel", frame)
-        title.Size = UDim2.new(1,-12,0,25)
-        title.Position = UDim2.new(0,12,0,5)
-        title.Text = options.Name or "Dropdown"
-        title.TextColor3 = Color3.new(1,1,1)
-        title.Font = Enum.Font.GothamBold
-        title.TextSize = 13
-        title.BackgroundTransparency = 1
-        title.TextXAlignment = Enum.TextXAlignment.Left
-        
-        local selectButton = Instance.new("TextButton", frame)
-        selectButton.Size = UDim2.new(1,-24,0,30)
-        selectButton.Position = UDim2.new(0,12,0,10)
-        selectButton.Text = default
-        selectButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
-        selectButton.TextColor3 = Color3.new(1,1,1)
-        selectButton.Font = Enum.Font.Gotham
-        selectButton.TextSize = 13
-        Instance.new("UICorner", selectButton).CornerRadius = UDim.new(0,4)
-        
-        local dropdownFrame = Instance.new("ScrollingFrame", frame)
-        dropdownFrame.Size = UDim2.new(1,-24,0,0)
-        dropdownFrame.Position = UDim2.new(0,12,0,45)
-        dropdownFrame.BackgroundColor3 = Color3.fromRGB(40,40,40)
-        dropdownFrame.ScrollBarThickness = 4
-        dropdownFrame.Visible = false
-        dropdownFrame.CanvasSize = UDim2.new(0,0,0, #dropdownOptions * 30)
-        Instance.new("UICorner", dropdownFrame).CornerRadius = UDim.new(0,4)
-        
-        local dropdownLayout = Instance.new("UIListLayout", dropdownFrame)
-        dropdownLayout.Padding = UDim.new(0,2)
-        
-        local isOpen = false
-        local optionButtons = {}
-        
-        for i, opt in ipairs(dropdownOptions) do
-            local btn = Instance.new("TextButton", dropdownFrame)
-            btn.Size = UDim2.new(1,0,0,30)
-            btn.Text = opt
-            btn.BackgroundColor3 = Color3.fromRGB(45,45,45)
-            btn.TextColor3 = Color3.new(1,1,1)
-            btn.Font = Enum.Font.Gotham
-            btn.TextSize = 13
-            btn.BackgroundTransparency = 0.3
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0,4)
-            
-            btn.MouseButton1Click:Connect(function()
-                selectButton.Text = opt
-                if options.Callback then options.Callback(opt) end
-                if isOpen then
-                    isOpen = false
-                    TweenService:Create(dropdownFrame, TweenInfo.new(0.15), {Size = UDim2.new(1,-24,0,0)}):Play()
-                    task.wait(0.15)
-                    dropdownFrame.Visible = false
-                    TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1,0,0,45)}):Play()
-                    updateUISize()
-                end
-            end)
-            
-            table.insert(optionButtons, btn)
-        end
-        
-        selectButton.MouseButton1Click:Connect(function()
-            isOpen = not isOpen
-            if isOpen then
-                dropdownFrame.Visible = true
-                local height = math.min(#dropdownOptions * 32, 150)
-                TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1,0,0,45 + height)}):Play()
-                TweenService:Create(dropdownFrame, TweenInfo.new(0.15), {Size = UDim2.new(1,-24,0,height)}):Play()
-                updateUISize()
-            else
-                TweenService:Create(dropdownFrame, TweenInfo.new(0.15), {Size = UDim2.new(1,-24,0,0)}):Play()
-                TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1,0,0,45)}):Play()
-                task.wait(0.15)
-                dropdownFrame.Visible = false
-                updateUISize()
-            end
-        end)
-        updateUISize()
-        return {SetValue = function(val)
-            for _, opt in ipairs(dropdownOptions) do
-                if opt == val then
-                    selectButton.Text = val
-                    if options.Callback then options.Callback(val) end
-                    break
-                end
-            end
-        end}
-    end
-    
-    -- Cập nhật UI lần đầu
     updateUISize()
     
     NoirUI:Notify(settings.Name or "Noir UI", "Loaded Successfully!", 3)
