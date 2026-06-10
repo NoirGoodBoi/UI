@@ -27,6 +27,7 @@ function NoirUI:CreateWindow(settings)
     Main.Position = UDim2.new(0.5,-150,0.5,-100)
     Main.BackgroundColor3 = Color3.fromRGB(10,10,10)
     Main.BackgroundTransparency = 0
+    Main.ClipsDescendants = true
     Instance.new("UICorner", Main)
     
     -- Background image
@@ -65,7 +66,7 @@ function NoirUI:CreateWindow(settings)
     Header.BackgroundTransparency = 1
     
     local Title = Instance.new("TextLabel", Header)
-    Title.Size = UDim2.new(1,-10,1,0)
+    Title.Size = UDim2.new(1,-80,1,0)
     Title.Position = UDim2.new(0,5,0,0)
     Title.BackgroundTransparency = 1
     Title.Text = settings.Name or "Noir UI"
@@ -85,7 +86,18 @@ function NoirUI:CreateWindow(settings)
         Title.TextXAlignment = Enum.TextXAlignment.Center
     end
 
-    -- Close button on header
+    -- Minimize button
+    local MinBtn = Instance.new("TextButton", Header)
+    MinBtn.Size = UDim2.new(0,30,0,30)
+    MinBtn.Position = UDim2.new(1,-70,0,7.5)
+    MinBtn.Text = "−"
+    MinBtn.TextColor3 = Color3.fromRGB(200,200,200)
+    MinBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    MinBtn.Font = Enum.Font.GothamBold
+    MinBtn.TextSize = 20
+    Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(1,0)
+    
+    -- Close button
     local CloseBtn = Instance.new("TextButton", Header)
     CloseBtn.Size = UDim2.new(0,30,0,30)
     CloseBtn.Position = UDim2.new(1,-35,0,7.5)
@@ -95,12 +107,7 @@ function NoirUI:CreateWindow(settings)
     CloseBtn.Font = Enum.Font.GothamBold
     CloseBtn.TextSize = 16
     Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(1,0)
-    CloseBtn.MouseButton1Click:Connect(function()
-        Main.Visible = false
-        TweenService:Create(Blur, TweenInfo.new(0.2), {Size = 0}):Play()
-        if floatBtn then floatBtn.Visible = true end
-    end)
-
+    
     -- Container (ScrollingFrame)
     local Container = Instance.new("ScrollingFrame", Main)
     Container.Size = UDim2.new(1,-10,1,-55)
@@ -113,25 +120,88 @@ function NoirUI:CreateWindow(settings)
     Layout.Padding = UDim.new(0,8)
     Layout.SortOrder = Enum.SortOrder.LayoutOrder
     
+    -- Biến trạng thái minimize
+    local isMinimized = false
+    local fullHeight = 200
+    local originalPosition = Main.Position
+    
     -- Hàm cập nhật chiều cao UI (tối đa 340)
     local function updateUISize()
         task.wait(0.05)
         if not Main or not Main.Parent then return end
         local contentHeight = Layout.AbsoluteContentSize.Y
         local newHeight = math.min(contentHeight + 65, 340)
-        newHeight = math.max(newHeight, 150) -- Chiều cao tối thiểu
+        newHeight = math.max(newHeight, 150)
+        fullHeight = newHeight
         
-        local targetSize = UDim2.new(0,300,0,newHeight)
-        Container.CanvasSize = UDim2.new(0,0,0,contentHeight + 10)
+        if not isMinimized then
+            local targetSize = UDim2.new(0,300,0,newHeight)
+            Container.CanvasSize = UDim2.new(0,0,0,contentHeight + 10)
+            TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+                Size = targetSize
+            }):Play()
+            
+            task.wait(0.1)
+            Main.Position = UDim2.new(0.5, -Main.Size.X.Offset/2, 0.5, -Main.Size.Y.Offset/2)
+            originalPosition = Main.Position
+        end
+    end
+    
+    -- Minimize animation
+    local function Minimize()
+        if isMinimized then return end
+        isMinimized = true
         
-        TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-            Size = targetSize
+        -- Ẩn container
+        TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(1,-10,0,0)
         }):Play()
         
-        -- Cập nhật vị trí giữ nguyên center
-        task.wait(0.1)
-        Main.Position = UDim2.new(0.5, -Main.Size.X.Offset/2, 0.5, -Main.Size.Y.Offset/2)
+        -- Thu nhỏ Main thành header
+        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0,300,0,45)
+        }):Play()
+        
+        -- Đổi text nút minimize
+        MinBtn.Text = "□"
     end
+    
+    local function Maximize()
+        if not isMinimized then return end
+        isMinimized = false
+        
+        -- Mở rộng Main
+        TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0,300,0,fullHeight)
+        }):Play()
+        
+        -- Hiện container
+        TweenService:Create(Container, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(1,-10,1,-55)
+        }):Play()
+        
+        -- Đổi text nút minimize
+        MinBtn.Text = "−"
+        
+        -- Cập nhật canvas
+        task.wait(0.3)
+        Container.CanvasSize = UDim2.new(0,0,0,Layout.AbsoluteContentSize.Y + 10)
+    end
+    
+    -- Sự kiện cho nút minimize
+    MinBtn.MouseButton1Click:Connect(function()
+        if isMinimized then
+            Maximize()
+        else
+            Minimize()
+        end
+    end)
+    
+    -- Sự kiện cho nút close
+    CloseBtn.MouseButton1Click:Connect(function()
+        Main.Visible = false
+        TweenService:Create(Blur, TweenInfo.new(0.2), {Size = 0}):Play()
+    end)
 
     -- ============ DRAG SYSTEM CHO MAIN UI ============
     local dragMain = false
@@ -150,6 +220,7 @@ function NoirUI:CreateWindow(settings)
         if dragMain and input.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = input.Position - dragMainStart
             Main.Position = UDim2.new(dragMainPos.X.Scale, dragMainPos.X.Offset + delta.X, dragMainPos.Y.Scale, dragMainPos.Y.Offset + delta.Y)
+            originalPosition = Main.Position
         end
     end)
     
@@ -263,82 +334,6 @@ function NoirUI:CreateWindow(settings)
         
         return n
     end
-
-    -- Float Button
-    local floatBtn = Instance.new("TextButton", ScreenGui)
-    floatBtn.Size = UDim2.new(0,50,0,50)
-    floatBtn.Position = UDim2.new(0,20,0.5,-25)
-    floatBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
-    floatBtn.Text = settings.FloatText or "●"
-    floatBtn.TextColor3 = Color3.new(1,1,1)
-    floatBtn.TextSize = 24
-    floatBtn.TextScaled = true
-    Instance.new("UICorner", floatBtn).CornerRadius = UDim.new(1,0)
-    
-    -- Float Button Stroke
-    local floatStroke = Instance.new("UIStroke", floatBtn)
-    floatStroke.Thickness = 2
-    local floatGlow = Instance.new("UIStroke", floatBtn)
-    floatGlow.Thickness = 6
-    floatGlow.Transparency = 0.7
-    
-    -- Rainbow cho float button
-    task.spawn(function()
-        while rainbowActive and floatBtn and floatBtn.Parent do
-            for i = 0,1,0.02 do
-                if not rainbowActive or not floatBtn or not floatBtn.Parent then break end
-                local c = Color3.fromHSV(i,1,1)
-                floatStroke.Color = c
-                floatGlow.Color = c
-                task.wait(0.02)
-            end
-        end
-    end)
-    
-    if settings.FloatIcon then
-        floatBtn.Text = ""
-        local fimg = Instance.new("ImageLabel", floatBtn)
-        fimg.Size = UDim2.new(0.7,0,0.7,0)
-        fimg.Position = UDim2.new(0.15,0,0.15,0)
-        fimg.BackgroundTransparency = 1
-        fimg.Image = "rbxassetid://" .. tostring(settings.FloatIcon):gsub("%D", "")
-    end
-    
-    -- ============ DRAG SYSTEM CHO FLOAT BUTTON ============
-    local draggingFloat = false
-    local dragFloatStart = nil
-    local startFloatPos = nil
-    
-    floatBtn.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            draggingFloat = true
-            dragFloatStart = input.Position
-            startFloatPos = floatBtn.Position
-        end
-    end)
-    
-    UIS.InputChanged:Connect(function(input)
-        if draggingFloat and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragFloatStart
-            floatBtn.Position = UDim2.new(startFloatPos.X.Scale, startFloatPos.X.Offset + delta.X, startFloatPos.Y.Scale, startFloatPos.Y.Offset + delta.Y)
-        end
-    end)
-    
-    UIS.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            draggingFloat = false
-        end
-    end)
-    -- ============ KẾT THÚC DRAG FLOAT ============
-    
-    local mainVisible = true
-    floatBtn.MouseButton1Click:Connect(function()
-        if not draggingFloat then
-            mainVisible = not mainVisible
-            Main.Visible = mainVisible
-            TweenService:Create(Blur, TweenInfo.new(0.2), {Size = mainVisible and 12 or 0}):Play()
-        end
-    end)
 
     -- Dropdown class
     local Dropdown = {}
