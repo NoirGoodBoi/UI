@@ -23,7 +23,7 @@ function NoirUI:CreateWindow(settings)
 
     -- Main Window (nhỏ hơn)
     local Main = Instance.new("Frame", ScreenGui)
-    Main.Size = UDim2.new(0,320,0,360)  -- Từ 380x400 xuống 320x360
+    Main.Size = UDim2.new(0,300,0,340)  -- Từ 380x400 xuống 320x360
     Main.Position = UDim2.new(0.5,-160,0.5,-180)
     Main.BackgroundColor3 = Color3.fromRGB(10,10,10)
     Main.BackgroundTransparency = 0
