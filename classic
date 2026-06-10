@@ -27,47 +27,7 @@ function NoirUI:CreateWindow(settings)
     Main.Position = UDim2.new(0.5,-150,0.5,-100)
     Main.BackgroundColor3 = Color3.fromRGB(10,10,10)
     Main.BackgroundTransparency = 0
-    Main.ClipsDescendants = true
     Instance.new("UICorner", Main)
-    
-    -- Stroke cho Main
-    local Stroke = Instance.new("UIStroke", Main)
-    Stroke.Thickness = 2
-    local Glow = Instance.new("UIStroke", Main)
-    Glow.Thickness = 6
-    Glow.Transparency = 0.7
-
-    -- Drag system cho MAIN UI (đã fix)
-    local dragMain = false
-    local dragMainInput = nil
-    local dragMainStart = nil
-    local dragMainPos = nil
-    
-    Main.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            local mousePos = UIS:GetMouseLocation()
-            local mainPos = Main.AbsolutePosition
-            -- Chỉ drag khi kéo vào header (45px đầu)
-            if mousePos.Y >= mainPos.Y and mousePos.Y <= mainPos.Y + 45 then
-                dragMain = true
-                dragMainStart = input.Position
-                dragMainPos = Main.Position
-                
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        dragMain = false
-                    end
-                end)
-            end
-        end
-    end)
-    
-    Main.InputChanged:Connect(function(input)
-        if dragMain and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragMainStart
-            Main.Position = UDim2.new(dragMainPos.X.Scale, dragMainPos.X.Offset + delta.X, dragMainPos.Y.Scale, dragMainPos.Y.Offset + delta.Y)
-        end
-    end)
     
     -- Background image
     if BACKGROUND_SETTING == "image" and BACKGROUND_IMAGE ~= "" then
@@ -79,6 +39,12 @@ function NoirUI:CreateWindow(settings)
         Instance.new("UICorner", bgImage).CornerRadius = UDim.new(0,8)
     end
     
+    local Stroke = Instance.new("UIStroke", Main)
+    Stroke.Thickness = 2
+    local Glow = Instance.new("UIStroke", Main)
+    Glow.Thickness = 6
+    Glow.Transparency = 0.7
+
     -- Rainbow border effect
     local rainbowActive = true
     task.spawn(function()
@@ -119,7 +85,7 @@ function NoirUI:CreateWindow(settings)
         Title.TextXAlignment = Enum.TextXAlignment.Center
     end
 
-    -- Close button
+    -- Close button on header
     local CloseBtn = Instance.new("TextButton", Header)
     CloseBtn.Size = UDim2.new(0,30,0,30)
     CloseBtn.Position = UDim2.new(1,-35,0,7.5)
@@ -135,7 +101,7 @@ function NoirUI:CreateWindow(settings)
         if floatBtn then floatBtn.Visible = true end
     end)
 
-    -- Container
+    -- Container (ScrollingFrame)
     local Container = Instance.new("ScrollingFrame", Main)
     Container.Size = UDim2.new(1,-10,1,-55)
     Container.Position = UDim2.new(0,5,0,50)
@@ -147,22 +113,52 @@ function NoirUI:CreateWindow(settings)
     Layout.Padding = UDim.new(0,8)
     Layout.SortOrder = Enum.SortOrder.LayoutOrder
     
-    -- Hàm cập nhật chiều cao UI
+    -- Hàm cập nhật chiều cao UI (tối đa 340)
     local function updateUISize()
         task.wait(0.05)
+        if not Main or not Main.Parent then return end
         local contentHeight = Layout.AbsoluteContentSize.Y
         local newHeight = math.min(contentHeight + 65, 340)
-        local targetSize = UDim2.new(0,300,0,newHeight)
+        newHeight = math.max(newHeight, 150) -- Chiều cao tối thiểu
         
+        local targetSize = UDim2.new(0,300,0,newHeight)
         Container.CanvasSize = UDim2.new(0,0,0,contentHeight + 10)
         
         TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
             Size = targetSize
         }):Play()
         
+        -- Cập nhật vị trí giữ nguyên center
         task.wait(0.1)
         Main.Position = UDim2.new(0.5, -Main.Size.X.Offset/2, 0.5, -Main.Size.Y.Offset/2)
     end
+
+    -- ============ DRAG SYSTEM CHO MAIN UI ============
+    local dragMain = false
+    local dragMainStart = nil
+    local dragMainPos = nil
+    
+    Header.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragMain = true
+            dragMainStart = input.Position
+            dragMainPos = Main.Position
+        end
+    end)
+    
+    UIS.InputChanged:Connect(function(input)
+        if dragMain and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragMainStart
+            Main.Position = UDim2.new(dragMainPos.X.Scale, dragMainPos.X.Offset + delta.X, dragMainPos.Y.Scale, dragMainPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragMain = false
+        end
+    end)
+    -- ============ KẾT THÚC DRAG MAIN ============
 
     -- Notify System
     local NotifyHolder = ScreenGui:FindFirstChild("NotifyHolder") or Instance.new("Frame", ScreenGui)
@@ -268,7 +264,7 @@ function NoirUI:CreateWindow(settings)
         return n
     end
 
-    -- FLOAT BUTTON (có đầy đủ stroke + drag)
+    -- Float Button
     local floatBtn = Instance.new("TextButton", ScreenGui)
     floatBtn.Size = UDim2.new(0,50,0,50)
     floatBtn.Position = UDim2.new(0,20,0.5,-25)
@@ -279,7 +275,7 @@ function NoirUI:CreateWindow(settings)
     floatBtn.TextScaled = true
     Instance.new("UICorner", floatBtn).CornerRadius = UDim.new(1,0)
     
-    -- Stroke cho Float Button (giống UI chính)
+    -- Float Button Stroke
     local floatStroke = Instance.new("UIStroke", floatBtn)
     floatStroke.Thickness = 2
     local floatGlow = Instance.new("UIStroke", floatBtn)
@@ -308,7 +304,7 @@ function NoirUI:CreateWindow(settings)
         fimg.Image = "rbxassetid://" .. tostring(settings.FloatIcon):gsub("%D", "")
     end
     
-    -- Drag system cho FLOAT BUTTON (đã fix)
+    -- ============ DRAG SYSTEM CHO FLOAT BUTTON ============
     local draggingFloat = false
     local dragFloatStart = nil
     local startFloatPos = nil
@@ -318,12 +314,6 @@ function NoirUI:CreateWindow(settings)
             draggingFloat = true
             dragFloatStart = input.Position
             startFloatPos = floatBtn.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    draggingFloat = false
-                end
-            end)
         end
     end)
     
@@ -333,6 +323,13 @@ function NoirUI:CreateWindow(settings)
             floatBtn.Position = UDim2.new(startFloatPos.X.Scale, startFloatPos.X.Offset + delta.X, startFloatPos.Y.Scale, startFloatPos.Y.Offset + delta.Y)
         end
     end)
+    
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            draggingFloat = false
+        end
+    end)
+    -- ============ KẾT THÚC DRAG FLOAT ============
     
     local mainVisible = true
     floatBtn.MouseButton1Click:Connect(function()
@@ -850,6 +847,7 @@ function NoirUI:CreateWindow(settings)
         end}
     end
     
+    -- Cập nhật UI lần đầu
     updateUISize()
     
     NoirUI:Notify(settings.Name or "Noir UI", "Loaded Successfully!", 3)
