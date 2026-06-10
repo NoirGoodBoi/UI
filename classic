@@ -21,17 +21,17 @@ function NoirUI:CreateWindow(settings)
     Blur.Size = 0
     TweenService:Create(Blur, TweenInfo.new(0.3), {Size = 12}):Play()
 
-    -- Main Window (nhỏ hơn)
+    -- Main Window (kích thước cố định chiều rộng 300, chiều cao tự động tối đa 340)
     local Main = Instance.new("Frame", ScreenGui)
-    Main.Size = UDim2.new(0,300,0,340)  -- Từ 380x400 xuống 320x360
-    Main.Position = UDim2.new(0.5,-160,0.5,-180)
+    Main.Size = UDim2.new(0,300,0,200)  -- Chiều cao ban đầu 200, sẽ tự động thay đổi
+    Main.Position = UDim2.new(0.5,-150,0.5,-100)
     Main.BackgroundColor3 = Color3.fromRGB(10,10,10)
     Main.BackgroundTransparency = 0
-    Main.Active = true  -- Cho phép drag
-    Main.Draggable = true  -- Drag cơ bản
+    Main.Active = true
+    Main.ClipsDescendants = true  -- Quan trọng để co giãn mượt
     Instance.new("UICorner", Main)
     
-    -- Drag system cho Main (nâng cao)
+    -- Drag system cho Main
     local dragMain = false
     local dragMainStart = nil
     local dragMainPos = nil
@@ -41,7 +41,7 @@ function NoirUI:CreateWindow(settings)
             local mousePos = UIS:GetMouseLocation()
             local mainPos = Main.AbsolutePosition
             if mousePos.X >= mainPos.X and mousePos.X <= mainPos.X + Main.AbsoluteSize.X and
-               mousePos.Y >= mainPos.Y and mousePos.Y <= mainPos.Y + 45 then  -- Chỉ drag khi kéo header
+               mousePos.Y >= mainPos.Y and mousePos.Y <= mainPos.Y + 45 then
                 dragMain = true
                 dragMainStart = input.Position
                 dragMainPos = Main.Position
@@ -134,13 +134,11 @@ function NoirUI:CreateWindow(settings)
         if floatBtn then floatBtn.Visible = true end
     end)
 
-    -- Container (ScrollingFrame tự co giãn)
+    -- Container (ScrollingFrame)
     local Container = Instance.new("ScrollingFrame", Main)
     Container.Size = UDim2.new(1,-10,1,-55)
     Container.Position = UDim2.new(0,5,0,50)
     Container.BackgroundTransparency = 1
-    Container.AutomaticCanvasSize = Enum.AutomaticSize.Y  -- TỰ ĐỘNG CO GIÃN
-    Container.CanvasSize = UDim2.new(0,0,0,0)
     Container.ScrollBarThickness = 2
     Container.BorderSizePixel = 0
     
@@ -148,10 +146,24 @@ function NoirUI:CreateWindow(settings)
     Layout.Padding = UDim.new(0,8)
     Layout.SortOrder = Enum.SortOrder.LayoutOrder
     
-    -- Cập nhật CanvasSize mỗi khi có phần tử mới
-    local function updateCanvas()
+    -- Hàm cập nhật chiều cao UI (tối đa 340)
+    local function updateUISize()
         task.wait(0.05)
-        Container.CanvasSize = UDim2.new(0,0,0,Layout.AbsoluteContentSize.Y + 10)
+        local contentHeight = Layout.AbsoluteContentSize.Y
+        local newHeight = math.min(contentHeight + 65, 340)  -- 65 là header + padding
+        local targetSize = UDim2.new(0,300,0,newHeight)
+        
+        -- Cập nhật CanvasSize cho ScrollingFrame
+        Container.CanvasSize = UDim2.new(0,0,0,contentHeight + 10)
+        
+        -- Tween resize UI
+        TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            Size = targetSize
+        }):Play()
+        
+        -- Cập nhật vị trí để giữ nguyên center
+        task.wait(0.1)
+        Main.Position = UDim2.new(0.5, -Main.Size.X.Offset/2, 0.5, -Main.Size.Y.Offset/2)
     end
 
     -- Notify System
@@ -258,7 +270,7 @@ function NoirUI:CreateWindow(settings)
         return n
     end
 
-    -- Float Button (có stroke giống UI chính + drag)
+    -- Float Button
     local floatBtn = Instance.new("TextButton", ScreenGui)
     floatBtn.Size = UDim2.new(0,50,0,50)
     floatBtn.Position = UDim2.new(0,20,0.5,-25)
@@ -267,17 +279,14 @@ function NoirUI:CreateWindow(settings)
     floatBtn.TextColor3 = Color3.new(1,1,1)
     floatBtn.TextSize = 24
     floatBtn.TextScaled = true
-    floatBtn.Draggable = true
     Instance.new("UICorner", floatBtn).CornerRadius = UDim.new(1,0)
     
-    -- Float Button Stroke (giống UI chính)
     local floatStroke = Instance.new("UIStroke", floatBtn)
     floatStroke.Thickness = 2
     local floatGlow = Instance.new("UIStroke", floatBtn)
     floatGlow.Thickness = 6
     floatGlow.Transparency = 0.7
     
-    -- Rainbow cho float button
     task.spawn(function()
         while rainbowActive and floatBtn and floatBtn.Parent do
             for i = 0,1,0.02 do
@@ -299,7 +308,7 @@ function NoirUI:CreateWindow(settings)
         fimg.Image = "rbxassetid://" .. tostring(settings.FloatIcon):gsub("%D", "")
     end
     
-    -- Float Button Drag System (nâng cao)
+    -- Float Button Drag
     local draggingFloat = false
     local dragFloatStart = nil
     local startFloatPos = nil
@@ -373,7 +382,7 @@ function NoirUI:CreateWindow(settings)
         self.dropdown.Visible = false
     end
     
-    -- Create Window Elements (cập nhật canvas)
+    -- Create Window Elements
     local elementCount = 0
     
     function NoirUI:CreateSection(text)
@@ -386,7 +395,7 @@ function NoirUI:CreateWindow(settings)
         s.TextSize = 14
         s.BackgroundTransparency = 1
         s.LayoutOrder = elementCount
-        updateCanvas()
+        updateUISize()
         return s
     end
     
@@ -402,7 +411,7 @@ function NoirUI:CreateWindow(settings)
         l.TextXAlignment = Enum.TextXAlignment.Left
         l.LayoutOrder = elementCount
         Instance.new("UIPadding", l).PaddingLeft = UDim.new(0,8)
-        updateCanvas()
+        updateUISize()
         return l
     end
     
@@ -421,7 +430,7 @@ function NoirUI:CreateWindow(settings)
         p.LayoutOrder = elementCount
         Instance.new("UIPadding", p).PaddingLeft = UDim.new(0,8)
         Instance.new("UIPadding", p).PaddingRight = UDim.new(0,8)
-        updateCanvas()
+        updateUISize()
         return p
     end
     
@@ -443,7 +452,7 @@ function NoirUI:CreateWindow(settings)
             TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30,30,30)}):Play()
             if options.Callback then options.Callback() end
         end)
-        updateCanvas()
+        updateUISize()
         return b
     end
     
@@ -473,7 +482,7 @@ function NoirUI:CreateWindow(settings)
             task.wait()
             b.MouseButton1Click:Fire()
         end
-        updateCanvas()
+        updateUISize()
         return {SetValue = function(s) if s ~= state then b.MouseButton1Click:Fire() end end}
     end
     
@@ -550,7 +559,7 @@ function NoirUI:CreateWindow(settings)
                 dragging = false
             end
         end)
-        updateCanvas()
+        updateUISize()
         return {SetValue = function(v) 
             v = math.clamp(v, min, max)
             local percent = (v - min)/(max - min)
@@ -579,7 +588,7 @@ function NoirUI:CreateWindow(settings)
         box.FocusLost:Connect(function(enterPressed)
             if options.Callback then options.Callback(box.Text) end
         end)
-        updateCanvas()
+        updateUISize()
         return box
     end
     
@@ -732,7 +741,7 @@ function NoirUI:CreateWindow(settings)
         end)
         
         updatePickerDisplay()
-        updateCanvas()
+        updateUISize()
         return {SetColor = function(color) 
             currentH, currentS, currentV = color:ToHSV()
             updatePickerDisplay()
@@ -806,6 +815,7 @@ function NoirUI:CreateWindow(settings)
                     task.wait(0.15)
                     dropdownFrame.Visible = false
                     TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1,0,0,45)}):Play()
+                    updateUISize()  -- Cập nhật lại UI sau khi đóng dropdown
                 end
             end)
             
@@ -819,14 +829,16 @@ function NoirUI:CreateWindow(settings)
                 local height = math.min(#dropdownOptions * 32, 150)
                 TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1,0,0,45 + height)}):Play()
                 TweenService:Create(dropdownFrame, TweenInfo.new(0.15), {Size = UDim2.new(1,-24,0,height)}):Play()
+                updateUISize()
             else
                 TweenService:Create(dropdownFrame, TweenInfo.new(0.15), {Size = UDim2.new(1,-24,0,0)}):Play()
                 TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1,0,0,45)}):Play()
                 task.wait(0.15)
                 dropdownFrame.Visible = false
+                updateUISize()
             end
         end)
-        updateCanvas()
+        updateUISize()
         return {SetValue = function(val)
             for _, opt in ipairs(dropdownOptions) do
                 if opt == val then
@@ -837,6 +849,9 @@ function NoirUI:CreateWindow(settings)
             end
         end}
     end
+    
+    -- Cập nhật UI lần đầu
+    updateUISize()
     
     NoirUI:Notify(settings.Name or "Noir UI", "Loaded Successfully!", 3)
     
